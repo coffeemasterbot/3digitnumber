@@ -1,0 +1,61 @@
+{
+  "checks": [
+    {
+      "homeTitle": "戶口三位數｜website v1",
+      "poster": 200
+    },
+    {
+      "progressEmpty": true
+    },
+    {
+      "storyStarted": true
+    },
+    {
+      "storySaved": true
+    },
+    {
+      "dragMove": true
+    },
+    {
+      "key": "instalments",
+      "result": true
+    },
+    {
+      "key": "coins",
+      "paused": true
+    },
+    {
+      "key": "coins",
+      "result": true
+    },
+    {
+      "key": "shipping",
+      "paused": true
+    },
+    {
+      "key": "shipping",
+      "result": true
+    },
+    {
+      "key": "pause",
+      "paused": true
+    },
+    {
+      "key": "pause",
+      "result": true
+    },
+    {
+      "standaloneSaved": true
+    },
+    {
+      "planGate": true
+    },
+    {
+      "mobileOverflow": false
+    },
+    {
+      "frameMobileOverflow": false
+    }
+  ],
+  "errors": []
+}
