@@ -17,6 +17,9 @@ arcade=arcade.replace('elapsed:0,last:0,','duration:new URLSearchParams(location
 const startDraw=arcade.indexOf('function draw(){'),endDraw=arcade.indexOf('const labels=',startDraw);if(startDraw<0||endDraw<0)throw Error('Draw function missing');arcade=arcade.slice(0,startDraw)+fs.readFileSync(path.join(root,'game-draw.js'),'utf8')+'\n'+arcade.slice(endDraw);
 arcade=arcade.replace('Math.min(312,g.y','Math.min(290,g.y').replace('g.y>322','g.y>302').replace('Math.min(322,g.y','Math.min(302,g.y');
 arcade=arcade.replace('function step(dt){const g=game,kind=g.v.kind;','function step(dt){const g=game,kind=g.v.kind;dt*=window.websiteTempo||1;');
+arcade=arcade.replace('g.elapsed+=dt;','g.elapsed+=dt*(window.websiteTempo||1);');
+arcade=arcade.replace('g.jump=Math.max(0,(g.jump||0)-dt);','g.jump=Math.max(0,(g.jump||0)-dt);if(kind===\'runner\')g.displayLane=(g.displayLane??g.lane)+(g.lane-(g.displayLane??g.lane))*(1-Math.exp(-dt*18));');
+arcade=arcade.replaceAll('g.lane*200','(g.displayLane??g.lane)*200');
 arcade=arcade.replace('game.board=values.map(v=>vocab.indexOf(v));','game.board=values.map(v=>vocab.indexOf(v));');
 
 arcade = arcade.slice(0,arcade.lastIndexOf('})();')) + '\n' + fs.readFileSync(path.join(root,'game-mechanics.js'),'utf8') + '\n})();';
@@ -30,5 +33,11 @@ if(!embedded){const a=document.createElement('a');a.className='site-return';a.hr
 })();</script>`;
 const extraCSS=`<style>.arcade-tile{user-select:none;-webkit-user-select:none;touch-action:none;border-radius:50%;aspect-ratio:1;display:grid;place-items:center;padding:0!important;box-shadow:inset 0 -5px #362a2415;font-size:.75rem}.arcade-board{padding:12px;background:#584633;border-radius:16px;gap:7px}.standalone .top,.standalone .hud,.standalone .layout,.standalone>.footer{display:none!important}.standalone{min-height:100svh;background:#ece7d9}.standalone dialog{max-width:720px}.standalone dialog::backdrop{background:#ece7d9}.site-return{display:block;background:#173f36;color:#fff8ed;padding:12px 20px;font-size:13px;text-decoration:none}.arcade-controls .btn{touch-action:none}</style>`;
 let h=fs.readFileSync(path.join(root,'source','story-base.html'),'utf8');const old=fs.readFileSync(path.join(root,'source','arcade-base.js'),'utf8');if(!h.includes(old))throw Error('Source integration mismatch');h=h.replace(old,arcade).replace(/<title>.*?<\/title>/,'<title>人生失物認領處｜website v1</title>').replace('</head>',extraCSS+'</head>').replace('</body>','<script>'+fs.readFileSync(path.join(root,'game-upgrades.js'),'utf8')+'</script>'+freeBridge+'</body>');h=h.replace('</head>','<style>'+fs.readFileSync(path.join(root,'game-polish.css'),'utf8')+'</style></head>');fs.writeFileSync(path.join(dist,'story','index.html'),h);
+// New games wrap only instalments and pause; the two remaining games keep their existing flow.
+h=h.replace(freeBridge,'<script>'+fs.readFileSync(path.join(root,'garden-duo-art.js'),'utf8')+'</script><script>'+fs.readFileSync(path.join(root,'garden-duo.js'),'utf8')+'</script>'+freeBridge);
+h=h.replace('</head>','<style>'+fs.readFileSync(path.join(root,'garden-duo.css'),'utf8')+'</style></head>').replaceAll('月供拼圖','預算守護花園').replaceAll('呼吸之間','冰火同行');
+h=h.replace('const oldFinishMini=finishMini;','window.moneyJourneySound=effect;window.moneyJourneyAudioMuted=()=>prefs.muted;\n  const oldFinishMini=finishMini;');
+fs.writeFileSync(path.join(dist,'story','index.html'),h);
+fs.copyFileSync(path.join(root,'garden-duo.css'),path.join(dist,'garden-duo.css'));
 if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missing talk poster asset');
 const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v1');

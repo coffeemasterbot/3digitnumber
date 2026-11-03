@@ -1,5 +1,6 @@
 // Resolved matches collapse by column and may create a new chain, as in drag-match games.
 const storyGuideBeforeArcade=window.guideHelp;
+window.addEventListener('blur',()=>{if(game&&!game.paused)window.arcadePause()});
 window.guideHelp=function(){if(!game)return storyGuideBeforeArcade();if(!game.paused)window.arcadePause();let guide=$('arcade-local-help');if(!guide){guide=document.createElement('aside');guide.id='arcade-local-help';guide.className='inline-guide';$('arcade-guide').after(guide)}guide.textContent=game.v.goal+' '+game.v.control+' 準備好就按「繼續」，亦可以隨時完成並回顧。';};
 window.websiteResolveDrag=function(values,index,moved){
  if(!game||game.v.kind!=='match'||game.paused)return;const names=['飯錢','交通','月供','儲備','休閒'];game.board=values.map(v=>names.indexOf(v));if(game.board.some(v=>v<0))return;game.selected=-1;let chains=0,total=0;

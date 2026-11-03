@@ -5,3 +5,13 @@ home-desktop.png
 home-mobile.png
 game-mobile.png
 polished-*.png
+new-arcade-*.png
+garden-wave-clear.png
+qa-*.png
+*-route.json
+qa-garden-duo-results.json
+qa-usability-results.json
+qa-layout-results.json
+qa-duo-only.cjs
+qa-new-smoke.cjs
+revise-arcade.cjs
