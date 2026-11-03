@@ -26,7 +26,7 @@
 dist/ 為可部署網站：index.html、style.css、app.js、story/index.html 及 assets/talk-poster.png。
 source/ 保留故事及小遊戲基底；game-upgrades.js 提供拖珠操作。
 以 Node 執行 build.cjs 重新整合故事頁。執行 preview.cjs 後開啟其 Local 網址。
-目前講座資料為11月9日1104、11月12日6580，第一場18:00–19:00、第二場18:00–19:30；報名連結仍待提供。
+目前講座資料為11月9日1104、11月12日6580，第一場18:00–19:00、第二場18:00–19:00；報名連結仍待提供。
 
 ## 驗證
 
