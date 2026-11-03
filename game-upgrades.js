@@ -8,3 +8,7 @@ function finish(){if(!drag)return;clearInterval(dragTick);const d=drag;drag=null
 };
 document.getElementById('dialog').addEventListener('close',()=>{drag=null;clearInterval(dragTick)});
 })();
+
+window.websiteTempo=.85;
+const websiteOriginalIntro=window.openMini;
+window.openMini=function(key){websiteOriginalIntro(key);if(key==='instalments')return;const guide=document.querySelector('#modal-body .operation');if(guide)guide.insertAdjacentHTML('afterend','<label class="tempo-control">遊戲節奏<select aria-label="遊戲節奏" onchange="window.websiteTempo=Number(this.value)"><option value="0.85">慢慢嚟</option><option value="1.15">正常節奏</option></select></label>');window.websiteTempo=.85};

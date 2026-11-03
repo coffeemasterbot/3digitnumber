@@ -1,0 +1,21 @@
+{
+  "checks": [
+    {
+      "helpPauses": true,
+      "specificHelp": true
+    },
+    {
+      "key": "coins",
+      "autoFinish": true
+    },
+    {
+      "key": "shipping",
+      "autoFinish": true
+    },
+    {
+      "key": "pause",
+      "autoFinish": true
+    }
+  ],
+  "errors": []
+}
