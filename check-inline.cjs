@@ -1,0 +1,1 @@
+const fs=require('fs'),vm=require('vm');const h=fs.readFileSync('dist/story/index.html','utf8');const blocks=[...h.matchAll(/<script[^>]*>([\s\S]*?)<\/script>/g)];blocks.forEach((m,i)=>{try{new vm.Script(m[1],{filename:'block-'+i})}catch(e){console.log('BAD SCRIPT',i,e.stack);fs.writeFileSync('bad-script.js',m[1])}});console.log('script blocks',blocks.length);

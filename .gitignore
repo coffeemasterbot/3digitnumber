@@ -15,3 +15,10 @@ qa-layout-results.json
 qa-duo-only.cjs
 qa-new-smoke.cjs
 revise-arcade.cjs
+
+polish-engine.py
+polish-integrate.cjs
+polish-legacy-integrate.cjs
+bad-script.js
+qa-polish-smoke.json
+qa-challenge-results.json
