@@ -1,0 +1,29 @@
+{
+  "checks": [
+    {
+      "name": "An actual oncoming train is spawned",
+      "ok": true
+    },
+    {
+      "name": "Train advances independently of the scrolling track",
+      "ok": true
+    },
+    {
+      "name": "Phone touch buttons change lane",
+      "ok": true
+    },
+    {
+      "name": "Phone jump button triggers animation",
+      "ok": true
+    },
+    {
+      "name": "Runner phone HUD fits actual 430px viewport",
+      "ok": true
+    },
+    {
+      "name": "No runner mobile runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

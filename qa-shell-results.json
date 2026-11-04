@@ -25,6 +25,10 @@
       "ok": true
     },
     {
+      "name": "Accessible range exits correctly from the homepage FPS entry",
+      "ok": true
+    },
+    {
       "name": "No browser runtime or console errors",
       "ok": true
     }

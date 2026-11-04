@@ -1,5 +1,7 @@
 # Lost & Found Money Journey — repair and Budget Defence report
 
+Historical V7 repair report. The latest five-game/FPS upgrade and current test results are documented in [GAME_UPGRADES.md](GAME_UPGRADES.md).
+
 ## Scope and reference
 
 Updated the existing Site `appgprj_6ae8d5ef36d081918d124e59eceb8519`, at its original URL and public audience. Baseline source commit: `6172c2e47a9d2c61b5b092ba2488ff05e5ec5261`.

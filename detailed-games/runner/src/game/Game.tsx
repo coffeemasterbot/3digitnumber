@@ -1,6 +1,6 @@
 import { CanvasTexture } from 'three';
 import { extras } from './extras';
-import { useRef, useState, useEffect, useMemo } from 'react';
+import { useRef, useState, useLayoutEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGameStore } from '../state/gameStore';
 import { useUIStore } from '../state/uiStore';
@@ -34,7 +34,7 @@ export function Game() {
   const { checkObstacleCollision, checkCoinCollision } = useCollision();
 
   // Reset spawner when game starts
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (gameState === 'playing' && useGameStore.getState().distance===0) {
  extras.time=0;extras.board=0;extras.shoes=0;extras.magnet=0;extras.index=0;extras.next=0;extras.pickups=[];
       resetSpawner();
@@ -62,6 +62,8 @@ export function Game() {
 
     // Spawn obstacles and coins
     const spawnedItems = spawn(-distanceRef.current);
+    // Oncoming services have their own motion, shared by rendering and collisions.
+    spawnedItems.obstacles.forEach(o=>{if(o.type==='moving')o.z+=delta*9});
     setObstacles(spawnedItems.obstacles);
     setCoins(spawnedItems.coins);
 
@@ -107,13 +109,13 @@ export function Game() {
   return (
     <>
       {/* Lighting */}
-      <ambientLight intensity={0.7} />
-      <directionalLight position={[5, 10, 5]} intensity={1} color="#ffffff" />
-      <pointLight position={[0, 5, 0]} intensity={0.5} color="#00ffff" />
-      <pointLight position={[-5, 3, -5]} intensity={0.7} color="#ff00ff" />
+      <ambientLight intensity={1.8} />
+      <directionalLight position={[5, 10, 5]} intensity={2.1} color="#fff1d2" />
+      <pointLight position={[0, 5, 0]} intensity={0.5} color="#fff1cf" />
+      <pointLight position={[-5, 3, -5]} intensity={0.7} color="#d4eac1" />
 
       {/* Fog for depth */}
-      <fog attach="fog" args={['#0a0a0f', 10, 80]} />
+      <fog attach="fog" args={['#acd6e5', 38, 145]} />
 
       {/* Track */}
       <Track />

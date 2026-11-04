@@ -44,6 +44,7 @@ export function useCollision() {
           }
           break;
         case 'block':
+        case 'moving':
           // Must be in different lane - already checked above
           return obstacle;
       }

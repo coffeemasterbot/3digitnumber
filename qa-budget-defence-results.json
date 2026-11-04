@@ -77,15 +77,15 @@
       "ok": true
     },
     {
-      "name": "Exit 1 removes minigame frame",
+      "name": "FPS exit 1 removes minigame frame",
       "ok": true
     },
     {
-      "name": "Exit 2 removes minigame frame",
+      "name": "FPS exit 2 removes minigame frame",
       "ok": true
     },
     {
-      "name": "Exit 3 removes minigame frame",
+      "name": "FPS exit 3 removes minigame frame",
       "ok": true
     },
     {

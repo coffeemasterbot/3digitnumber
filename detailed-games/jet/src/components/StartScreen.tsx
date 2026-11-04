@@ -13,7 +13,7 @@ interface Props {
 }
 
 const DIFF_CONFIG: Record<Difficulty, { label: string; desc: string; color: string }> = {
-  easy:   { label: '輕鬆',   desc: 'Slow missiles, more coins', color: '#00ff88' },
+  easy:   { label: '輕鬆',   desc: '較慢障礙、更多資源', color: '#00ff88' },
   medium: { label: '標準', desc: '標準挑戰',        color: '#ffd700' },
   hard:   { label: '挑戰',   desc: '高速密集',        color: '#ff2244' },
 };

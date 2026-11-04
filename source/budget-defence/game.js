@@ -42,7 +42,7 @@
  function pause(){if(state.phase==='playing')send({type:'pause'});audio?.suspend().catch(()=>{})}
  on(document,'visibilitychange',()=>{if(document.hidden)pause()});on(window,'blur',pause);on(window,'resize',draw);
  function cleanup(){if(closed)return;closed=true;cancelAnimationFrame(raf);raf=0;events.abort();audio?.close().catch(()=>{});audio=null}
- function exit(){cleanup();if(parent!==window)parent.postMessage({type:'budget-defence-exit'},location.origin);else location.href='../../story/'}
+ function exit(){cleanup();if(parent!==window){parent.postMessage({type:'budget-defence-exit'},location.origin);parent.postMessage({type:'website-v1-back'},location.origin)}else location.href='../../story/'}
  on($('exit'),'click',exit);on($('retry'),'click',()=>send({type:'retry'}));on(window,'pagehide',cleanup);
  // Read-only snapshot for regression tests and manual diagnostics.
  window.budgetDefenceSnapshot=()=>JSON.parse(JSON.stringify({...state,score:M.score(state),audioState:audio?.state||'not-started'}));render();

@@ -1,0 +1,142 @@
+{
+  "checks": [
+    {
+      "name": "Homepage has an obvious FPS entry",
+      "ok": true
+    },
+    {
+      "name": "Runner jumps with an elevated rig",
+      "ok": true
+    },
+    {
+      "name": "Runner slide changes pose and state",
+      "ok": true
+    },
+    {
+      "name": "Runner board pickup is actually collected",
+      "ok": true
+    },
+    {
+      "name": "Jump shoes produce a visibly higher jump",
+      "ok": true
+    },
+    {
+      "name": "Garden planted sunflower uses original vector artwork",
+      "ok": true
+    },
+    {
+      "name": "Zombie habit labels and numeric health are visible",
+      "ok": true
+    },
+    {
+      "name": "Double sun collection cannot duplicate resources",
+      "ok": true
+    },
+    {
+      "name": "Produced and falling suns have animation paths",
+      "ok": true
+    },
+    {
+      "name": "Forest map 1 has marked pool types and wide platforms",
+      "ok": true
+    },
+    {
+      "name": "Forest map 2 has marked pool types and wide platforms",
+      "ok": true
+    },
+    {
+      "name": "Forest map 3 has marked pool types and wide platforms",
+      "ok": true
+    },
+    {
+      "name": "Floor switch really opens the gate",
+      "ok": true
+    },
+    {
+      "name": "Gate remains open after stepping away and old timer expires",
+      "ok": true
+    },
+    {
+      "name": "Jetpack has three real collectible transformations",
+      "ok": true
+    },
+    {
+      "name": "FPS double buy deducts credits once",
+      "ok": true
+    },
+    {
+      "name": "FPS keyboard movement changes player position",
+      "ok": true
+    },
+    {
+      "name": "FPS aim/shoot hits a robot",
+      "ok": true
+    },
+    {
+      "name": "FPS reload has active feedback",
+      "ok": true
+    },
+    {
+      "name": "FPS pause blocks timer, reload, AI and firing",
+      "ok": true
+    },
+    {
+      "name": "FPS first wave can be defeated through real aim/fire inputs",
+      "ok": true
+    },
+    {
+      "name": "Defeated robots enter a collapse animation",
+      "ok": true
+    },
+    {
+      "name": "FPS requires a financial judgement at terminal 1",
+      "ok": true
+    },
+    {
+      "name": "FPS defuse completes round 1",
+      "ok": true
+    },
+    {
+      "name": "FPS requires a financial judgement at terminal 2",
+      "ok": true
+    },
+    {
+      "name": "FPS defuse completes round 2",
+      "ok": true
+    },
+    {
+      "name": "FPS requires a financial judgement at terminal 3",
+      "ok": true
+    },
+    {
+      "name": "FPS defuse completes round 3",
+      "ok": true
+    },
+    {
+      "name": "FPS final score separates judgement from shooting accuracy",
+      "ok": true
+    },
+    {
+      "name": "FPS retry resets campaign resources",
+      "ok": true
+    },
+    {
+      "name": "FPS death animation reaches retry screen",
+      "ok": true
+    },
+    {
+      "name": "FPS touch controls can aim and fire",
+      "ok": true
+    },
+    {
+      "name": "FPS mobile UI fits the viewport",
+      "ok": true
+    },
+    {
+      "name": "No upgrade runtime errors or failed assets",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "failedAssets": []
+}

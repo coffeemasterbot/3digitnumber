@@ -3,7 +3,7 @@
 // ─────────────────────────────────────────────
 
 export type GameState = 'start' | 'playing' | 'paused' | 'gameover';
-export type PowerUpType = 'shield' | 'magnet' | 'boost' | 'none';
+export type PowerUpType = 'shield' | 'magnet' | 'boost' | 'mecha' | 'glider' | 'drill' | 'none';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type MissileType = 'horizontal' | 'diagonal-up' | 'diagonal-down' | 'homing';
 

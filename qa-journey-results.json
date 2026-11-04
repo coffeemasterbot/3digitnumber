@@ -9,6 +9,10 @@
       "ok": true
     },
     {
+      "name": "Stale modal close cannot stop a newly opened game",
+      "ok": true
+    },
+    {
       "name": "Arcade completion cannot solve financial clue",
       "ok": true
     },

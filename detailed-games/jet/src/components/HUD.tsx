@@ -21,6 +21,9 @@ const POWERUP_CONFIG: Record<PowerUpType, { icon: string; color: string; label: 
   shield: { icon: '🛡', color: '#00d4ff', label: 'SHIELD'  },
   magnet: { icon: '🧲', color: '#ff44ff', label: 'MAGNET'  },
   boost:  { icon: '⚡', color: '#00ff88', label: 'BOOST'   },
+  mecha:{icon:'🤖',color:'#f3b948',label:'儲備機甲 · 自動擋擊'},
+  glider:{icon:'🛩',color:'#efd6aa',label:'計劃滑翔翼 · 緩慢下墜'},
+  drill:{icon:'⚙',color:'#de8057',label:'界線鑽頭 · 衝破誘惑'},
   none:   { icon: '',   color: 'transparent', label: ''    },
 };
 

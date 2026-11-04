@@ -44,3 +44,8 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
+
+FPS / 5 November 2026 upgrade:
+Original local arena, AI robots, training weapon models, procedural geometry, vector plant art and synthesized sound effects. Uses existing Three.js 0.160.1 under its retained MIT notice in games/licenses/three_0.160.1.txt.
+Architecture references: https://threejs.org/examples/games_fps.html and https://threejs.org/docs/pages/PointerLockControls.html
+No Valve, EA/PopCap or commercial-game extracted maps, sprites or sound files were added.

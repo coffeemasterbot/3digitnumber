@@ -29,54 +29,7 @@ export function drawBackground(
   buildings: BackgroundBuilding[],
   buildingsFar: BackgroundBuilding[]
 ) {
-  // Sky gradient
-  const grad = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
-  grad.addColorStop(0, '#03031a');
-  grad.addColorStop(1, '#08082a');
-  ctx.fillStyle = grad;
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-
-  // Stars (fixed)
-  for (const s of stars) {
-    const pulse = 0.6 + Math.sin(Date.now() * 0.002 + s.brightness * 10) * 0.4;
-    ctx.globalAlpha = s.brightness * pulse;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(s.x, s.y, s.size, s.size);
-  }
-  ctx.globalAlpha = 1;
-
-  // Far buildings (slow parallax)
-  drawBuildings(ctx, buildingsFar, (scrollOffset * 0.2) % CANVAS_WIDTH);
-
-  // Mid buildings (medium parallax)
-  drawBuildings(ctx, buildings, (scrollOffset * 0.5) % CANVAS_WIDTH);
-
-  // Grid floor
-  drawGrid(ctx, scrollOffset);
-
-  // Ceiling strip
-  ctx.fillStyle = COLORS.ceiling;
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CEILING_Y);
-  withGlow(ctx, COLORS.ceilingGlow, 18, () => {
-    ctx.strokeStyle = COLORS.ceilingGlow;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, CEILING_Y);
-    ctx.lineTo(CANVAS_WIDTH, CEILING_Y);
-    ctx.stroke();
-  });
-
-  // Ground strip
-  ctx.fillStyle = COLORS.ground;
-  ctx.fillRect(0, GROUND_Y, CANVAS_WIDTH, CANVAS_HEIGHT - GROUND_Y);
-  withGlow(ctx, COLORS.groundGlow, 18, () => {
-    ctx.strokeStyle = COLORS.groundGlow;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(0, GROUND_Y);
-    ctx.lineTo(CANVAS_WIDTH, GROUND_Y);
-    ctx.stroke();
-  });
+  const sky=ctx.createLinearGradient(0,0,0,CANVAS_HEIGHT);sky.addColorStop(0,'#f5c98b');sky.addColorStop(1,'#fff0ca');ctx.fillStyle=sky;ctx.fillRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);ctx.fillStyle='#ffe8a3';ctx.beginPath();ctx.arc(720,100,58,0,Math.PI*2);ctx.fill();drawBuildings(ctx,buildingsFar,(scrollOffset*.15)%CANVAS_WIDTH);drawBuildings(ctx,buildings,(scrollOffset*.45)%CANVAS_WIDTH);ctx.fillStyle='#7e674d';ctx.fillRect(0,GROUND_Y,CANVAS_WIDTH,70);ctx.fillStyle='#e2c391';ctx.fillRect(0,GROUND_Y,CANVAS_WIDTH,9);ctx.fillStyle='#906947';ctx.fillRect(0,0,CANVAS_WIDTH,CEILING_Y);ctx.fillStyle='#fff3d0';ctx.font='bold 17px Microsoft JhengHei';ctx.fillText('先保需要，再避開消費誘惑。',28,GROUND_Y+46);
 }
 
 function drawGrid(ctx: CanvasRenderingContext2D, scrollOffset: number) {
@@ -118,12 +71,12 @@ function drawBuildings(
     ctx.fillRect(x, b.y, b.width, b.height);
 
     // Windows
-    ctx.fillStyle = 'rgba(0, 200, 255, 0.12)';
+    ctx.fillStyle = '#f5e1b0';
     const ww = b.width / (b.windowCols + 1);
     const wh = b.height / (b.windowRows + 1);
     for (let r = 0; r < b.windowRows; r++) {
       for (let c = 0; c < b.windowCols; c++) {
-        if (Math.random() > 0.4) {
+        if ((r+c)%3!==0) {
           ctx.fillRect(x + (c + 0.5) * ww, b.y + (r + 0.5) * wh, ww * 0.5, wh * 0.5);
         }
       }
@@ -162,6 +115,7 @@ export function drawPlayer(
 
   ctx.save();
 
+  if(['mecha','glider','drill'].includes(powerUp)){ctx.fillStyle=powerUp==='mecha'?'#cd9a42':powerUp==='glider'?'#648c7b':'#b86c46';ctx.strokeStyle='#fff0c3';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(x-10,y-12,width+20,height+24,10);ctx.fill();ctx.stroke();ctx.fillStyle='#284740';ctx.fillRect(x+3,y+2,width-6,17);if(powerUp==='glider'){ctx.fillStyle='#f5deac';ctx.beginPath();ctx.moveTo(x-40,y+5);ctx.lineTo(x+width+40,y+5);ctx.lineTo(cx,y-35);ctx.fill()}if(powerUp==='drill'){ctx.fillStyle='#e6d2b0';ctx.beginPath();ctx.moveTo(x+width+28,cy);ctx.lineTo(x+width,cy-20);ctx.lineTo(x+width,cy+20);ctx.fill()}if(powerUp==='mecha'){ctx.fillStyle='#443d30';ctx.fillRect(x-12,y+height,28,16);ctx.fillRect(x+width-10,y+height,28,16);ctx.fillRect(x+width,y+20,29,10)}ctx.fillStyle='#fff3cb';ctx.font='bold 12px Microsoft JhengHei';ctx.textAlign='center';ctx.fillText(powerUp==='mecha'?'儲備機甲':powerUp==='drill'?'界線鑽頭':'計劃滑翔翼',cx,y-19);ctx.restore();return;}
   // Shield bubble
   if (powerUp === 'shield') {
     const r = width * 0.8;
@@ -233,60 +187,8 @@ export function drawPlayer(
 // ── Missiles ───────────────────────────────────
 export function drawMissile(ctx: CanvasRenderingContext2D, m: Missile) {
   if (!m.active) return;
-  const cx = m.x + m.width / 2;
-  const cy = m.y + m.height / 2;
-
-  ctx.save();
-  ctx.translate(cx, cy);
-  ctx.rotate(m.angle - Math.PI);
-
-  withGlow(ctx, COLORS.missileGlow, 22, () => {
-    // Body
-    const bodyGrad = ctx.createLinearGradient(-m.width / 2, 0, m.width / 2, 0);
-    bodyGrad.addColorStop(0, '#cc0022');
-    bodyGrad.addColorStop(0.5, '#ff3355');
-    bodyGrad.addColorStop(1, '#ff5577');
-    ctx.fillStyle = bodyGrad;
-    ctx.beginPath();
-    ctx.roundRect(-m.width / 2, -m.height / 2, m.width * 0.8, m.height, 4);
-    ctx.fill();
-
-    // Nose cone
-    ctx.fillStyle = '#ff7799';
-    ctx.beginPath();
-    ctx.moveTo(m.width * 0.3, 0);
-    ctx.lineTo(-m.width * 0.1, -m.height / 2);
-    ctx.lineTo(-m.width * 0.1, m.height / 2);
-    ctx.closePath();
-    ctx.fill();
-
-    // Fins
-    ctx.fillStyle = '#aa0022';
-    ctx.beginPath();
-    ctx.moveTo(-m.width / 2, -m.height / 2);
-    ctx.lineTo(-m.width / 2 - 10, -m.height);
-    ctx.lineTo(-m.width / 2 + 6, -m.height / 2);
-    ctx.closePath();
-    ctx.fill();
-    ctx.beginPath();
-    ctx.moveTo(-m.width / 2, m.height / 2);
-    ctx.lineTo(-m.width / 2 - 10, m.height);
-    ctx.lineTo(-m.width / 2 + 6, m.height / 2);
-    ctx.closePath();
-    ctx.fill();
-
-    // Engine glow
-    ctx.fillStyle = '#ff6600';
-    ctx.shadowColor = '#ff6600';
-    ctx.shadowBlur = 12;
-    ctx.beginPath();
-    ctx.arc(-m.width / 2 - 4, 0, 6, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
-  ctx.restore();
+  ctx.save();ctx.fillStyle='#a6533c';ctx.strokeStyle='#ffe8b2';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(m.x,m.y,m.width,m.height,7);ctx.fill();ctx.stroke();ctx.fillStyle='#fff8e5';ctx.font='bold 15px Microsoft JhengHei';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(({horizontal:'不必要的支出','diagonal-up':'想要 ≠ 需要','diagonal-down':'一次性享樂',homing:'限時優惠追住你'})[m.type],m.x+m.width/2,m.y+m.height/2);ctx.restore();
 }
-
 // ── Coins ──────────────────────────────────────
 export function drawCoin(ctx: CanvasRenderingContext2D, coin: Coin, time: number) {
   if (!coin.active || coin.collected) return;
@@ -321,7 +223,7 @@ export function drawCoin(ctx: CanvasRenderingContext2D, coin: Coin, time: number
 
 // ── Power-up items ─────────────────────────────
 const POWERUP_ICONS: Record<string, string> = {
-  shield: '🛡',
+  mecha:'🤖',glider:'🛩',drill:'⚙',shield: '🛡',
   magnet: '🧲',
   boost:  '⚡',
 };

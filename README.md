@@ -1,5 +1,7 @@
 # 戶口三位數 website v1
 
+最新五款遊戲升級及完整測試結果見 [GAME_UPGRADES.md](GAME_UPGRADES.md)。目前完整建置指令係 `node build.cjs`；以下 V7 修復紀錄保留作參考。
+
 ## Lost & Found 修復及自選預算防衛戰
 
 完整檢查、問題分類、檔案說明、操作／評分同測試限制見 [QA_REPORT.md](QA_REPORT.md)。預算防衛戰喺主線第二幕以「自選練習」進入，可直接跳過；點數同阿俊嘅故事金額完全分開。
@@ -34,3 +36,9 @@
 所有分數、最佳紀錄與原有故事進度只存在本機；沒有登入、Supabase、遠端排行榜或問卷收集。網站受原本的Sites存取設定控制。
 
 講座資料沿用已確認安排：2026年11月9日1104、11月12日6580；兩場均18:00–19:00。報名連結仍待提供。
+
+## 2026-11-05 五款遊戲升級
+
+見 [GAME_UPGRADES.md](GAME_UPGRADES.md)：街頭 3D 跑酷、植物圖像／壞習慣敵人／陽光、三關森林地圖／固定開閘、暖色飛行／三款變身，以及首頁可直接進入嘅 3D 機械人拆彈。FPS 預設路徑係 `/games/budget-defence/`；原本無障礙不限時練習保留喺 `/games/budget-defence/range.html`。
+
+今次已安裝現有鎖定依賴，正式建置用 `node build.cjs`（完整重新打包）。邏輯測試：`node --test tests/*.test.cjs tests/*.test.mjs`。新瀏覽器測試：啟動 `node preview.cjs` 後執行 `node qa-upgrades.cjs`、`node qa-train-mobile.cjs`；主線、存檔及退出測試仍保留。原有 `node qa.cjs` 會自行啟動預覽，先停止現有伺服器。

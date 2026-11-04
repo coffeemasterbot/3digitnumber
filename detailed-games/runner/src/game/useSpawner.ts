@@ -17,7 +17,7 @@ const COIN_GROUP_SIZE = 3; // Coins in a row
 let idCounter = 0;
 const generateId = () => `item_${++idCounter}`;
 
-const OBSTACLE_TYPES: ObstacleType[] = ['jump', 'slide', 'block'];
+const OBSTACLE_TYPES: ObstacleType[] = ['jump', 'slide', 'block', 'moving'];
 
 function randomLane(): number {
   return LANES[Math.floor(Math.random() * LANES.length)];

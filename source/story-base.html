@@ -354,7 +354,7 @@ window.arcadeTile=function(i){const g=game;if(!g||g.paused)return;if(g.selected<
 window.finishArcade=function(){if(!game)return;const g=game,key=g.key,v=g.v,stats={score:g.score,hits:g.hits,miss:g.miss,moves:g.moves,matched:g.matched,seconds:Math.round(g.elapsed),demo};stop();s.arcade=s.arcade||{};const first=!s.arcade[key];s.arcade[key]=stats;if(first)spend(5);save();modal('重演之後',`<div class="kicker">${v.title} ／ 接返阿俊嘅故事</div><h2>${g.v.kind==='match'?`你整理咗 ${g.matched} 格記錄。`:`你留意到 ${g.score} 個空間。`}</h2><div class="response">${v.take}</div><p>${g.v.kind==='match'?`有效交換 ${g.moves} 次。記錄只係分類，月供金額仍要照付。`:`碰撞 ${g.hits} 次，試玩 ${stats.seconds} 秒。呢個係操作記錄，唔係理財能力評分。`}</p><p class="subtle">${first?'呢次調查推進故事時間5分鐘。':'重玩已更新回顧，故事時間冇再增加。'} 下一步：用帳單驗證你嘅判斷。</p><div class="actions"><button class="btn" onclick="window.arcadeContinue('${key}')">返到帳單，作一個決定</button><button class="btn secondary" onclick="window.startArcade('${key}')">再試一次</button></div>`)};
 window.arcadeContinue=k=>{stop();oldMini(k)};
 const oldCard=planCard;planCard=function(){const h=oldCard();if(!s.arcade||!Object.keys(s.arcade).length)return h;const names=Object.keys(s.arcade).filter(k=>specs[k]).map(k=>specs[k].title).join('、');return h+`<section class="focus surface"><h3>你帶返現實嘅一條線索</h3><p>你試過 ${names}。揀一件最想調整嘅事，寫入上面嘅七日行動。</p><p class="subtle">小遊戲紀錄同樣只存喺本機；遊戲幣唔會增加阿俊嘅戶口餘額。</p></section>`};
-window.addEventListener('pagehide',stop);document.getElementById('dialog').addEventListener('close',stop);
+window.addEventListener('pagehide',stop);document.getElementById('dialog').addEventListener('close',()=>{if(!document.getElementById('dialog').open)stop()});
 })();
 
 </script></body></html>

@@ -54,7 +54,11 @@ h=h.replace('</body>','<script src="journey-repairs.js"></script></body>').repla
 fs.writeFileSync(path.join(dist,'story','index.html'),h);
 for(const file of ['journey-core.js','journey-repairs.js','journey-repairs.css'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,'story',file));
 fs.mkdirSync(path.join(dist,'games','budget-defence'),{recursive:true});
-for(const file of ['index.html','model.js','game.js','style.css'])fs.copyFileSync(path.join(root,'source','budget-defence',file),path.join(dist,'games','budget-defence',file));
+for(const file of ['model.js','game.js','style.css'])fs.copyFileSync(path.join(root,'source','budget-defence',file),path.join(dist,'games','budget-defence',file));
+fs.copyFileSync(path.join(root,'source','budget-defence','index.html'),path.join(dist,'games','budget-defence','range.html'));
+fs.copyFileSync(path.join(root,'source','fps','index.html'),path.join(dist,'games','budget-defence','index.html'));
+fs.copyFileSync(path.join(root,'source','fps','fps.css'),path.join(dist,'games','budget-defence','fps.css'));
+fs.copyFileSync(path.join(root,'source','fps','preview.svg'),path.join(dist,'assets','preview-defence.svg'));
 fs.copyFileSync(path.join(root,'source','site-icon.svg'),path.join(dist,'assets','site-icon.svg'));
 fs.copyFileSync(path.join(root,'garden-duo.css'),path.join(dist,'garden-duo.css'));
 if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missing talk poster asset');

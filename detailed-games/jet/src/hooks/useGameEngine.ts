@@ -57,8 +57,8 @@ function generateBuildings(count: number, yBase: number, palette: string[]): Bac
   return buildings;
 }
 
-const FAR_PALETTE  = ['#080820', '#0a0a24', '#0c0c2a'];
-const MID_PALETTE  = ['#0e0e30', '#111138', '#131340'];
+const FAR_PALETTE=['#e7bd92','#d5ad85','#edcda7'];
+const MID_PALETTE=['#bd765b','#ca9874','#d5ac82'];
 
 export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
   const canvasRef  = useRef<HTMLCanvasElement | null>(null);
@@ -90,7 +90,8 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
   // ── Spawn timers ─────────────────────────────
   const missileTimerRef = useRef(MISSILE_SPAWN_BASE);
   const coinTimerRef    = useRef(20);
-  const powerUpTimerRef = useRef(POWERUP_SPAWN_INTERVAL);
+  const powerUpTimerRef = useRef(90);
+  const vehicleCycle=useRef(0);const blastRef=useRef(0);
 
   // ── High score (localStorage) ─────────────────
   // Use both a ref (for sync access inside game loop) and state (for UI re-renders)
@@ -155,7 +156,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
     frameRef.current     = 0;
     missileTimerRef.current = MISSILE_SPAWN_BASE;
     coinTimerRef.current    = 20;
-    powerUpTimerRef.current = POWERUP_SPAWN_INTERVAL;
+    powerUpTimerRef.current = 90;vehicleCycle.current=0;blastRef.current=0;
     thrustingRef.current    = false;
   }, [difficulty]);
 
@@ -250,6 +251,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
     if (t === 'shield') return SHIELD_DURATION;
     if (t === 'magnet') return MAGNET_DURATION;
     if (t === 'boost')  return BOOST_DURATION;
+    if(['mecha','glider','drill'].includes(t))return 600;
     return 1;
   }
 
@@ -311,6 +313,10 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       p.velocity = Math.min(p.velocity + GRAVITY, MAX_FALL_SPEED);
     }
 
+    if(p.powerUp==='glider'){p.velocity=Math.max(-5,Math.min(3,p.velocity*.92));}
+    if(p.powerUp==='drill'&&thrustingRef.current)p.velocity=Math.max(-8,p.velocity-0.25);
+    if(p.powerUp==='mecha'&&frame%24===0){const target=missilesRef.current.find(m=>m.active&&m.x>p.x&&m.x<p.x+450&&Math.abs(m.y-p.y)<90);if(target){target.active=false;blastRef.current=8;scoreRef.current+=5;play('powerup')}}
+    blastRef.current=Math.max(0,blastRef.current-1);
     if (p.powerUp === 'boost') {
       p.velocity = Math.min(p.velocity, MAX_FALL_SPEED * 0.5);
     }
@@ -354,7 +360,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
     if (missileTimerRef.current <= 0) {
       const difficultyFactor = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 0.7 : 0.5;
       const scoreBonus = Math.max(0, 1 - scoreRef.current / 3000);
-      missilesRef.current.push(spawnMissile(speed, scoreRef.current));
+      const barrier=spawnMissile(speed,scoreRef.current);barrier.width=145;barrier.height=45;missilesRef.current.push(barrier);
       missileTimerRef.current = Math.max(40, MISSILE_SPAWN_BASE * difficultyFactor * (0.5 + scoreBonus));
     }
 
@@ -366,7 +372,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
 
     powerUpTimerRef.current--;
     if (powerUpTimerRef.current <= 0) {
-      powerUpsRef.current.push(spawnPowerUp());
+      const pickup=spawnPowerUp();pickup.type=(['mecha','glider','drill','shield','magnet','boost'] as PowerUpType[])[vehicleCycle.current++%6];pickup.x=450;pickup.y=Math.max(CEILING_Y+15,Math.min(GROUND_Y-50,p.y));powerUpsRef.current.push(pickup);
       powerUpTimerRef.current = POWERUP_SPAWN_INTERVAL;
     }
 
@@ -429,7 +435,8 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       for (const m of missilesRef.current) {
         if (!m.active) continue;
         if (rectIntersects(p, m)) {
-          if (p.powerUp === 'shield') {
+          if(p.powerUp==='drill'){m.active=false;p.powerUpTimer=Math.max(0,p.powerUpTimer-90);play('hit');continue}
+          if (p.powerUp === 'shield'||p.powerUp==='mecha') {
             // Shield absorbs hit
             p.powerUp = 'none';
             p.powerUpTimer = 0;
@@ -465,7 +472,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
         pu.active = false;
         p.powerUp = pu.type;
         p.powerUpTimer =
-          pu.type === 'shield' ? SHIELD_DURATION :
+          ['mecha','glider','drill'].includes(pu.type)?600:pu.type === 'shield' ? SHIELD_DURATION :
           pu.type === 'magnet' ? MAGNET_DURATION :
           BOOST_DURATION;
         play('powerup');
@@ -507,7 +514,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
     drawParticles(ctx, p.particles);
 
     // Player
-    drawPlayer(ctx, p, frame);
+    drawPlayer(ctx, p, frame);if(blastRef.current>0){ctx.strokeStyle='#fff0b2';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(p.x+p.width,p.y+22);ctx.lineTo(p.x+420,p.y+22);ctx.stroke()}
 
     // Magnet field hint
     if (p.powerUp === 'magnet') {
