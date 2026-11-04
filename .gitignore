@@ -29,3 +29,9 @@ qa-reworked-duo-results.json
 qa-garden-repair-results.json
 
 qa-powerups-results.json
+
+detailed-games/node_modules/
+qa-detailed-results.json
+
+qa-detailed-mobile-results.json
+qa-detailed-outcomes-results.json

@@ -25,9 +25,11 @@ arcade=arcade.replace('if(g.elapsed>=g.duration)', 'if(g.elapsed>=g.duration&&!g
 arcade=arcade.replace('g.elapsed+=dt;','g.elapsed+=dt*(window.websiteTempo||1);');
 arcade=arcade.replace('g.jump=Math.max(0,(g.jump||0)-dt);','g.jump=Math.max(0,(g.jump||0)-dt);if(kind===\'runner\')g.displayLane=(g.displayLane??g.lane)+(g.lane-(g.displayLane??g.lane))*(1-Math.exp(-dt*18));');
 arcade=arcade.replaceAll('g.lane*200','(g.displayLane??g.lane)*200');
+arcade=arcade.replace('else if(!g.jump){',"else if(it.obstacle==='train'||(it.obstacle==='overhead'?!g.slide:!g.jump)){");
+arcade=arcade.replace('Math.hypot(it.x-100,it.y-g.y)<43',"(it.obstacle==='laser'?Math.abs(it.x-100)<23&&Math.abs(it.y-g.y)<63:Math.hypot(it.x-100,it.y-g.y)<43)");
 arcade=arcade.replace('game.board=values.map(v=>vocab.indexOf(v));','game.board=values.map(v=>vocab.indexOf(v));');
 
-arcade = arcade.slice(0,arcade.lastIndexOf('})();')) + '\n' + fs.readFileSync(path.join(root,'game-mechanics.js'),'utf8') + '\n' + fs.readFileSync(path.join(root,'arcade-challenge.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'arcade-powerups.js'),'utf8') + '\n})();';
+arcade = arcade.slice(0,arcade.lastIndexOf('})();')) + '\n' + fs.readFileSync(path.join(root,'game-mechanics.js'),'utf8') + '\n' + fs.readFileSync(path.join(root,'arcade-challenge.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'arcade-powerups.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'arcade-skills.js'),'utf8') + '\n})();';
 // Board controls remain keyboard-usable through the original two-cell swap handler.
 const freeBridge=`<script>
 (()=>{const q=new URLSearchParams(location.search),key=q.get('arcade');const standalone=['coins','shipping','instalments','pause'].includes(key);const embedded=parent!==window;const close=window.closeModal;function back(){if(embedded)parent.postMessage({type:'website-v1-back'},location.origin);else location.href='../#arcade'}
@@ -45,10 +47,12 @@ h=h.replace('const nowScene=','let nowScene=');
 h=h.replace('const oldFinishMini=finishMini;',()=>fs.readFileSync(path.join(root,'arcade-score.js'),'utf8')+'\nconst oldFinishMini=finishMini;');
 h=h.replace('const oldFinishMini=finishMini;','window.moneyJourneySound=effect;window.moneyJourneyAudioMuted=()=>prefs.muted;\n  const oldFinishMini=finishMini;');
 h=h.replace('</head>','<style>'+fs.readFileSync(path.join(root,'game-premium.css'),'utf8')+'</style></head>');
-h=h.replace('</body>',()=>'<script>'+fs.readFileSync(path.join(root,'game-sprites.js'),'utf8')+'</script></body>');
+h=h.replace('</body>',()=>'<script>'+fs.readFileSync(path.join(root,'game-sprites.js'),'utf8')+'</script><script>'+fs.readFileSync(path.join(root,'arcade-experience.js'),'utf8')+'</script></body>');
 fs.writeFileSync(path.join(dist,'story','index.html'),h);
 fs.copyFileSync(path.join(root,'garden-duo.css'),path.join(dist,'garden-duo.css'));
 if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missing talk poster asset');
 const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v1');
 
 require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
+
+require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});

@@ -7,7 +7,7 @@ window.websiteJump=function(){if(game?.dying)return;const airborne=!!game?.jump;
 function grantPower(g,kind){g.powers[kind]=powerMeta[kind].seconds;g.powerNotice=powerMeta[kind].name+' 啟動！';g.powerNoticeFor=1.6;window.moneyJourneySound?.('success');}
 step=function(dt){const g=game;if(!g?.powers)return powerStep(dt);if(g.dying){g.elapsed=g.deathElapsed;g.dying.time+=dt;g.held=false;return}
  for(const k in g.powers)g.powers[k]=Math.max(0,g.powers[k]-dt);g.invincible=Math.max(0,g.invincible-dt);g.powerNoticeFor=Math.max(0,(g.powerNoticeFor||0)-dt);
- const hits=g.hits,score=g.score;powerStep(dt);
+ const hits=g.hits,score=g.score;powerStep(dt);window.arcadeAdvancedCollisions?.(g,dt);
  if(g.hits>hits&&(g.invincible>0||g.powers.board>0||g.powers.shield>0)){g.hits=hits;if(g.invincible<=0){const k=g.powers.board>0?'board':'shield';g.powers[k]=0;g.invincible=1;g.powerNotice=powerMeta[k].name+'擋住咗！';g.powerNoticeFor=1.4;window.moneyJourneySound?.('select')}}
  if(g.powers.double>0&&g.score>score)g.score+=g.score-score;
  if(g.powers.magnet>0)for(const it of g.items){if(it.hit||!it.good)continue;const close=g.v.kind==='runner'?Math.abs(it.y-275)<100:Math.hypot(it.x-100,it.y-g.y)<145;if(close){it.hit=true;g.score+=g.powers.double>0?2:1;window.moneyJourneySound?.('select')}}
