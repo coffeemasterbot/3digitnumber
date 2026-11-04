@@ -21,12 +21,13 @@ arcade=arcade.replace('function step(dt){const g=game,kind=g.v.kind;','function 
 arcade=arcade.replace('function stop(){cancelAnimationFrame(frame);','function stop(){window.moneyJourneyMusic?.(null);cancelAnimationFrame(frame);');
 arcade=arcade.replace('step(dt);if(g.elapsed>=g.duration)', 'step(dt);if(window.arcadeCheckChallenge?.())return;if(g.elapsed>=g.duration)');
 arcade=arcade.replace('dt*=window.websiteTempo||1;', 'dt*=(window.websiteTempo||1)*(g.challenge?g.challenge.pace*(1+.28*g.elapsed/g.duration):1);');
+arcade=arcade.replace('if(g.elapsed>=g.duration)', 'if(g.elapsed>=g.duration&&!g.dying)');
 arcade=arcade.replace('g.elapsed+=dt;','g.elapsed+=dt*(window.websiteTempo||1);');
 arcade=arcade.replace('g.jump=Math.max(0,(g.jump||0)-dt);','g.jump=Math.max(0,(g.jump||0)-dt);if(kind===\'runner\')g.displayLane=(g.displayLane??g.lane)+(g.lane-(g.displayLane??g.lane))*(1-Math.exp(-dt*18));');
 arcade=arcade.replaceAll('g.lane*200','(g.displayLane??g.lane)*200');
 arcade=arcade.replace('game.board=values.map(v=>vocab.indexOf(v));','game.board=values.map(v=>vocab.indexOf(v));');
 
-arcade = arcade.slice(0,arcade.lastIndexOf('})();')) + '\n' + fs.readFileSync(path.join(root,'game-mechanics.js'),'utf8') + '\n' + fs.readFileSync(path.join(root,'arcade-challenge.js'),'utf8') + '\n})();';
+arcade = arcade.slice(0,arcade.lastIndexOf('})();')) + '\n' + fs.readFileSync(path.join(root,'game-mechanics.js'),'utf8') + '\n' + fs.readFileSync(path.join(root,'arcade-challenge.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'arcade-powerups.js'),'utf8') + '\n})();';
 // Board controls remain keyboard-usable through the original two-cell swap handler.
 const freeBridge=`<script>
 (()=>{const q=new URLSearchParams(location.search),key=q.get('arcade');const standalone=['coins','shipping','instalments','pause'].includes(key);const embedded=parent!==window;const close=window.closeModal;function back(){if(embedded)parent.postMessage({type:'website-v1-back'},location.origin);else location.href='../#arcade'}
