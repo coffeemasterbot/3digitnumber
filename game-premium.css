@@ -10,3 +10,7 @@
  #modal-body:has(#arcade-canvas) .arcade-controls{margin-top:5px;gap:8px;flex-wrap:nowrap;justify-content:center}
  #modal-body:has(#arcade-canvas) .arcade-controls .btn{min-height:38px;padding:5px 12px;font-size:11px;white-space:nowrap}
 }
+
+.plant-palette{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.plant-palette button{min-width:0}.plant-palette button:disabled{opacity:.5}@media(orientation:landscape) and (max-height:520px){.plant-palette{grid-template-columns:1fr 1fr;width:240px;gap:4px}.plant-palette button{padding:4px;min-height:45px}.plant-palette small{font-size:8px}.plant-palette span{font-size:10px}}
+
+@media(orientation:landscape) and (max-height:520px){.plant-palette{width:128px;grid-template-columns:1fr;max-height:calc(100svh - 85px);overflow-y:auto;overscroll-behavior:contain}.plant-palette button{min-height:38px}.plant-palette span{font-size:10px}.plant-palette small{font-size:8px}}

@@ -22,3 +22,8 @@ polish-legacy-integrate.cjs
 bad-script.js
 qa-polish-smoke.json
 qa-challenge-results.json
+
+qa-repair-results.json
+qa-reworked-duo-results.json
+
+qa-garden-repair-results.json
