@@ -49,10 +49,17 @@ h=h.replace('const oldFinishMini=finishMini;','window.moneyJourneySound=effect;w
 h=h.replace('</head>','<style>'+fs.readFileSync(path.join(root,'game-premium.css'),'utf8')+'</style></head>');
 h=h.replace('</body>',()=>'<script>'+fs.readFileSync(path.join(root,'game-sprites.js'),'utf8')+'</script><script>'+fs.readFileSync(path.join(root,'arcade-experience.js'),'utf8')+'</script></body>');
 fs.writeFileSync(path.join(dist,'story','index.html'),h);
+// Keep repair logic outside the preserved story script; load after arcade wrappers.
+h=h.replace('</body>','<script src="journey-repairs.js"></script></body>').replace('</head>','<link rel="stylesheet" href="journey-repairs.css"><link rel="icon" href="../assets/site-icon.svg" type="image/svg+xml"></head>');
+fs.writeFileSync(path.join(dist,'story','index.html'),h);
+for(const file of ['journey-core.js','journey-repairs.js','journey-repairs.css'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,'story',file));
+fs.mkdirSync(path.join(dist,'games','budget-defence'),{recursive:true});
+for(const file of ['index.html','model.js','game.js','style.css'])fs.copyFileSync(path.join(root,'source','budget-defence',file),path.join(dist,'games','budget-defence',file));
+fs.copyFileSync(path.join(root,'source','site-icon.svg'),path.join(dist,'assets','site-icon.svg'));
 fs.copyFileSync(path.join(root,'garden-duo.css'),path.join(dist,'garden-duo.css'));
 if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missing talk poster asset');
 const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v1');
 
 require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
 
-require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});
+if(!process.argv.includes('--preserve-arcade'))require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});

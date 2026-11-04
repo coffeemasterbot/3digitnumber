@@ -1,5 +1,13 @@
 # 戶口三位數 website v1
 
+## Lost & Found 修復及自選預算防衛戰
+
+完整檢查、問題分類、檔案說明、操作／評分同測試限制見 [QA_REPORT.md](QA_REPORT.md)。預算防衛戰喺主線第二幕以「自選練習」進入，可直接跳過；點數同阿俊嘅故事金額完全分開。
+
+今次修改嘅靜態正式建置：`node build.cjs --preserve-arcade`（保留未修改嘅獨立遊戲已建置套件）。邏輯測試：`node --test tests/*.test.cjs`。啟動 `node preview.cjs` 後，執行 `node qa-journey.cjs`、`node qa-budget-defence.cjs`、`node qa-shell.cjs`。瀏覽器 QA 沿用本機已安裝嘅 Playwright／Edge 路徑。原有獨立遊戲測試：`node qa.cjs`，會自行啟動預覽，請先停止現有伺服器。
+
+故事存檔升級至版本 6，保留原有儲存鍵並驗證遷移版本 5。損壞／未支援版本會保留原檔並提供備份、重設及暫時繼續遊玩。重設只清除故事；聲音偏好及獨立遊戲紀錄保留。
+
 目前首頁採用遊戲優先入口：完整植物防守、真正3D跑酷、完整噴射飛行及冰火合作。遊戲完成後直接顯示成績、重玩與返回選單，不再強制故事、反思或問答。原有TRPG故事模式仍可獨立開啟。
 
 ## 詳細遊戲版本

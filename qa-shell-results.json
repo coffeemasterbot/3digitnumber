@@ -1,0 +1,34 @@
+{
+  "checks": [
+    {
+      "name": "Header navigation closes the active iframe",
+      "ok": true
+    },
+    {
+      "name": "Browser Back restores story and progress",
+      "ok": true
+    },
+    {
+      "name": "Browser Forward returns to event section",
+      "ok": true
+    },
+    {
+      "name": "Malformed progress summary remains usable",
+      "ok": true
+    },
+    {
+      "name": "Malformed progress summary remains usable",
+      "ok": true
+    },
+    {
+      "name": "Malformed progress summary remains usable",
+      "ok": true
+    },
+    {
+      "name": "No browser runtime or console errors",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "failedRequests": []
+}

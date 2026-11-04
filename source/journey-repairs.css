@@ -1,0 +1,6 @@
+/* Preserve the warm paper/orange identity with readable small-text contrast. */
+.btn:not(.secondary):not(.green){background:#b64e26;border-color:#973b1a;color:#fff}
+.kicker{color:#af4b23}
+a:focus-visible,textarea:focus-visible,select:focus-visible{outline:3px solid #397c9b;outline-offset:4px}
+#budget-dialog button:focus-visible{outline:3px solid #397c9b;outline-offset:2px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation:none!important;transition:none!important}}

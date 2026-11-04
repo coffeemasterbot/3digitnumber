@@ -1,0 +1,102 @@
+{
+  "checks": [
+    {
+      "name": "Repeated clue has no time/reward duplication",
+      "ok": true
+    },
+    {
+      "name": "Refresh restores four unique clues",
+      "ok": true
+    },
+    {
+      "name": "Arcade completion cannot solve financial clue",
+      "ok": true
+    },
+    {
+      "name": "Financial decision resolves clue",
+      "ok": true
+    },
+    {
+      "name": "Refresh resumes sea-front branch",
+      "ok": true
+    },
+    {
+      "name": "Plan and review date survive refresh",
+      "ok": true
+    },
+    {
+      "name": "Complete new-player journey reaches fourth-day ending",
+      "ok": true
+    },
+    {
+      "name": "Ending rule and UI: fourth",
+      "ok": true
+    },
+    {
+      "name": "Ending rule and UI: company",
+      "ok": true
+    },
+    {
+      "name": "Ending rule and UI: boundary",
+      "ok": true
+    },
+    {
+      "name": "Ending rule and UI: repair",
+      "ok": true
+    },
+    {
+      "name": "Ending rule and UI: relay",
+      "ok": true
+    },
+    {
+      "name": "Social branch remains reachable: honest",
+      "ok": true
+    },
+    {
+      "name": "Social branch remains reachable: quiet",
+      "ok": true
+    },
+    {
+      "name": "Social branch remains reachable: promisekeep",
+      "ok": true
+    },
+    {
+      "name": "Social branch remains reachable: promisechange",
+      "ok": true
+    },
+    {
+      "name": "Restart preserves unrelated storage",
+      "ok": true
+    },
+    {
+      "name": "Bad save offers recovery without overwriting",
+      "ok": true
+    },
+    {
+      "name": "Bad save offers recovery without overwriting",
+      "ok": true
+    },
+    {
+      "name": "Bad save offers recovery without overwriting",
+      "ok": true
+    },
+    {
+      "name": "Unavailable storage allows play with prominent notice",
+      "ok": true
+    },
+    {
+      "name": "Narrow screen and modal have no horizontal overflow",
+      "ok": true
+    },
+    {
+      "name": "Escape closes clue modal",
+      "ok": true
+    },
+    {
+      "name": "No runtime errors or failed asset responses",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "failedRequests": []
+}

@@ -1,0 +1,20 @@
+{
+  "errors": [
+    "Cannot convert undefined or null to object",
+    "Cannot convert undefined or null to object",
+    "Cannot convert undefined or null to object"
+  ],
+  "observations": [
+    {
+      "case": "Exit arcade before financial decision",
+      "mini": {
+        "coins": true
+      },
+      "screen": "散紙追蹤 · RESULTS\n今次成績\n\n下一局，試另一個打法。\n\n今次分數\n0\n個人最佳\n0\n遊戲時間\n0s\n立即重玩\n下一款遊戲 →\n返回遊戲選單"
+    },
+    {
+      "case": "Malformed save",
+      "screen": ""
+    }
+  ]
+}

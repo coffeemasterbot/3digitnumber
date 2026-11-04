@@ -1,0 +1,126 @@
+{
+  "checks": [
+    {
+      "name": "Audio does not start before interaction",
+      "ok": true
+    },
+    {
+      "name": "User can enable synthesized audio",
+      "ok": true
+    },
+    {
+      "name": "Mute suspends audio",
+      "ok": true
+    },
+    {
+      "name": "Practice completes without spending or score",
+      "ok": true
+    },
+    {
+      "name": "Double purchase deducts once",
+      "ok": true
+    },
+    {
+      "name": "Untimed mode prevents unnecessary time-card purchase",
+      "ok": true
+    },
+    {
+      "name": "Untimed round does not expire",
+      "ok": true
+    },
+    {
+      "name": "Keyboard firing and reload feedback",
+      "ok": true
+    },
+    {
+      "name": "Pause freezes reload and firing",
+      "ok": true
+    },
+    {
+      "name": "Reload finishes once",
+      "ok": true
+    },
+    {
+      "name": "Check reveals information before judgement",
+      "ok": true
+    },
+    {
+      "name": "First round review is complete",
+      "ok": true
+    },
+    {
+      "name": "Three rounds produce separate judgement, savings and accuracy",
+      "ok": true
+    },
+    {
+      "name": "Focus loss pauses timed round",
+      "ok": true
+    },
+    {
+      "name": "Timed round expires with unhandled scenarios explicit",
+      "ok": true
+    },
+    {
+      "name": "Retry 1 has one timer and fresh score",
+      "ok": true
+    },
+    {
+      "name": "Retry 2 has one timer and fresh score",
+      "ok": true
+    },
+    {
+      "name": "Retry 3 has one timer and fresh score",
+      "ok": true
+    },
+    {
+      "name": "Hidden tab pauses safely",
+      "ok": true
+    },
+    {
+      "name": "Exit 1 removes minigame frame",
+      "ok": true
+    },
+    {
+      "name": "Exit 2 removes minigame frame",
+      "ok": true
+    },
+    {
+      "name": "Exit 3 removes minigame frame",
+      "ok": true
+    },
+    {
+      "name": "Minigame never changes story save, money or clues",
+      "ok": true
+    },
+    {
+      "name": "Outer exit also tears down frame",
+      "ok": true
+    },
+    {
+      "name": "Reduced-motion preference is respected",
+      "ok": true
+    },
+    {
+      "name": "Touch coordinates hit correct target",
+      "ok": true
+    },
+    {
+      "name": "Pointer mapping stays correct after resize",
+      "ok": true
+    },
+    {
+      "name": "No mobile horizontal overflow",
+      "ok": true
+    },
+    {
+      "name": "320px layout fits",
+      "ok": true
+    },
+    {
+      "name": "No minigame runtime errors or failed assets",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "failedRequests": []
+}
