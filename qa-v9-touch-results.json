@@ -1,0 +1,81 @@
+{
+  "checks": [
+    {
+      "name": "runner touch start visible",
+      "ok": true
+    },
+    {
+      "name": "Runner touch changes lane",
+      "ok": true
+    },
+    {
+      "name": "Runner touch jumps",
+      "ok": true
+    },
+    {
+      "name": "Runner touch slide changes pose",
+      "ok": true
+    },
+    {
+      "name": "runner portrait fits",
+      "ok": true
+    },
+    {
+      "name": "runner landscape fits",
+      "ok": true
+    },
+    {
+      "name": "jet touch start visible",
+      "ok": true
+    },
+    {
+      "name": "Jet touch thrust raises the player",
+      "ok": true
+    },
+    {
+      "name": "jet portrait fits",
+      "ok": true
+    },
+    {
+      "name": "jet landscape fits",
+      "ok": true
+    },
+    {
+      "name": "garden touch start visible",
+      "ok": true
+    },
+    {
+      "name": "Garden touch planting begins with no produced sun",
+      "ok": true
+    },
+    {
+      "name": "garden portrait fits",
+      "ok": true
+    },
+    {
+      "name": "garden landscape fits",
+      "ok": true
+    },
+    {
+      "name": "Forest touch movement changes position",
+      "ok": true
+    },
+    {
+      "name": "Forest touch jump works",
+      "ok": true
+    },
+    {
+      "name": "Forest hides descriptions during active play",
+      "ok": true
+    },
+    {
+      "name": "Forest narrow screen fits",
+      "ok": true
+    },
+    {
+      "name": "No touch runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

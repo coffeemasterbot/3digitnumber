@@ -1,0 +1,4 @@
+import{test}from'node:test';import assert from'node:assert/strict';import{obstacleHit,travelPoints,POWER_DURATION}from'../source/runner-rules.mjs';
+test('Train collisions respect boot jump height for stationary and moving trains',()=>{for(const type of ['moving','block']){const o={type,lane:0,z:0};assert.ok(obstacleHit(o,0,0,.05,false));assert.equal(obstacleHit(o,0,0,3.2,false),false);assert.equal(obstacleHit(o,2,0,.05,false),false);assert.equal(obstacleHit(o,0,10,.05,false),false)}});
+test('Sliding and jumping avoid appropriate financial barriers',()=>{assert.equal(obstacleHit({type:'slide',lane:0,z:0},0,0,0,true),false);assert.ok(obstacleHit({type:'slide',lane:0,z:0},0,0,0,false));assert.equal(obstacleHit({type:'jump',lane:0,z:0},0,0,1,false),false)});
+test('Temporary double item changes travel score only',()=>{assert.equal(travelPoints(100,2),200);assert.equal(travelPoints(100),100);assert.ok(Object.values(POWER_DURATION).every(x=>x>0&&x<20))});

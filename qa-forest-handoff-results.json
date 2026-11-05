@@ -1,0 +1,89 @@
+{
+  "checks": [
+    {
+      "name": "Level 1 pressure plate opens first door",
+      "ok": true
+    },
+    {
+      "name": "Level 1 ice collects starting elevated coin",
+      "ok": true
+    },
+    {
+      "name": "Level 1 far switch handoff remains held",
+      "ok": true
+    },
+    {
+      "name": "Level 1 gate closes after both leave pressure plates",
+      "ok": true
+    },
+    {
+      "name": "Level 1 all finance tokens collected through real keyboard inputs",
+      "ok": true
+    },
+    {
+      "name": "Level 1 both characters reach exit",
+      "ok": true
+    },
+    {
+      "name": "Level 2 pressure plate opens first door",
+      "ok": true
+    },
+    {
+      "name": "Level 2 ice collects starting elevated coin",
+      "ok": true
+    },
+    {
+      "name": "Level 2 far switch handoff remains held",
+      "ok": true
+    },
+    {
+      "name": "Level 2 gate closes after both leave pressure plates",
+      "ok": true
+    },
+    {
+      "name": "Level 2 all finance tokens collected through real keyboard inputs",
+      "ok": true
+    },
+    {
+      "name": "Level 2 both characters reach exit",
+      "ok": true
+    },
+    {
+      "name": "Level 3 pressure plate opens first door",
+      "ok": true
+    },
+    {
+      "name": "Level 3 ice collects starting elevated coin",
+      "ok": true
+    },
+    {
+      "name": "Level 3 far switch handoff remains held",
+      "ok": true
+    },
+    {
+      "name": "Level 3 gate closes after both leave pressure plates",
+      "ok": true
+    },
+    {
+      "name": "Level 3 all finance tokens collected through real keyboard inputs",
+      "ok": true
+    },
+    {
+      "name": "Level 3 both characters reach exit",
+      "ok": true
+    },
+    {
+      "name": "Three cooperative levels recorded complete",
+      "ok": true
+    },
+    {
+      "name": "Forest leaves Ah Jun save untouched",
+      "ok": true
+    },
+    {
+      "name": "No forest runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

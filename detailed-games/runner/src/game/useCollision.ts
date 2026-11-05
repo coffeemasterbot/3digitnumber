@@ -1,3 +1,4 @@
+import{obstacleHit}from'../../../../source/runner-rules.mjs';
 import { useCallback } from 'react';
 import { LANES, PLAYER_RADIUS, PLAYER_HEIGHT, PLAYER_SLIDE_HEIGHT } from '../utils/constants';
 import type { ObstacleData } from './Obstacle';
@@ -21,35 +22,7 @@ export function useCollision() {
   ): ObstacleData | null => {
     const playerLane = LANES[playerState.lane];
     
-    for (const obstacle of obstacles) {
-      // Check if obstacle is in range
-      const zDist = Math.abs(obstacle.z - playerZ);
-      if (zDist > COLLISION_THRESHOLD_Z) continue;
-      
-      // Check if same lane
-      if (Math.abs(obstacle.lane - playerLane) > 0.1) continue;
-      
-      // Check collision based on obstacle type and player state
-      switch (obstacle.type) {
-        case 'jump':
-          // Can avoid by jumping
-          if (!playerState.isJumping) {
-            return obstacle;
-          }
-          break;
-        case 'slide':
-          // Can avoid by sliding
-          if (!playerState.isSliding) {
-            return obstacle;
-          }
-          break;
-        case 'block':
-        case 'moving':
-          // Must be in different lane - already checked above
-          return obstacle;
-      }
-    }
-    
+    for(const obstacle of obstacles)if(obstacleHit(obstacle,playerLane,playerZ,playerState.y-.85,playerState.isSliding))return obstacle;
     return null;
   }, []);
 

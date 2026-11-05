@@ -24,3 +24,6 @@
   .duo-controls button{min-height:40px;min-width:64px;font-size:13px;padding:6px 18px}
   #journey-overlay{z-index:6}#journey-overlay>div{padding:16px 22px}#journey-overlay h3{font-size:20px;margin:7px 0}#journey-overlay p{font-size:13px;margin:7px 0 12px}
 }
+.forest-active #journey-feedback,.forest-active .journey-help,.forest-active .journey-top>div>.kicker,.forest-active .journey-top h2,.forest-active .duo-palette small{display:none!important}.forest-active .duo-palette button{font-size:25px;padding:5px 25px}.forest-active .journey-hud{padding:8px 15px}.forest-active .journey-stage{margin-top:8px}.forest-active .journey-bottom{margin-top:10px}
+
+body.forest-active.forest-help .journey-help{display:block}

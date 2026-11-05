@@ -927,7 +927,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
         </div>
     </div>
 
-    <script>
+    <script src="sunflower-rules.js"></script><script>
         let runGeneration=0;
         // Game State
         let gameState = {
@@ -1471,7 +1471,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                     healthBar: null,
                     healthFill: null,
                     lastShot: 0,
-                    lastProduction: 0
+                    productionCharge: 0
                 };
                 
                 const plantElement = document.createElement('div');
@@ -2099,10 +2099,12 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                         const plantType = plantTypes[plant.type];
                         
                         if (plantType.produces === 'sun') {
-                            if (!plant.lastProduction || now - plant.lastProduction > plantType.interval / gameState.gameSpeed) {
-                                plant.lastProduction = now;
-                                produceSun(plant);
-                            }
+                            const interval = plantType.interval / gameState.gameSpeed;
+                            if (SunflowerRules.advance(plant, deltaTime, interval)) produceSun(plant);
+                            const charge = Math.min(100, plant.productionCharge / interval * 100);
+                            plant.element.style.setProperty('--charge', charge + '%');
+                            const meter = plant.element.querySelector('.sun-charge');
+                            if(meter){meter.setAttribute('aria-valuenow',String(Math.floor(charge)));meter.title='吸收陽光 '+Math.floor(charge)+'%';}
                         }
                         
                         if (plantType.shoots) {

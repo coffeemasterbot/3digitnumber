@@ -256,7 +256,8 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
   }
 
   const deathFrames=useRef(0),lastClock=useRef(0),fixedAcc=useRef(0);
-  (window as any).detailedGameSnapshot=()=>({state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
+  (window as any).detailedGameSnapshot=()=>({state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
+  function endVehicle(p:Player,reason:string){p.expiredType=p.powerUp;p.expiredTimer=100;p.expiredReason=reason;for(let i=0;i<(matchMedia('(prefers-reduced-motion:reduce)').matches?0:16);i++){const a=i*Math.PI/8;p.particles.push({x:p.x+p.width/2,y:p.y+p.height/2,vx:Math.cos(a)*3,vy:Math.sin(a)*3,life:40,maxLife:40,size:4,color:'#e9bc66'})}play('powerup')}
   // ── Main game loop ────────────────────────────
   const gameLoop = useCallback(() => {
     const canvas = canvasRef.current;
@@ -341,10 +342,12 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       if (p.invincibleTimer <= 0) p.invincible = false;
     }
 
+    p.expiredTimer=Math.max(0,(p.expiredTimer||0)-1);
     // Power-up timer
     if (p.powerUp !== 'none') {
       p.powerUpTimer--;
       if (p.powerUpTimer <= 0) {
+        if(['mecha','glider','drill'].includes(p.powerUp))endVehicle(p,'時間已到');
         p.powerUp = 'none';
         p.powerUpTimer = 0;
       }
@@ -438,6 +441,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
           if(p.powerUp==='drill'){m.active=false;p.powerUpTimer=Math.max(0,p.powerUpTimer-90);play('hit');continue}
           if (p.powerUp === 'shield'||p.powerUp==='mecha') {
             // Shield absorbs hit
+            if(p.powerUp==='mecha')endVehicle(p,'擋擊後解除');
             p.powerUp = 'none';
             p.powerUpTimer = 0;
             p.invincible = true;
@@ -516,6 +520,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
     // Player
     drawPlayer(ctx, p, frame);if(blastRef.current>0){ctx.strokeStyle='#fff0b2';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(p.x+p.width,p.y+22);ctx.lineTo(p.x+420,p.y+22);ctx.stroke()}
 
+    if((p.expiredTimer||0)>0){const k=matchMedia('(prefers-reduced-motion:reduce)').matches?0:1-(p.expiredTimer||0)/100,cx=p.x+p.width/2,cy=p.y+p.height/2;ctx.save();ctx.globalAlpha=1-k;ctx.strokeStyle='#fff0c5';ctx.lineWidth=3;ctx.setLineDash([8,5]);ctx.beginPath();ctx.arc(cx,cy,32+k*45,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=Math.min(1,(p.expiredTimer||0)/20);ctx.fillStyle='#fff2d4';ctx.fillRect(p.x-25,p.y-42,210,26);ctx.fillStyle='#765131';ctx.font='bold 13px Microsoft JhengHei';ctx.textAlign='left';ctx.fillText((p.expiredType==='mecha'?'儲備機甲':p.expiredType==='glider'?'計劃滑翔翼':'界線鑽頭')+' · '+p.expiredReason,p.x-18,p.y-24);ctx.restore()}
     // Magnet field hint
     if (p.powerUp === 'magnet') {
       ctx.save();

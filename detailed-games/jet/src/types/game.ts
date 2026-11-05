@@ -24,6 +24,9 @@ export interface Player extends Rect {
   /** Active power-up type */
   powerUp: PowerUpType;
   powerUpTimer: number;
+  expiredType?: PowerUpType;
+  expiredTimer?: number;
+  expiredReason?: string;
   /** Brief invincibility flash after getting hit with no shield */
   invincible: boolean;
   invincibleTimer: number;

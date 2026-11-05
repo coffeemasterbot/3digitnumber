@@ -1,0 +1,170 @@
+{
+  "checks": [
+    {
+      "name": "Sniper purchase charges once",
+      "ok": true
+    },
+    {
+      "name": "Four usable weapons and one-bullet health",
+      "ok": true
+    },
+    {
+      "name": "Drag rotates yaw and pitch",
+      "ok": true
+    },
+    {
+      "name": "Jump lifts the viewpoint",
+      "ok": true
+    },
+    {
+      "name": "Crouch lowers viewpoint",
+      "ok": true
+    },
+    {
+      "name": "Sniper scope changes view",
+      "ok": true
+    },
+    {
+      "name": "Sniper hits and collapses robot",
+      "ok": true
+    },
+    {
+      "name": "Pistol has independent ammo and reload",
+      "ok": true
+    },
+    {
+      "name": "Knife switch cancels reload without refilling pistol",
+      "ok": true
+    },
+    {
+      "name": "Knife defeats a nearby robot without affecting accuracy shots",
+      "ok": true
+    },
+    {
+      "name": "Pistol retains previous magazine after switching",
+      "ok": true
+    },
+    {
+      "name": "E opens nearby tactical door",
+      "ok": true
+    },
+    {
+      "name": "E closes tactical door",
+      "ok": true
+    },
+    {
+      "name": "Pause blocks fire, movement and timer",
+      "ok": true
+    },
+    {
+      "name": "Financial terminal available in round 1",
+      "ok": true
+    },
+    {
+      "name": "Defuse completes round 1",
+      "ok": true
+    },
+    {
+      "name": "Financial terminal available in round 2",
+      "ok": true
+    },
+    {
+      "name": "Defuse completes round 2",
+      "ok": true
+    },
+    {
+      "name": "Financial terminal available in round 3",
+      "ok": true
+    },
+    {
+      "name": "Defuse completes round 3",
+      "ok": true
+    },
+    {
+      "name": "Finance score separates accuracy and reserve",
+      "ok": true
+    },
+    {
+      "name": "A single projectile causes death and retry",
+      "ok": true
+    },
+    {
+      "name": "Retry restores only local campaign budget",
+      "ok": true
+    },
+    {
+      "name": "New sunflower starts with empty production meter",
+      "ok": true
+    },
+    {
+      "name": "Sunflower charges without immediate production",
+      "ok": true
+    },
+    {
+      "name": "Paused sunflower does not absorb sun",
+      "ok": true
+    },
+    {
+      "name": "Sunflower produces only after full active charge",
+      "ok": true
+    },
+    {
+      "name": "Boots lift player above train roof height",
+      "ok": true
+    },
+    {
+      "name": "Booted player passes an oncoming train without board protection",
+      "ok": true
+    },
+    {
+      "name": "Double item weights travel score separately from actual distance",
+      "ok": true
+    },
+    {
+      "name": "Every active item has seconds below its timer bar",
+      "ok": true
+    },
+    {
+      "name": "Runner pause freezes power timers",
+      "ok": true
+    },
+    {
+      "name": "Polished SVG icon for mecha",
+      "ok": true
+    },
+    {
+      "name": "Polished SVG icon for glider",
+      "ok": true
+    },
+    {
+      "name": "Polished SVG icon for drill",
+      "ok": true
+    },
+    {
+      "name": "Vehicle expiry keeps a visible dismantle state",
+      "ok": true
+    },
+    {
+      "name": "Expiry effect clears once rather than looping",
+      "ok": true
+    },
+    {
+      "name": "Mobile FPS has working jump/fire controls",
+      "ok": true
+    },
+    {
+      "name": "Mobile crouch changes posture",
+      "ok": true
+    },
+    {
+      "name": "Mobile FPS controls fit viewport",
+      "ok": true
+    },
+    {
+      "name": "No runtime errors or failed assets",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "failedAssets": []
+}

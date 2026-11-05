@@ -1,3 +1,4 @@
+import{travelPoints as scoreTravel}from'../../../../source/runner-rules.mjs';
 import { create } from 'zustand';
 import type { GameState } from '../utils/types';
 import { INITIAL_SPEED } from '../utils/constants';
@@ -7,6 +8,7 @@ interface GameStore {
   gameState: GameState;
   score: number;
   distance: number;
+  travelPoints:number;
   coins: number;
   speed: number;
   
@@ -19,7 +21,7 @@ interface GameStore {
   
   // Updates
   addScore: (amount: number) => void;
-  addDistance: (amount: number) => void;
+  addDistance: (amount: number,multiplier?:number) => void;
   addCoin: () => void;
   setSpeed: (speed: number) => void;
 }
@@ -27,14 +29,14 @@ interface GameStore {
 export const useGameStore = create<GameStore>((set) => ({
   gameState: 'menu',
   score: 0,
-  distance: 0,
+  distance: 0,travelPoints:0,
   coins: 0,
   speed: INITIAL_SPEED,
 
   startGame: () => set({
     gameState: 'playing',
     score: 0,
-    distance: 0,
+    distance: 0,travelPoints:0,
     coins: 0,
     speed: INITIAL_SPEED,
   }),
@@ -48,7 +50,7 @@ export const useGameStore = create<GameStore>((set) => ({
   resetGame: () => set({
     gameState: 'menu',
     score: 0,
-    distance: 0,
+    distance: 0,travelPoints:0,
     coins: 0,
     speed: INITIAL_SPEED,
   }),
@@ -57,14 +59,14 @@ export const useGameStore = create<GameStore>((set) => ({
     score: state.score + amount 
   })),
   
-  addDistance: (amount) => set((state) => ({ 
+  addDistance: (amount,multiplier=1) => set((state) => ({ 
     distance: state.distance + amount,
-    score: state.coins*10 + Math.floor(state.distance+amount),
+    travelPoints:state.travelPoints+scoreTravel(amount,multiplier),score: state.coins*10 + Math.floor(state.travelPoints+scoreTravel(amount,multiplier)),
   })),
   
   addCoin: () => set((state) => ({ 
     coins: state.coins + 1,
-    score: state.score + 10,
+    score: Math.floor(state.travelPoints)+(state.coins+1)*10,
   })),
   
   setSpeed: (speed) => set({ speed }),

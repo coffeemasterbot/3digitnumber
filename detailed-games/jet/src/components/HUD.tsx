@@ -1,5 +1,6 @@
 'use client';
 
+import VehicleIcon from './VehicleIcon';
 import { motion } from 'framer-motion';
 import { PowerUpType } from '@/types/game';
 
@@ -107,7 +108,7 @@ export default function HUD({
           exit={{ opacity: 0, x: -20 }}
           className="absolute bottom-20 left-3 flex items-center gap-2"
         >
-          <span className="text-xl">{pwCfg.icon}</span>
+          {['mecha','glider','drill'].includes(activePowerUp)?<VehicleIcon type={activePowerUp}/>:<span className="text-xl">{pwCfg.icon}</span>}
           <div className="flex flex-col gap-0.5">
             <span className="font-mono text-xs font-bold uppercase leading-none" style={{ color: pwCfg.color }}>
               {pwCfg.label}

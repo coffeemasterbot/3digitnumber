@@ -115,8 +115,14 @@ export function drawPlayer(
 
   ctx.save();
 
-  if(['mecha','glider','drill'].includes(powerUp)){ctx.fillStyle=powerUp==='mecha'?'#cd9a42':powerUp==='glider'?'#648c7b':'#b86c46';ctx.strokeStyle='#fff0c3';ctx.lineWidth=3;ctx.beginPath();ctx.roundRect(x-10,y-12,width+20,height+24,10);ctx.fill();ctx.stroke();ctx.fillStyle='#284740';ctx.fillRect(x+3,y+2,width-6,17);if(powerUp==='glider'){ctx.fillStyle='#f5deac';ctx.beginPath();ctx.moveTo(x-40,y+5);ctx.lineTo(x+width+40,y+5);ctx.lineTo(cx,y-35);ctx.fill()}if(powerUp==='drill'){ctx.fillStyle='#e6d2b0';ctx.beginPath();ctx.moveTo(x+width+28,cy);ctx.lineTo(x+width,cy-20);ctx.lineTo(x+width,cy+20);ctx.fill()}if(powerUp==='mecha'){ctx.fillStyle='#443d30';ctx.fillRect(x-12,y+height,28,16);ctx.fillRect(x+width-10,y+height,28,16);ctx.fillRect(x+width,y+20,29,10)}ctx.fillStyle='#fff3cb';ctx.font='bold 12px Microsoft JhengHei';ctx.textAlign='center';ctx.fillText(powerUp==='mecha'?'儲備機甲':powerUp==='drill'?'界線鑽頭':'計劃滑翔翼',cx,y-19);ctx.restore();return;}
-  // Shield bubble
+  if(['mecha','glider','drill'].includes(powerUp)){
+    const metal=ctx.createLinearGradient(x,y,x+width,y+height);metal.addColorStop(0,powerUp==='mecha'?'#ffdc7c':powerUp==='glider'?'#afdbbf':'#edb18a');metal.addColorStop(1,powerUp==='mecha'?'#a56b2e':powerUp==='glider'?'#3b776a':'#a14b32');ctx.fillStyle=metal;ctx.strokeStyle='#463e2e';ctx.lineWidth=3;
+    if(powerUp==='glider'){ctx.beginPath();ctx.moveTo(x-42,y+15);ctx.lineTo(cx,y-35);ctx.lineTo(x+width+42,y+15);ctx.lineTo(x+width,y+23);ctx.lineTo(cx,y+height+8);ctx.lineTo(x,y+23);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(cx,y-35);ctx.lineTo(cx,y+height);ctx.moveTo(x-40,y+15);ctx.lineTo(cx,y);ctx.lineTo(x+width+40,y+15);ctx.stroke()}
+    else{ctx.beginPath();ctx.roundRect(x-10,y+3,width+20,height-3,8);ctx.fill();ctx.stroke();if(powerUp==='mecha'){ctx.fillRect(x-23,y+14,13,30);ctx.strokeRect(x-23,y+14,13,30);ctx.fillRect(x+width+10,y+14,18,14);ctx.strokeRect(x+width+10,y+14,18,14);for(const side of [-1,1]){const lx=cx+side*(width/2+2)-9;ctx.fillRect(lx,y+height-3,18,20);ctx.strokeRect(lx,y+height-3,18,20)}ctx.beginPath();ctx.roundRect(x+2,y-16,width-4,25,5);ctx.fill();ctx.stroke()}
+    else{ctx.beginPath();ctx.moveTo(x+width+8,y+4);ctx.lineTo(x+width+48,cy+4);ctx.lineTo(x+width+8,y+height);ctx.closePath();ctx.fillStyle='#e0dac0';ctx.fill();ctx.stroke();for(let i=0;i<3;i++){ctx.beginPath();ctx.moveTo(x+width+10+i*9,y+10+i*5);ctx.lineTo(x+width+21+i*6,y+height-10-i*4);ctx.stroke()}ctx.fillStyle='#4d5148';ctx.beginPath();ctx.roundRect(x-14,y+height-3,width+25,14,6);ctx.fill();for(let i=0;i<4;i++){ctx.fillStyle='#aaaf91';ctx.beginPath();ctx.arc(x-5+i*15,y+height+4,4,0,7);ctx.fill()}}}
+    ctx.fillStyle='#284f46';ctx.beginPath();ctx.roundRect(x+4,y+5,width-8,14,3);ctx.fill();ctx.fillStyle='#aef5db';ctx.fillRect(x+9,y+8,width-18,5);ctx.fillStyle='#ffeab2';ctx.beginPath();ctx.arc(cx,cy+9,5,0,7);ctx.fill();ctx.fillStyle='#fff2ce';ctx.font='bold 12px Microsoft JhengHei';ctx.textAlign='center';ctx.fillText(powerUp==='mecha'?'儲備機甲':powerUp==='drill'?'界線鑽頭':'計劃滑翔翼',cx,y-22);ctx.restore();return;
+  }
+
   if (powerUp === 'shield') {
     const r = width * 0.8;
     withGlow(ctx, COLORS.shieldRing, 20, () => {

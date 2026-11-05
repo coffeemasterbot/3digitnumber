@@ -42,3 +42,5 @@
 見 [GAME_UPGRADES.md](GAME_UPGRADES.md)：街頭 3D 跑酷、植物圖像／壞習慣敵人／陽光、三關森林地圖／固定開閘、暖色飛行／三款變身，以及首頁可直接進入嘅 3D 機械人拆彈。FPS 預設路徑係 `/games/budget-defence/`；原本無障礙不限時練習保留喺 `/games/budget-defence/range.html`。
 
 今次已安裝現有鎖定依賴，正式建置用 `node build.cjs`（完整重新打包）。邏輯測試：`node --test tests/*.test.cjs tests/*.test.mjs`。新瀏覽器測試：啟動 `node preview.cjs` 後執行 `node qa-upgrades.cjs`、`node qa-train-mobile.cjs`；主線、存檔及退出測試仍保留。原有 `node qa.cjs` 會自行啟動預覽，先停止現有伺服器。
+
+Current game mechanics, controls, issue classification and verification: [GAME_REFINEMENTS_V9.md](GAME_REFINEMENTS_V9.md). Start `node preview.cjs` before browser QA.
