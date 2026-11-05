@@ -1,0 +1,57 @@
+{
+  "checks": [
+    {
+      "name": "New navigation and sharing fit a narrow phone",
+      "ok": true
+    },
+    {
+      "name": "English slides work on touch",
+      "ok": true
+    },
+    {
+      "name": "Share copy action provides a usable result",
+      "ok": true
+    },
+    {
+      "name": "Downloaded play link has usable URL and separate lines",
+      "ok": true
+    },
+    {
+      "name": "Opening leaderboard pauses runner safely",
+      "ok": true
+    },
+    {
+      "name": "Typing in public nickname cannot resume game",
+      "ok": true
+    },
+    {
+      "name": "Shared leaderboard dialog fits mobile",
+      "ok": true
+    },
+    {
+      "name": "Mobile FPS retains working shoot/jump/crouch controls",
+      "ok": true
+    },
+    {
+      "name": "Mobile FPS drag rotates the camera",
+      "ok": true
+    },
+    {
+      "name": "Mobile FPS does not overflow",
+      "ok": true
+    },
+    {
+      "name": "Cherry Bomb remains reachable in narrow plant strip",
+      "ok": true
+    },
+    {
+      "name": "Shovel remains reachable in narrow plant strip",
+      "ok": true
+    },
+    {
+      "name": "No mobile runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

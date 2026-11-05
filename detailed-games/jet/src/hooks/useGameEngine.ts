@@ -256,7 +256,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
   }
 
   const deathFrames=useRef(0),lastClock=useRef(0),fixedAcc=useRef(0);
-  (window as any).detailedGameSnapshot=()=>({state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
+  (window as any).detailedGameSnapshot=()=>({state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,distance:distanceRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
   function endVehicle(p:Player,reason:string){p.expiredType=p.powerUp;p.expiredTimer=100;p.expiredReason=reason;for(let i=0;i<(matchMedia('(prefers-reduced-motion:reduce)').matches?0:16);i++){const a=i*Math.PI/8;p.particles.push({x:p.x+p.width/2,y:p.y+p.height/2,vx:Math.cos(a)*3,vy:Math.sin(a)*3,life:40,maxLife:40,size:4,color:'#e9bc66'})}play('powerup')}
   // ── Main game loop ────────────────────────────
   const gameLoop = useCallback(() => {
@@ -375,7 +375,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
 
     powerUpTimerRef.current--;
     if (powerUpTimerRef.current <= 0) {
-      const pickup=spawnPowerUp();pickup.type=(['mecha','glider','drill','shield','magnet','boost'] as PowerUpType[])[vehicleCycle.current++%6];pickup.x=450;pickup.y=Math.max(CEILING_Y+15,Math.min(GROUND_Y-50,p.y));powerUpsRef.current.push(pickup);
+      const pickup=spawnPowerUp();pickup.type=(['mecha','glider','drill','shield','magnet','boost'] as PowerUpType[])[Math.floor(Math.random()*6)];pickup.x=450;pickup.y=Math.max(CEILING_Y+15,Math.min(GROUND_Y-50,p.y));powerUpsRef.current.push(pickup);
       powerUpTimerRef.current = POWERUP_SPAWN_INTERVAL;
     }
 
@@ -547,7 +547,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
 
   // ── Keyboard input ────────────────────────────
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
+    const onKeyDown = (e: KeyboardEvent) => {if(e.target instanceof Element&&e.target.closest('input,textarea,dialog'))return;
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
         e.preventDefault();
         if (gameStateRef.current === 'start' || gameStateRef.current === 'gameover') {

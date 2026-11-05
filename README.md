@@ -44,3 +44,5 @@
 今次已安裝現有鎖定依賴，正式建置用 `node build.cjs`（完整重新打包）。邏輯測試：`node --test tests/*.test.cjs tests/*.test.mjs`。新瀏覽器測試：啟動 `node preview.cjs` 後執行 `node qa-upgrades.cjs`、`node qa-train-mobile.cjs`；主線、存檔及退出測試仍保留。原有 `node qa.cjs` 會自行啟動預覽，先停止現有伺服器。
 
 Current game mechanics, controls, issue classification and verification: [GAME_REFINEMENTS_V9.md](GAME_REFINEMENTS_V9.md). Start `node preview.cjs` before browser QA.
+
+Latest agreed feedback, controls, shared leaderboard architecture and QA: [GAME_FEEDBACK_V10.md](GAME_FEEDBACK_V10.md). Build with `node build.cjs`; preview with `node preview.cjs`. Generate future database migrations with `pnpm db:generate`; never edit an applied migration.

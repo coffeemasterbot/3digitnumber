@@ -64,6 +64,8 @@ fs.copyFileSync(path.join(root,'garden-duo.css'),path.join(dist,'garden-duo.css'
 if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missing talk poster asset');
 const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v1');
 
-require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
+fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'presentation.js'));require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
 
 if(!process.argv.includes('--preserve-arcade'))require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});
+
+require('./build-server.cjs');

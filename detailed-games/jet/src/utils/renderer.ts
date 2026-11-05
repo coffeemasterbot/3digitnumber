@@ -244,47 +244,7 @@ const POWERUP_FILL: Record<string, string> = {
   boost:  '#003322',
 };
 
-export function drawPowerUp(ctx: CanvasRenderingContext2D, p: PowerUpItem, time: number) {
-  if (!p.active) return;
-  const cx = p.x + POWERUP_SIZE / 2;
-  const cy = p.y + POWERUP_SIZE / 2 + Math.sin(time * 0.05 + p.x * 0.02) * 4;
-
-  ctx.save();
-  ctx.translate(cx, cy);
-
-  const glow = POWERUP_GLOW[p.type] ?? '#ffffff';
-  const fill = POWERUP_FILL[p.type] ?? '#111';
-
-  withGlow(ctx, glow, 25, () => {
-    // Outer rotating ring
-    ctx.rotate(time * 0.04);
-    ctx.strokeStyle = glow;
-    ctx.lineWidth = 2;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath();
-    ctx.arc(0, 0, POWERUP_SIZE * 0.72, 0, Math.PI * 2);
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.rotate(-time * 0.04);
-
-    // Background circle
-    ctx.fillStyle = fill;
-    ctx.beginPath();
-    ctx.arc(0, 0, POWERUP_SIZE * 0.55, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.strokeStyle = glow;
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  });
-
-  // Icon
-  ctx.font = `${POWERUP_SIZE * 0.62}px serif`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(POWERUP_ICONS[p.type] ?? '?', 0, 1);
-
-  ctx.restore();
-}
+export function drawPowerUp(ctx:CanvasRenderingContext2D,p:PowerUpItem,time:number){if(!p.active)return;const cx=p.x+POWERUP_SIZE/2,cy=p.y+POWERUP_SIZE/2;ctx.save();ctx.translate(cx,cy);const rainbow=ctx.createLinearGradient(-24,-24,24,24);['#fb987a','#f5d875','#a5d88f','#8ddde0','#b8a3e0'].forEach((c,i)=>rainbow.addColorStop(i/4,c));ctx.fillStyle=rainbow;ctx.strokeStyle='#fff6d7';ctx.lineWidth=3;ctx.shadowColor='#ffdc94';ctx.shadowBlur=10;ctx.beginPath();ctx.roundRect(-24,-24,48,48,10);ctx.fill();ctx.stroke();ctx.shadowBlur=0;ctx.fillStyle='#3b3c52';ctx.font='bold 39px Georgia';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText('?',0,3);ctx.restore()}
 
 // ── Coin collected pop ─────────────────────────
 export function drawCoinPop(ctx: CanvasRenderingContext2D, coin: Coin) {

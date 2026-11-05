@@ -13,7 +13,7 @@ export function useInput(playerRef: React.RefObject<PlayerHandle | null>) {
     if (gameState !== 'playing') return;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!playerRef.current) return;
+      if (!playerRef.current||(e.target instanceof Element&&e.target.closest('input,textarea,dialog'))) return;
 
       switch (e.key) {
         case 'ArrowLeft':

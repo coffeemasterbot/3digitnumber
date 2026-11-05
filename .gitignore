@@ -35,3 +35,7 @@ qa-detailed-results.json
 
 qa-detailed-mobile-results.json
 qa-detailed-outcomes-results.json
+
+node_modules/
+.sites-runtime/
+.local-data/

@@ -1470,7 +1470,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                     element: null,
                     healthBar: null,
                     healthFill: null,
-                    lastShot: 0,
+                    lastShot: -100000,
                     productionCharge: 0
                 };
                 
@@ -1561,7 +1561,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
         function shoot(plant) {
             if (!plant.element || !plant.element.parentElement) return;
             
-            const now = Date.now();
+            const now = gameState.activeClock||0;
             const plantType = plantTypes[plant.type];
             
             if (!plantType.shoots) return;
@@ -1631,13 +1631,13 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             });
             
             if (plantType.double) {
-                setTimeout(() => {
+                plant.pendingBurst={left:180,fire:() => {
                     targetRows.forEach(row => {
                         if (gameState.zombies.some(z => z.row === row && z.element)) {
                             createProjectileForRow(row);
                         }
                     });
-                }, 200);
+                }};
             }
         }
 
@@ -1669,11 +1669,11 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                         if (proj.slow) {
                             zombie.slowed = true;
                             zombie.slowedUntil = Date.now() + 3000;
-                            zombie.element.classList.add('slowed');
+                            zombie.element.classList.add('slowed');zombie.freezeLeft=3000;
                         }
                         
                         if (proj.fire && zombie.element) {
-                            createParticleEffect(zombie.element, '🔥');
+                            createParticleEffect(zombie.element, '🔥');zombie.burnLeft=1600;zombie.element.classList.add('burning');
                         }
                         
                         setTimeout(() => {
@@ -1724,7 +1724,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             gameState.zombies = gameState.zombies.filter(zombie => {
                 if (!zombie.element) return false;
                 
-                if (zombie.slowed && Date.now() > zombie.slowedUntil) {
+                if (zombie.slowed && (zombie.freezeLeft||0)<=0) {
                     zombie.slowed = false;
                     zombie.element.classList.remove('slowed');
                 }
@@ -2091,6 +2091,8 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 gameState.lastUpdate = now;
                 
                 if (!gameState.isPaused && !gameState.isGameOver) {
+                    gameState.activeClock=(gameState.activeClock||0)+Math.min(100,Math.max(0,deltaTime))*gameState.gameSpeed;
+                    window.gardenActiveStep?.(Math.min(100,Math.max(0,deltaTime))*gameState.gameSpeed);
                     moveZombies(deltaTime);
                     moveProjectiles(deltaTime);
                     
@@ -2267,5 +2269,5 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             }
         });
     </script>
-<script src="../game-shell.js"></script><script>document.addEventListener("keydown",e=>{if(e.target.matches(".plantCard")&&["Enter"," "].includes(e.key)){e.preventDefault();e.target.click()}else if(/^[1-9]$/.test(e.key))document.querySelectorAll(".plantCard")[Number(e.key)-1]?.click()})</script><script src="garden-upgrade.js"></script></body>
+<script src="../game-shell.js"></script><script>document.addEventListener("keydown",e=>{if(e.target.matches(".plantCard")&&["Enter"," "].includes(e.key)){e.preventDefault();e.target.click()}else if(/^[1-9]$/.test(e.key))document.querySelectorAll(".plantCard")[Number(e.key)-1]?.click()})</script><script src="garden-mechanics.js"></script><script src="garden-upgrade.js"></script></body>
 </html>

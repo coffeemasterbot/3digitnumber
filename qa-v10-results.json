@@ -1,0 +1,182 @@
+{
+  "checks": [
+    {
+      "name": "Both approved talk dates link to the team Instagram",
+      "ok": true
+    },
+    {
+      "name": "Presentation has a working English version",
+      "ok": true
+    },
+    {
+      "name": "English presentation advances",
+      "ok": true
+    },
+    {
+      "name": "Presentation language preference survives refresh",
+      "ok": true
+    },
+    {
+      "name": "Public test link downloads as a real file",
+      "ok": true
+    },
+    {
+      "name": "Plant cooldown blocks immediate repeated placement without spending",
+      "ok": true
+    },
+    {
+      "name": "Plant cooldown freezes when paused",
+      "ok": true
+    },
+    {
+      "name": "Shovel removes a planted object without a refund exploit",
+      "ok": true
+    },
+    {
+      "name": "Repeater fires the first pea and queues the second",
+      "ok": true
+    },
+    {
+      "name": "Repeater burst cannot fire during pause",
+      "ok": true
+    },
+    {
+      "name": "Repeater completes a rapid two-shot burst after resuming",
+      "ok": true
+    },
+    {
+      "name": "Zombie name and health are not mirrored",
+      "ok": true
+    },
+    {
+      "name": "Actual projectile hits show freeze and burn feedback",
+      "ok": true
+    },
+    {
+      "name": "Cherry Bomb detonates, removes itself and defeats nearby enemies",
+      "ok": true
+    },
+    {
+      "name": "Garden music runs after interaction",
+      "ok": true
+    },
+    {
+      "name": "FPS starts at zero and blocks unaffordable equipment",
+      "ok": true
+    },
+    {
+      "name": "FPS has more enemies, doors and a shorter live bomb timer",
+      "ok": true
+    },
+    {
+      "name": "Desktop right-side action buttons are hidden",
+      "ok": true
+    },
+    {
+      "name": "Mouse movement rotates view without dragging",
+      "ok": true
+    },
+    {
+      "name": "Right-click fires and a pistol headshot gives one coin reward",
+      "ok": true
+    },
+    {
+      "name": "Headshot has a distinct hit effect",
+      "ok": true
+    },
+    {
+      "name": "Shooting a defeated target cannot duplicate its reward",
+      "ok": true
+    },
+    {
+      "name": "Equipment deducts earned coins once",
+      "ok": true
+    },
+    {
+      "name": "Sniper scope activates",
+      "ok": true
+    },
+    {
+      "name": "Sniper automatically unscopes and enforces bolt cooldown",
+      "ok": true
+    },
+    {
+      "name": "Sniper cannot refire during recovery",
+      "ok": true
+    },
+    {
+      "name": "Rifle has actual aim recoil",
+      "ok": true
+    },
+    {
+      "name": "FPS pause freezes timer, reload and shooting",
+      "ok": true
+    },
+    {
+      "name": "Financial check and defuse complete round 2",
+      "ok": true
+    },
+    {
+      "name": "Financial check and defuse complete round 3",
+      "ok": true
+    },
+    {
+      "name": "FPS judgement remains separate from shooting",
+      "ok": true
+    },
+    {
+      "name": "One enemy projectile still causes death",
+      "ok": true
+    },
+    {
+      "name": "Boots still raise the player above train height",
+      "ok": true
+    },
+    {
+      "name": "Boots clear an oncoming train without board protection",
+      "ok": true
+    },
+    {
+      "name": "Magnet attracts coins visibly before collecting",
+      "ok": true
+    },
+    {
+      "name": "Magnet arrival grants coins once",
+      "ok": true
+    },
+    {
+      "name": "Runner enters a collision/death phase before results",
+      "ok": true
+    },
+    {
+      "name": "Death animation completes into runner results",
+      "ok": true
+    },
+    {
+      "name": "Runner automatically saves its completed run online",
+      "ok": true
+    },
+    {
+      "name": "Another isolated player sees the same saved run",
+      "ok": true
+    },
+    {
+      "name": "Typing into leaderboard does not control the game",
+      "ok": true
+    },
+    {
+      "name": "Jetpack guide is polished and contains mystery-box instructions",
+      "ok": true
+    },
+    {
+      "name": "Jetpack leaderboard entry is available",
+      "ok": true
+    },
+    {
+      "name": "No runtime errors or failed assets",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "failedAssets": []
+}

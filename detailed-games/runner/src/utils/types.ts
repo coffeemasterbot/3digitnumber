@@ -1,4 +1,4 @@
-export type GameState = 'menu' | 'playing' | 'paused' | 'gameOver';
+export type GameState = 'menu' | 'playing' | 'paused' | 'dying' | 'gameOver';
 
 export type Screen = 'menu' | 'game' | 'leaderboard';
 

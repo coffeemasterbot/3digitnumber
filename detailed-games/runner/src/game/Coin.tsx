@@ -1,3 +1,4 @@
+import{useGameStore}from'../state/gameStore';import{extras}from'./extras';
 import { useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { COLORS } from '../utils/constants';
@@ -14,11 +15,11 @@ export function Coin({ position }: CoinProps) {
   const meshRef = useRef<Mesh>(null);
 
   useFrame((_, delta) => {
-    if (!meshRef.current) return;
+    if (!meshRef.current) return;if(useGameStore.getState().gameState!=='playing')return;
     // Spin animation
     meshRef.current.rotation.y += delta * 3;
     // Bob up and down
-    const time = Date.now() * 0.002;
+    const time = extras.time*2;
     meshRef.current.position.y = position[1] + Math.sin(time) * 0.1;
   });
 
@@ -38,6 +39,7 @@ export function Coin({ position }: CoinProps) {
 
 export interface CoinData {
   id: string;
+  attracting?:boolean;
   lane: number;
   z: number;
   y: number;

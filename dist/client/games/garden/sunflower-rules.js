@@ -1,0 +1,1 @@
+(function(r,f){if(typeof module==='object')module.exports=f();else r.SunflowerRules=f()})(globalThis,()=>({advance(plant,delta,interval){plant.productionCharge=Math.max(0,Number(plant.productionCharge)||0)+Math.max(0,Math.min(100,delta));if(plant.productionCharge>=interval){plant.productionCharge-=interval;return true}return false}}));

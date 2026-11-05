@@ -1,0 +1,13 @@
+{
+  "name": "lost-found-money-journey",
+  "private": true,
+  "scripts": {
+    "build": "node build.cjs",
+    "db:generate": "drizzle-kit generate"
+  },
+  "devDependencies": {
+    "drizzle-kit": "^0.31.0",
+    "drizzle-orm": "^0.44.0"
+  },
+  "packageManager": "pnpm@11.25.0"
+}

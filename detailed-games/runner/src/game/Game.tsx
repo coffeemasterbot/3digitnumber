@@ -37,7 +37,7 @@ export function Game() {
   // Reset spawner when game starts
   useLayoutEffect(() => {
     if (gameState === 'playing' && useGameStore.getState().distance===0) {
- extras.time=0;extras.board=0;extras.shoes=0;extras.magnet=0;extras.double=0;extras.index=0;extras.next=0;extras.pickups=[];
+ extras.time=0;extras.deathTime=0;extras.impact=0;extras.deathKind='';extras.board=0;extras.shoes=0;extras.magnet=0;extras.double=0;extras.index=0;extras.next=0;extras.pickups=[];
       resetSpawner();
       distanceRef.current = 0;
     }
@@ -50,7 +50,7 @@ export function Game() {
   // Game loop
   useFrame((_, delta) => {
     const lift=Math.max(0,(playerRef.current?.position.y??.9)-.9)*.7;_.camera.position.y=3.5+lift;_.camera.lookAt(0,1.4+lift,-22);
-    if (gameState !== 'playing' || !playerRef.current) return;delta=Math.min(delta,.05);extras.time+=delta;if(extras.time>=90){endGame();return;}
+    if(gameState==='dying'){extras.deathTime+=Math.min(delta,.05);if(extras.deathTime>=1.15){endGame();openGameOverModal()}return}if (gameState !== 'playing' || !playerRef.current) return;extras.impact=Math.max(0,extras.impact-delta);delta=Math.min(delta,.05);extras.time+=delta;if(extras.time>=90){endGame();return;}
 
     // Update distance
     const distanceDelta = speed * delta;
@@ -85,7 +85,7 @@ export function Game() {
       -distanceRef.current
     );
 
-    if(hitObstacle){if(extras.board>extras.time){extras.board=0;spawnedItems.obstacles.splice(spawnedItems.obstacles.indexOf(hitObstacle),1)}else{handleCollision();return}}
+    if(hitObstacle){extras.impact=.4;if(extras.board>extras.time){extras.board=0;spawnedItems.obstacles.splice(spawnedItems.obstacles.indexOf(hitObstacle),1)}else{handleCollision(hitObstacle.type);return}}
 
     // Check coin collection
     let collectedCoins = checkCoinCollision(
@@ -94,7 +94,7 @@ export function Game() {
       -distanceRef.current
     );
 
-    if(extras.magnet>extras.time)collectedCoins=spawnedItems.coins.filter(c=>Math.abs(c.z+distanceRef.current)<7);
+    for(const c of spawnedItems.coins){if(extras.magnet>extras.time&&Math.abs(c.z+distanceRef.current)<12)c.attracting=true;if(c.attracting){const k=Math.min(1,delta*10);c.lane+=([-2,0,2][playerState.lane]-c.lane)*k;c.y+=(playerState.y+.35-c.y)*k;c.z+=(-distanceRef.current-c.z)*k;if(Math.hypot(c.lane-[-2,0,2][playerState.lane],c.y-playerState.y-.35,c.z+distanceRef.current)<.85&&!collectedCoins.includes(c))collectedCoins.push(c)}}
     if(extras.time>=extras.next){extras.pickups.push({kind:['board','shoes','double','magnet'][extras.index++%4] as any,lane:[-2,0,2][extras.index%3],z:-distanceRef.current-55});extras.next=extras.time+8}extras.pickups=extras.pickups.filter(p=>{if(Math.abs(p.z+distanceRef.current)<2&&Math.abs(p.lane-[-2,0,2][playerState.lane])<.5){extras[p.kind]=extras.time+POWER_DURATION[p.kind];return false}return p.z+distanceRef.current<10});
     if (collectedCoins.length > 0) {
       collectedCoins.forEach(coin => {
@@ -104,10 +104,7 @@ export function Game() {
     }
   });
 
-  const handleCollision = () => {
-    endGame();
-    openGameOverModal();
-  };
+  const handleCollision = (kind='barrier') => {if(useGameStore.getState().gameState!=='playing')return;extras.deathKind=kind;extras.deathTime=0;extras.impact=.5;useGameStore.setState({gameState:'dying'})};
 
   return (
     <>

@@ -1,3 +1,4 @@
+import{canSpawnObstacle}from'../../../../source/runner-rules.mjs';
 import { useRef, useCallback } from 'react';
 import { LANES, CHUNK_LENGTH } from '../utils/constants';
 import type { ObstacleType, ObstacleData } from './Obstacle';
@@ -51,12 +52,7 @@ export function useSpawner() {
         const lane = randomLane();
         const type = randomObstacleType();
         
-        state.obstacles.push({
-          id: generateId(),
-          lane,
-          type,
-          z: state.lastSpawnZ,
-        });
+        const candidate={id:generateId(),lane,type,z:state.lastSpawnZ};if(canSpawnObstacle(state.obstacles,candidate))state.obstacles.push(candidate);
         
         // Maybe spawn coins in other lanes
         if (Math.random() < 0.5) {
