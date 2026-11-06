@@ -1,0 +1,57 @@
+{
+  "checks": [
+    {
+      "name": "Published existing site loads successfully",
+      "ok": true
+    },
+    {
+      "name": "Published Instagram links are correct",
+      "ok": true
+    },
+    {
+      "name": "Published English presentation works",
+      "ok": true
+    },
+    {
+      "name": "Live runner run can be saved",
+      "ok": true
+    },
+    {
+      "name": "Second visitor sees live runner score",
+      "ok": true
+    },
+    {
+      "name": "Live runner finish is idempotent",
+      "ok": true
+    },
+    {
+      "name": "Live jet run can be saved",
+      "ok": true
+    },
+    {
+      "name": "Second visitor sees live jet score",
+      "ok": true
+    },
+    {
+      "name": "Live jet finish is idempotent",
+      "ok": true
+    },
+    {
+      "name": "Temporary test scores can be removed by their owner",
+      "ok": true
+    },
+    {
+      "name": "Temporary runner entry was cleaned up",
+      "ok": true
+    },
+    {
+      "name": "Temporary jet entry was cleaned up",
+      "ok": true
+    },
+    {
+      "name": "Published homepage has no runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

@@ -1,0 +1,77 @@
+{
+  "checks": [
+    {
+      "name": "Guide sound control is an icon with an accessible label",
+      "ok": true
+    },
+    {
+      "name": "Enabled speaker starts real audio after interaction",
+      "ok": true
+    },
+    {
+      "name": "Second speaker press stops audio and its loop",
+      "ok": true
+    },
+    {
+      "name": "Repeated sound toggles retain one music loop",
+      "ok": true
+    },
+    {
+      "name": "Mystery pickup grants real mecha transformation",
+      "ok": true
+    },
+    {
+      "name": "Revealed mecha has a distinctive HUD icon",
+      "ok": true
+    },
+    {
+      "name": "Mystery pickup grants real glider transformation",
+      "ok": true
+    },
+    {
+      "name": "Revealed glider has a distinctive HUD icon",
+      "ok": true
+    },
+    {
+      "name": "Mystery pickup grants real drill transformation",
+      "ok": true
+    },
+    {
+      "name": "Revealed drill has a distinctive HUD icon",
+      "ok": true
+    },
+    {
+      "name": "Vehicle expiry still shows one clear dismantle animation",
+      "ok": true
+    },
+    {
+      "name": "Jet pause stops vehicle and run clocks",
+      "ok": true
+    },
+    {
+      "name": "Jet collision reaches final score",
+      "ok": true
+    },
+    {
+      "name": "Polished mission review has real score and actions",
+      "ok": true
+    },
+    {
+      "name": "Mobile mission review fits and remains usable",
+      "ok": true
+    },
+    {
+      "name": "Jetpack automatically uploads the run",
+      "ok": true
+    },
+    {
+      "name": "Jetpack shared score is visible to another visitor",
+      "ok": true
+    },
+    {
+      "name": "No Jetpack runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

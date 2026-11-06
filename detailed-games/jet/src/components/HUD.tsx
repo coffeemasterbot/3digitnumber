@@ -1,3 +1,4 @@
+import SoundButton from'./SoundButton';
 'use client';
 
 import VehicleIcon from './VehicleIcon';
@@ -76,12 +77,7 @@ export default function HUD({
             <span className="font-mono text-xs text-yellow-500 font-bold">{coins}</span>
             <span className="text-sm">🪙</span>
             {/* Sound */}
-            <button
-              onClick={onSoundToggle}
-              className="pointer-events-auto w-7 h-7 rounded-lg border border-cyan-900 bg-black/60 text-sm flex items-center justify-center hover:border-cyan-500 transition-colors ml-1"
-            >
-              {soundEnabled ? '🔊' : '🔇'}
-            </button>
+            <SoundButton enabled={soundEnabled} onToggle={onSoundToggle}/>
             {/* Pause */}
             <button
               onClick={onPause}

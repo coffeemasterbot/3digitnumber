@@ -1,0 +1,54 @@
+{
+  "checks": [
+    {
+      "name": "Boots still raise the player above train height",
+      "ok": true
+    },
+    {
+      "name": "Boots clear an oncoming train without board protection",
+      "ok": true
+    },
+    {
+      "name": "Magnet attracts coins visibly before collecting",
+      "ok": true
+    },
+    {
+      "name": "Magnet arrival grants coins once",
+      "ok": true
+    },
+    {
+      "name": "Runner enters a collision/death phase before results",
+      "ok": true
+    },
+    {
+      "name": "Death animation completes into runner results",
+      "ok": true
+    },
+    {
+      "name": "Runner automatically saves its completed run online",
+      "ok": true
+    },
+    {
+      "name": "Another isolated player sees the same saved run",
+      "ok": true
+    },
+    {
+      "name": "Typing into leaderboard does not control the game",
+      "ok": true
+    },
+    {
+      "name": "Jetpack guide is polished and contains mystery-box instructions",
+      "ok": true
+    },
+    {
+      "name": "Jetpack leaderboard entry is available",
+      "ok": true
+    },
+    {
+      "name": "No runtime errors or failed assets",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "failedAssets": []
+}

@@ -136,47 +136,13 @@ export function drawPlayer(
     });
   }
 
-  // Jetpack body
-  ctx.shadowColor = '#005577';
-  ctx.shadowBlur = 10;
-  ctx.fillStyle = COLORS.jetpack;
-  ctx.beginPath();
-  ctx.roundRect(x + width - 16, y + 10, 14, height - 18, 4);
-  ctx.fill();
-
-  // Jetpack nozzle flame outline
-  ctx.fillStyle = '#223344';
-  ctx.fillRect(x + width - 18, y + height - 26, 8, 14);
-
-  // Character body
-  const bodyGrad = ctx.createLinearGradient(x, y, x + width * 0.7, y + height);
-  bodyGrad.addColorStop(0, '#007799');
-  bodyGrad.addColorStop(1, '#004466');
-  ctx.fillStyle = bodyGrad;
-  ctx.shadowColor = COLORS.player;
-  ctx.shadowBlur = 14;
-  ctx.beginPath();
-  ctx.roundRect(x + 2, y + 8, width - 18, height - 12, 8);
-  ctx.fill();
-
-  // Visor
-  ctx.fillStyle = '#00d4ff';
-  ctx.shadowColor = '#00ffff';
-  ctx.shadowBlur = 20;
-  ctx.beginPath();
-  ctx.roundRect(x + 6, y + 12, width * 0.42, height * 0.3, 6);
-  ctx.fill();
-
-  // Visor glare
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
-  ctx.fillRect(x + 9, y + 15, 7, 4);
-
-  // Boots
-  ctx.shadowBlur = 0;
-  ctx.fillStyle = '#002233';
-  ctx.fillRect(x + 4, y + height - 14, 18, 10);
-  ctx.fillRect(x + 24, y + height - 14, 18, 10);
-
+  // Original rider: visible face, helmet, scarf, bent limbs and a separate backpack.
+  ctx.shadowBlur=0;ctx.lineCap='round';ctx.strokeStyle='#614b35';ctx.lineWidth=3;
+  const pack=ctx.createLinearGradient(x+3,y,x+22,y);pack.addColorStop(0,'#8b947e');pack.addColorStop(.5,'#d6cfae');pack.addColorStop(1,'#697a68');ctx.fillStyle=pack;ctx.beginPath();ctx.roundRect(x+3,y+20,17,26,5);ctx.fill();ctx.stroke();ctx.fillStyle='#b68b4e';ctx.fillRect(x+5,y+28,13,5);ctx.fillStyle='#40594b';ctx.fillRect(x+6,y+44,11,7);
+  const tilt=player.isThrusting?-2:Math.sin(frame*.08)*1.5;ctx.strokeStyle='#53675b';ctx.lineWidth=8;ctx.beginPath();ctx.moveTo(x+25,y+36);ctx.lineTo(x+28,y+height-7+tilt);ctx.lineTo(x+38,y+height-4+tilt);ctx.moveTo(x+36,y+36);ctx.lineTo(x+43,y+height-13-tilt);ctx.lineTo(x+50,y+height-12-tilt);ctx.stroke();ctx.strokeStyle='#5d4935';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x+32,y+height-4+tilt);ctx.lineTo(x+41,y+height-4+tilt);ctx.moveTo(x+46,y+height-12-tilt);ctx.lineTo(x+54,y+height-12-tilt);ctx.stroke();
+  ctx.fillStyle='#c8794e';ctx.strokeStyle='#805439';ctx.lineWidth=2;ctx.beginPath();ctx.roundRect(x+19,y+20,23,21,7);ctx.fill();ctx.stroke();ctx.strokeStyle='#c7b488';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(x+21,y+21);ctx.lineTo(x+18,y+36);ctx.stroke();ctx.fillStyle='#efd0a0';ctx.beginPath();ctx.arc(x+32,y+12,11,0,Math.PI*2);ctx.fill();ctx.strokeStyle='#916c45';ctx.lineWidth=1.5;ctx.stroke();ctx.fillStyle='#518a7a';ctx.beginPath();ctx.arc(x+30,y+9,12,Math.PI*.85,Math.PI*1.93);ctx.lineTo(x+42,y+10);ctx.lineTo(x+18,y+13);ctx.closePath();ctx.fill();ctx.fillStyle='#2c4840';ctx.beginPath();ctx.arc(x+37,y+13,1.4,0,7);ctx.fill();ctx.strokeStyle='#9c7852';ctx.lineWidth=1.2;ctx.beginPath();ctx.moveTo(x+35,y+19);ctx.lineTo(x+40,y+19);ctx.stroke();
+  ctx.fillStyle='#e9bd62';ctx.beginPath();ctx.moveTo(x+22,y+23);ctx.lineTo(x+7,y+17+tilt);ctx.lineTo(x+11,y+28);ctx.lineTo(x+24,y+27);ctx.fill();ctx.strokeStyle='#d7ad7a';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(x+39,y+25);ctx.lineTo(x+46,y+31);ctx.lineTo(x+53,y+27);ctx.stroke();ctx.strokeStyle='#425d4c';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x+51,y+24);ctx.lineTo(x+55,y+30);ctx.stroke();
+  if(player.isThrusting){const glow=ctx.createLinearGradient(x+10,y+49,x+10,y+68);glow.addColorStop(0,'#fff0a5');glow.addColorStop(.5,'#eaae56');glow.addColorStop(1,'#d58a3800');ctx.fillStyle=glow;ctx.beginPath();ctx.moveTo(x+7,y+49);ctx.lineTo(x+12,y+66+Math.sin(frame)*3);ctx.lineTo(x+17,y+49);ctx.fill()}
   // Boost tint overlay
   if (powerUp === 'boost') {
     ctx.globalAlpha = 0.25;

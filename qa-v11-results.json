@@ -1,0 +1,126 @@
+{
+  "checks": [
+    {
+      "name": "Five original lawnmowers are ready",
+      "ok": true
+    },
+    {
+      "name": "Shovel is separate from plant cards",
+      "ok": true
+    },
+    {
+      "name": "Enemies are tougher",
+      "ok": true
+    },
+    {
+      "name": "Enemy near home triggers only its row mower",
+      "ok": true
+    },
+    {
+      "name": "Sweeping mower is consumed",
+      "ok": true
+    },
+    {
+      "name": "Wave progress freezes during pause",
+      "ok": true
+    },
+    {
+      "name": "Final wave really spawns two tougher giants",
+      "ok": true
+    },
+    {
+      "name": "Final deadline cannot erase living giants",
+      "ok": true
+    },
+    {
+      "name": "Final wave completes only after survivors are defeated",
+      "ok": true
+    },
+    {
+      "name": "Restart restores exactly five mowers",
+      "ok": true
+    },
+    {
+      "name": "Mobile shovel and progress stay inside viewport",
+      "ok": true
+    },
+    {
+      "name": "FPS default free camera starts without lock",
+      "ok": true
+    },
+    {
+      "name": "FPS mouse look rotates once",
+      "ok": true
+    },
+    {
+      "name": "Settings pause the mission",
+      "ok": true
+    },
+    {
+      "name": "Settings freeze bomb and prevent firing",
+      "ok": true
+    },
+    {
+      "name": "Settings close and resume cleanly",
+      "ok": true
+    },
+    {
+      "name": "Native fullscreen works and pauses safely",
+      "ok": true
+    },
+    {
+      "name": "Fullscreen exits cleanly",
+      "ok": true
+    },
+    {
+      "name": "L enables continuous locked camera",
+      "ok": true
+    },
+    {
+      "name": "L unlock does not accidentally pause",
+      "ok": true
+    },
+    {
+      "name": "Sensitivity and volume persist on refresh",
+      "ok": true
+    },
+    {
+      "name": "Round 1 builds its distinct map",
+      "ok": true
+    },
+    {
+      "name": "Round 2 builds its distinct map",
+      "ok": true
+    },
+    {
+      "name": "Round 3 builds its distinct map",
+      "ok": true
+    },
+    {
+      "name": "Bot fires a burst from its 9-round magazine",
+      "ok": true
+    },
+    {
+      "name": "Bots expend all nine bullets and reload for another magazine",
+      "ok": true
+    },
+    {
+      "name": "Mobile settings fit viewport",
+      "ok": true
+    },
+    {
+      "name": "Mobile settings are scrollable within screen",
+      "ok": true
+    },
+    {
+      "name": "FPS fullscreen works from the existing homepage iframe",
+      "ok": true
+    },
+    {
+      "name": "No browser exceptions or failed assets",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "assets": []
+}

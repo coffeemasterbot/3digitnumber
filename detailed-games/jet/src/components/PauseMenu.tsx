@@ -1,3 +1,4 @@
+import SoundButton from'./SoundButton';
 'use client';
 
 import { motion } from 'framer-motion';
@@ -51,13 +52,7 @@ export default function PauseMenu({ onResume, onRestart, onMenu, soundEnabled, o
         </div>
 
         {/* Sound toggle */}
-        <button
-          onClick={onSoundToggle}
-          className="flex items-center gap-2 text-sm font-mono text-cyan-700 hover:text-cyan-400 transition-colors mt-1"
-        >
-          <span className="text-lg">{soundEnabled ? '🔊' : '🔇'}</span>
-          <span>{soundEnabled ? '聲音：開' : '聲音：關'}</span>
-        </button>
+        <SoundButton enabled={soundEnabled} onToggle={onSoundToggle}/>
 
         <div className="text-xs font-mono text-cyan-900 uppercase tracking-widest">
           Press P or ESC to resume

@@ -1750,7 +1750,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                         zombie.attacking = true;
                         zombie.element.classList.add('eating');
                         
-                        if (plantTypes[plant.type].melee && Date.now() - zombie.lastChomped > 1000) {
+                        if (zombie.type!=='giant'&&plantTypes[plant.type].melee && Date.now() - zombie.lastChomped > 1000) {
                             zombie.lastChomped = Date.now();
                             const points = zombieTypes[zombie.type].points * 2;
                             showPointsPopup(zombie.element, points);
@@ -1797,8 +1797,8 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
         }
 
         // Spawn Zombie with Health Bar
-        function spawnZombie() {
-            const row = Math.floor(Math.random() * 5);
+        function spawnZombie(forcedType,forcedRow) {
+            const row = Number.isInteger(forcedRow)?forcedRow:Math.floor(Math.random() * 5);
             const zombieTypeKeys = Object.keys(zombieTypes);
             
             let typeIndex = 0;
@@ -1813,7 +1813,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 typeIndex = 1;
             }
             
-            const zombieType = zombieTypes[zombieTypeKeys[typeIndex]];
+            const zombieType = zombieTypes[forcedType||zombieTypeKeys[typeIndex]];
             
             const zombie = document.createElement('div');
             zombie.className = 'zombie';
@@ -1842,7 +1842,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 healthFill: healthFill,
                 row: row,
                 health: zombieType.health,
-                type: zombieTypeKeys[typeIndex],
+                type: forcedType||zombieTypeKeys[typeIndex],
                 x: startX,
                 attacking: false,
                 lastAttack: 0,
@@ -2269,5 +2269,5 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             }
         });
     </script>
-<script src="../game-shell.js"></script><script>document.addEventListener("keydown",e=>{if(e.target.matches(".plantCard")&&["Enter"," "].includes(e.key)){e.preventDefault();e.target.click()}else if(/^[1-9]$/.test(e.key))document.querySelectorAll(".plantCard")[Number(e.key)-1]?.click()})</script><script src="garden-mechanics.js"></script><script src="garden-upgrade.js"></script></body>
+<script src="../game-shell.js"></script><script>document.addEventListener("keydown",e=>{if(e.target.matches(".plantCard")&&["Enter"," "].includes(e.key)){e.preventDefault();e.target.click()}else if(/^[1-9]$/.test(e.key))document.querySelectorAll(".plantCard")[Number(e.key)-1]?.click()})</script><script src="garden-rules.js"></script><script src="garden-mechanics.js"></script><script src="garden-battle.js"></script><script src="garden-upgrade.js"></script></body>
 </html>

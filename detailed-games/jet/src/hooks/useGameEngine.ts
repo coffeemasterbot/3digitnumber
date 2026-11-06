@@ -113,6 +113,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
   });
 
   const { play, stopBGM } = useSound(soundEnabled);
+  useEffect(()=>{if(soundEnabled&&gameStateRef.current==='playing')play('bgm');else stopBGM();syncUI()},[soundEnabled,play,stopBGM]);
 
   // ── Sync high score from localStorage ────────
   useEffect(() => {

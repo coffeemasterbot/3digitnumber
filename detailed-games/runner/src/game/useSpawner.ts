@@ -10,15 +10,15 @@ interface SpawnerState {
   lastSpawnZ: number;
 }
 
-const SPAWN_INTERVAL = 15; // Distance between spawn points
-const OBSTACLE_CHANCE = 0.6; // 60% chance for obstacle at spawn point
-const COIN_CHANCE = 0.4; // 40% chance for coins at spawn point
+const SPAWN_INTERVAL = 13.5; // Distance between spawn points
+const OBSTACLE_CHANCE = 0.76; // 60% chance for obstacle at spawn point
+const COIN_CHANCE = 0.24; // 40% chance for coins at spawn point
 const COIN_GROUP_SIZE = 3; // Coins in a row
 
 let idCounter = 0;
 const generateId = () => `item_${++idCounter}`;
 
-const OBSTACLE_TYPES: ObstacleType[] = ['jump', 'slide', 'block', 'moving'];
+const OBSTACLE_TYPES: ObstacleType[] = ['jump','slide','crate','hurdle','sign','gap','block','moving'];
 
 function randomLane(): number {
   return LANES[Math.floor(Math.random() * LANES.length)];

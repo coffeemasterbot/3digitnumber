@@ -9,7 +9,7 @@ type SoundName = 'thrust' | 'coin' | 'powerup' | 'hit' | 'death' | 'start' | 'bg
 export function useSound(enabled: boolean) {
   const ctxRef = useRef<AudioContext | null>(null);
   const bgmNodesRef = useRef<{ osc: OscillatorNode; gain: GainNode }[]>([]);
-  const bgmPlayingRef = useRef(false);
+  const bgmPlayingRef = useRef(false);const bgmTimerRef=useRef<ReturnType<typeof setTimeout>|null>(null);const generationRef=useRef(0);
 
   // Lazy-init AudioContext (must be after user gesture)
   const getCtx = useCallback((): AudioContext | null => {
@@ -140,7 +140,7 @@ export function useSound(enabled: boolean) {
   const startBGM = useCallback(() => {
     const ctx = getCtx();
     if (!ctx || bgmPlayingRef.current) return;
-    bgmPlayingRef.current = true;
+    bgmPlayingRef.current = true;const generation=++generationRef.current;
 
     // Simple neon arpeggio pattern
     const scale = [110, 138.6, 164.8, 220, 261.6, 329.6, 440];
@@ -149,7 +149,7 @@ export function useSound(enabled: boolean) {
     const interval = (60 / bpm) * 1000 * 0.5;
 
     function tick() {
-      if (!bgmPlayingRef.current || !ctx) return;
+      if (!bgmPlayingRef.current || !ctx || generation!==generationRef.current) return;
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'square';
@@ -161,13 +161,13 @@ export function useSound(enabled: boolean) {
       osc.start();
       osc.stop(ctx.currentTime + 0.2);
       step++;
-      setTimeout(tick, interval);
+      bgmNodesRef.current.push({osc,gain});osc.onended=()=>{bgmNodesRef.current=bgmNodesRef.current.filter(n=>n.osc!==osc);osc.disconnect();gain.disconnect()};bgmTimerRef.current=setTimeout(tick, interval);
     }
     tick();
   }, [getCtx]);
 
   const stopBGM = useCallback(() => {
-    bgmPlayingRef.current = false;
+    bgmPlayingRef.current = false;generationRef.current++;if(bgmTimerRef.current!==null){clearTimeout(bgmTimerRef.current);bgmTimerRef.current=null;}
     bgmNodesRef.current.forEach(({ osc, gain }) => {
       try { osc.stop(); } catch {}
     });
@@ -176,7 +176,7 @@ export function useSound(enabled: boolean) {
 
   // Stop BGM when disabled
   useEffect(() => {
-    if (!enabled) stopBGM();
+    if (!enabled){stopBGM();ctxRef.current?.suspend().catch(()=>{})}
   }, [enabled, stopBGM]);
 
   const play = useCallback((name: SoundName) => {
@@ -192,5 +192,7 @@ export function useSound(enabled: boolean) {
     }
   }, [enabled, playThrust, playCoin, playPowerUp, playHit, playDeath, playStart, startBGM]);
 
+  useEffect(()=>()=>{stopBGM();ctxRef.current?.close().catch(()=>{})},[stopBGM]);
+  (window as any).jetSoundSnapshot=()=>({enabled,context:ctxRef.current?.state||'not-started',playing:bgmPlayingRef.current,timer:bgmTimerRef.current!==null,nodes:bgmNodesRef.current.length});
   return { play, stopBGM };
 }

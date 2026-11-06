@@ -14,7 +14,7 @@ import MobileControls from './MobileControls';
 export default function Game() {
   // ── User preferences ──────────────────────────
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
-  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [soundEnabled, setSoundEnabled] = useState(()=>{try{return localStorage.getItem('jet-sound-enabled')==='true'}catch{return false}});
 
   const {
     canvasRef,
@@ -47,7 +47,7 @@ export default function Game() {
   }, []);
 
   const toggleSound = useCallback(() => {
-    setSoundEnabled(prev => !prev);
+    setSoundEnabled(prev => {const next=!prev;try{localStorage.setItem('jet-sound-enabled',String(next))}catch{}return next});
   }, []);
 
   // ── Canvas responsiveness ─────────────────────
@@ -131,6 +131,8 @@ export default function Game() {
               distance={uiState.distance}
               coins={uiState.coins}
               isNewHighScore={isNewHighScore}
+              soundEnabled={soundEnabled}
+              onSoundToggle={toggleSound}
               onRestart={handleRestart}
               onMenu={handleMenu}
             />
