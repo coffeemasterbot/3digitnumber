@@ -1,0 +1,98 @@
+{
+  "checks": [
+    {
+      "name": "Single downloaded HTML opens with the internet disconnected",
+      "ok": true
+    },
+    {
+      "name": "Embedded images load offline",
+      "ok": true
+    },
+    {
+      "name": "English presentation works offline",
+      "ok": true
+    },
+    {
+      "name": "Story clue is readable offline",
+      "ok": true
+    },
+    {
+      "name": "Offline story progress survives reopening",
+      "ok": true
+    },
+    {
+      "name": "Optional story FPS opens from embedded offline content",
+      "ok": true
+    },
+    {
+      "name": "Nested optional game exits back to story",
+      "ok": true
+    },
+    {
+      "name": "Runner 3D starts offline",
+      "ok": true
+    },
+    {
+      "name": "Runner has no online score controls",
+      "ok": true
+    },
+    {
+      "name": "Jetpack starts offline",
+      "ok": true
+    },
+    {
+      "name": "Jetpack has no online score controls",
+      "ok": true
+    },
+    {
+      "name": "Jetpack sound preference works offline",
+      "ok": true
+    },
+    {
+      "name": "Jetpack return-to-menu reload uses embedded content",
+      "ok": true
+    },
+    {
+      "name": "Garden starts with all five mowers offline",
+      "ok": true
+    },
+    {
+      "name": "Garden can plant with no network",
+      "ok": true
+    },
+    {
+      "name": "Forest has the correct standalone route offline",
+      "ok": true
+    },
+    {
+      "name": "FPS starts with five AI enemies offline",
+      "ok": true
+    },
+    {
+      "name": "FPS settings remain usable offline",
+      "ok": true
+    },
+    {
+      "name": "Accessible range opens offline from FPS",
+      "ok": true
+    },
+    {
+      "name": "Accessible range returns to offline menu",
+      "ok": true
+    },
+    {
+      "name": "Offline preferences survive file refresh",
+      "ok": true
+    },
+    {
+      "name": "No HTTP requests, API calls or asset fetches",
+      "ok": true
+    },
+    {
+      "name": "No offline runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "network": []
+}

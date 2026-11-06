@@ -68,4 +68,5 @@ fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'present
 
 if(!process.argv.includes('--preserve-arcade'))require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});
 
+require('./build-offline.cjs');
 require('./build-server.cjs');
