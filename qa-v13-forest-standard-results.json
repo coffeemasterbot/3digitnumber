@@ -1,0 +1,149 @@
+{
+  "checks": [
+    {
+      "name": "Custom names appear beside polished avatar icons",
+      "ok": true
+    },
+    {
+      "name": "Level 1 box moves under player input",
+      "ok": true
+    },
+    {
+      "name": "Level 1 player stands on movable box",
+      "ok": true
+    },
+    {
+      "name": "Level 1 box allows reaching a high spirit",
+      "ok": true
+    },
+    {
+      "name": "Level 1 first pressure gate opens",
+      "ok": true
+    },
+    {
+      "name": "Level 1 character pressure handoff works",
+      "ok": true
+    },
+    {
+      "name": "Level 1 pushed stone snaps into its pressure socket",
+      "ok": true
+    },
+    {
+      "name": "Level 1 weighted gate stays open without player on either plate",
+      "ok": true
+    },
+    {
+      "name": "Level 1 all elemental spirits collected through real keyboard inputs",
+      "ok": true
+    },
+    {
+      "name": "Level 1 both characters reach exit",
+      "ok": true
+    },
+    {
+      "name": "Level 2 box moves under player input",
+      "ok": true
+    },
+    {
+      "name": "Level 2 player stands on movable box",
+      "ok": true
+    },
+    {
+      "name": "Level 2 box allows reaching a high spirit",
+      "ok": true
+    },
+    {
+      "name": "Level 2 first pressure gate opens",
+      "ok": true
+    },
+    {
+      "name": "Level 2 character pressure handoff works",
+      "ok": true
+    },
+    {
+      "name": "Level 2 pushed stone snaps into its pressure socket",
+      "ok": true
+    },
+    {
+      "name": "Level 2 weighted gate stays open without player on either plate",
+      "ok": true
+    },
+    {
+      "name": "Level 2 fire lever activates",
+      "ok": true
+    },
+    {
+      "name": "Level 2 water lever opens circuit door",
+      "ok": true
+    },
+    {
+      "name": "Level 2 all elemental spirits collected through real keyboard inputs",
+      "ok": true
+    },
+    {
+      "name": "Level 2 both characters reach exit",
+      "ok": true
+    },
+    {
+      "name": "Level 3 box moves under player input",
+      "ok": true
+    },
+    {
+      "name": "Level 3 player stands on movable box",
+      "ok": true
+    },
+    {
+      "name": "Level 3 box allows reaching a high spirit",
+      "ok": true
+    },
+    {
+      "name": "Level 3 first pressure gate opens",
+      "ok": true
+    },
+    {
+      "name": "Level 3 character pressure handoff works",
+      "ok": true
+    },
+    {
+      "name": "Level 3 pushed stone snaps into its pressure socket",
+      "ok": true
+    },
+    {
+      "name": "Level 3 weighted gate stays open without player on either plate",
+      "ok": true
+    },
+    {
+      "name": "Level 3 fire lever activates",
+      "ok": true
+    },
+    {
+      "name": "Level 3 water lever opens circuit door",
+      "ok": true
+    },
+    {
+      "name": "Level 3 lift reaches the elevated spirit",
+      "ok": true
+    },
+    {
+      "name": "Level 3 all elemental spirits collected through real keyboard inputs",
+      "ok": true
+    },
+    {
+      "name": "Level 3 both characters reach exit",
+      "ok": true
+    },
+    {
+      "name": "Three cooperative levels recorded complete",
+      "ok": true
+    },
+    {
+      "name": "Forest leaves Ah Jun save untouched",
+      "ok": true
+    },
+    {
+      "name": "No forest runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

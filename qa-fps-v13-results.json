@@ -1,0 +1,118 @@
+{
+  "checks": [
+    {
+      "name": "Default desktop mode obtains native pointer lock",
+      "ok": true
+    },
+    {
+      "name": "Aim invitation disappears after pointer lock",
+      "ok": true
+    },
+    {
+      "name": "Health starts at 100 with visible health bar",
+      "ok": true
+    },
+    {
+      "name": "Round one contains ten bots",
+      "ok": true
+    },
+    {
+      "name": "Relative aim rotates more than 360 degrees at a fixed edge coordinate",
+      "ok": true
+    },
+    {
+      "name": "Bots patrol through the map rather than stand still",
+      "ok": true
+    },
+    {
+      "name": "Embedded game fits the short browser viewport",
+      "ok": true
+    },
+    {
+      "name": "Nearby closed door shows an E-open prompt",
+      "ok": true
+    },
+    {
+      "name": "Door interaction updates to E-close prompt",
+      "ok": true
+    },
+    {
+      "name": "A real bot projectile deals eight damage without killing or unlocking aim",
+      "ok": true
+    },
+    {
+      "name": "Financial check is allowed while all bots remain alive",
+      "ok": true
+    },
+    {
+      "name": "Reading the financial question pauses the combat clock",
+      "ok": true
+    },
+    {
+      "name": "Bomb progress advances while enemies are still alive",
+      "ok": true
+    },
+    {
+      "name": "Defuse progress and weapon row do not overlap",
+      "ok": true
+    },
+    {
+      "name": "Incoming damage interrupts the current defuse progress",
+      "ok": true
+    },
+    {
+      "name": "Round can finish with surviving bots and zero kills",
+      "ok": true
+    },
+    {
+      "name": "Round result hides stale defuse and gameplay panels",
+      "ok": true
+    },
+    {
+      "name": "Result card stays inside the short viewport",
+      "ok": true
+    },
+    {
+      "name": "Second round increases to thirteen mobile bots",
+      "ok": true
+    },
+    {
+      "name": "Round 2 can be defused with surviving bots",
+      "ok": true
+    },
+    {
+      "name": "Third round increases to sixteen bots",
+      "ok": true
+    },
+    {
+      "name": "Round 3 can be defused with surviving bots",
+      "ok": true
+    },
+    {
+      "name": "All three financial checks reach a valid no-kill ending",
+      "ok": true
+    },
+    {
+      "name": "Health reaches zero after repeated hits and plays defeat",
+      "ok": true
+    },
+    {
+      "name": "Retry restores 100 HP and fresh enemies",
+      "ok": true
+    },
+    {
+      "name": "Esc safely pauses and releases the cursor",
+      "ok": true
+    },
+    {
+      "name": "Resume reacquires continuous aim with saved sensitivity",
+      "ok": true
+    },
+    {
+      "name": "No FPS browser exceptions or missing assets",
+      "ok": true
+    }
+  ],
+  "errors": [],
+  "assets": []
+}

@@ -53,6 +53,10 @@
       "ok": true
     },
     {
+      "name": "Garden tolerates an initial pending board layout",
+      "ok": true
+    },
+    {
       "name": "Garden starts with all five mowers offline",
       "ok": true
     },
@@ -65,7 +69,7 @@
       "ok": true
     },
     {
-      "name": "FPS starts with five AI enemies offline",
+      "name": "FPS starts with ten AI enemies offline",
       "ok": true
     },
     {

@@ -1,0 +1,53 @@
+{
+  "checks": [
+    {
+      "name": "Mobile player names and custom avatar icons are visible",
+      "ok": true
+    },
+    {
+      "name": "Real touch direction control pushes the box",
+      "ok": true
+    },
+    {
+      "name": "Pause freezes box and stone physics exactly",
+      "ok": true
+    },
+    {
+      "name": "Retry recreates exactly two objects at their initial state",
+      "ok": true
+    },
+    {
+      "name": "Forest controls fit narrow portrait screen",
+      "ok": true
+    },
+    {
+      "name": "Player names survive refresh",
+      "ok": true
+    },
+    {
+      "name": "Touch FPS starts without requesting a mouse lock",
+      "ok": true
+    },
+    {
+      "name": "Touch dragging still rotates FPS view",
+      "ok": true
+    },
+    {
+      "name": "Mobile door prompt is visible",
+      "ok": true
+    },
+    {
+      "name": "Mobile defuse bar stays clear of touch controls",
+      "ok": true
+    },
+    {
+      "name": "Mobile homepage frame is contained in viewport",
+      "ok": true
+    },
+    {
+      "name": "No mobile runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}
