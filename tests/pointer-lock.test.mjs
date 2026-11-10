@@ -58,6 +58,7 @@ test('cancellation invalidates late promise completions and stale lock results',
   assert.equal(state.intent, null);
   assert.equal(state.pending, false);
   assert.equal(state.settle(oldAttempt, 'failure'), false);
+  assert.equal(state.acquire(canvas, canvas), null, 'an unrequested late lock cannot consume a cancelled intent');
   assert.equal(state.acquire(null, canvas), null);
 
   state.setIntent('start');

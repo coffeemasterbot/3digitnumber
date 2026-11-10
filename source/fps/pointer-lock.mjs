@@ -35,7 +35,7 @@ export function createPointerLockState() {
       return true;
     },
     acquire(owner, canvas) {
-      if (!canvas || owner !== canvas) return null;
+      if (!pending || !canvas || owner !== canvas) return null;
       const acquiredIntent = intent;
       generation++;
       intent = null;
