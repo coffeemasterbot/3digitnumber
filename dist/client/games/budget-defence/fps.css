@@ -17,3 +17,20 @@
 @media(max-width:700px) and (min-height:521px){#touch{bottom:180px}#interaction-hint{top:calc(var(--hud-bottom,100px) + 45px);bottom:auto}}
 
 body[data-aim-required=true] #aim-gate{display:grid!important;z-index:80;background:#142d2399}body[data-aim-required=true] #aim-gate button:disabled{cursor:wait;opacity:.8}
+
+.control-guide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.control-guide span{padding:8px;background:#e5e4ca;border-radius:6px}.control-guide b{display:block;color:#285345}
+summary{cursor:pointer;font-weight:bold;padding:6px 0}button:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid #cc9136;outline-offset:2px}
+button:hover:not(:disabled){filter:brightness(1.12)}button:disabled{opacity:.65}#settings-dialog small{display:block;margin:8px 0}
+#view-status:not(:empty){position:absolute;z-index:85;top:var(--hud-bottom);left:50%;transform:translateX(-50%);width:max-content;max-width:95%;background:#fff2cf;color:#284638;padding:6px 12px;border-radius:6px;pointer-events:none}
+#hud{justify-content:center}body:not([data-phase=playing]) #hud :is(#health-wrap,#ammo,#timer){display:none}
+body[data-phase=playing] #hud{left:50%;right:auto;transform:translateX(-50%);width:max-content;max-width:94%;flex-wrap:nowrap}
+body[data-phase=playing] #hud :is(#money,#exit,#settings-open,#fullscreen,#mute){display:none}
+body[data-phase=playing] #hud #pause{order:3}
+body[data-phase=playing] #hud{transform:none;left:0;right:0;width:fit-content;margin:auto}
+body[data-phase=playing] :is(#health-wrap,#ammo){position:fixed;bottom:7px;background:#152c2aef;padding:5px 9px;border-radius:6px}
+body[data-phase=playing] #health-wrap{left:8px}body[data-phase=playing] #ammo{right:8px}
+body[data-phase=playing] #weapon-bar{left:50%;bottom:44px;transform:translateX(-50%);width:max-content}
+#notice{bottom:84px}#defuse{bottom:112px}#interaction-hint{top:calc(var(--hud-bottom) + 46px);bottom:auto}
+@media(pointer:coarse){#touch{bottom:88px}.touch-actions{grid-template-columns:repeat(3,minmax(40px,56px))}#notice{top:calc(var(--hud-bottom) + 90px);bottom:auto}#defuse{top:calc(var(--hud-bottom) + 42px);bottom:auto}#touch #look{display:none}}
+@media(max-height:520px) and (pointer:coarse){.touch-actions{grid-template-columns:repeat(4,52px)}}
