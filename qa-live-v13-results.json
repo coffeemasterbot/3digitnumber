@@ -1,0 +1,37 @@
+{
+  "checks": [
+    {
+      "name": "Published forest has custom names",
+      "ok": true
+    },
+    {
+      "name": "Published forest has a box and rolling stone",
+      "ok": true
+    },
+    {
+      "name": "Published forest includes the spirit and socket art",
+      "ok": true
+    },
+    {
+      "name": "Published FPS uses native pointer lock",
+      "ok": true
+    },
+    {
+      "name": "Published FPS starts with 100 HP and ten bots",
+      "ok": true
+    },
+    {
+      "name": "Published FPS fits the short viewport",
+      "ok": true
+    },
+    {
+      "name": "Updated offline download is available",
+      "ok": true
+    },
+    {
+      "name": "No published runtime errors",
+      "ok": true
+    }
+  ],
+  "errors": []
+}

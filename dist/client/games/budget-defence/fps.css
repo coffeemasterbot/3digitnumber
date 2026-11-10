@@ -15,3 +15,5 @@
 [hidden]{display:none!important}
 
 @media(max-width:700px) and (min-height:521px){#touch{bottom:180px}#interaction-hint{top:calc(var(--hud-bottom,100px) + 45px);bottom:auto}}
+
+body[data-aim-required=true] #aim-gate{display:grid!important;z-index:80;background:#142d2399}body[data-aim-required=true] #aim-gate button:disabled{cursor:wait;opacity:.8}

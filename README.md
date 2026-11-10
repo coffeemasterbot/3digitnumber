@@ -27,6 +27,12 @@
 
 修改後：在 detailed-games 執行 `pnpm install --frozen-lockfile`，回到根目錄執行 `node build.cjs`。執行 `node preview.cjs` 開啟其 Local 網址。3D跑酷需要瀏覽器支援WebGL。
 
+## GitHub Pages 遊玩版
+
+`.github/workflows/pages.yml` 會建置並部署 `dist-pages/` 靜態版本。先執行 `node build.cjs`，再執行 `node build-pages.cjs` 可在本機產生相同輸出。Pages 版保留故事、遊戲和離線下載；跑酷／飛行最佳分數只保存在本機，並移除排行榜 API 呼叫。GitHub Pages 不會執行本專案的 D1 Worker。原有網站的 Worker、共用排行榜及離線包仍由 `node build.cjs` 建置，Pages 版不會覆蓋 `dist/client/` 或 Worker 輸出。
+
+GitHub Actions 工作流程需放入已連接的 GitHub repository，並在 repository 設定中啟用 GitHub Actions 作為 Pages 部署來源。此工作區目前沒有 Git remote；工作流程已準備，但尚未推送或部署。
+
 `qa-detailed.cjs` 測試入口、操作、暫停、部署與結果；`qa-detailed-mobile.cjs` 測試手機直橫屏並更新遊戲預覽圖；`qa-detailed-outcomes.cjs` 測試碰撞、死亡、重玩及暫停。QA使用Playwright及Microsoft Edge。
 
 ## 來源及私隱
@@ -35,7 +41,7 @@
 
 所有分數、最佳紀錄與原有故事進度只存在本機；沒有登入、Supabase、遠端排行榜或問卷收集。網站受原本的Sites存取設定控制。
 
-講座資料沿用已確認安排：2026年11月9日1104、11月12日6580；兩場均18:00–19:00。報名連結仍待提供。
+日期核對：聖雅各福群會官方[個人理財大使計劃日程](https://www.sjscareersparkle.org/個人理財大使計劃2627)列出2026年11月9至13日為理財教育計劃諮詢環節。此資料未能核實11月16日的活動。舊內部筆記所列11月9日及12日講座時間／地點，與網站原有日期互相矛盾；確認前不要當作已核實活動資料使用。
 
 ## 2026-11-05 五款遊戲升級
 
