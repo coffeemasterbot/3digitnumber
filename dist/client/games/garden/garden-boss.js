@@ -12,7 +12,22 @@ const GardenBoss=(()=>{
    gameState.boss={z,cycle:0,left:7000,exposed:true,hazard:null,iceReady:0};
    panel.hidden=false;z.element.classList.add('mechanical-body');
  }
- function clearBall(b){b.hazard=null}
+ function clearBall(b){b.hazard?.element?.remove();b.hazard=null}
+ function drawAttack(h){
+   if(!gameState.cellSize?.height||!gameState.boardRect)return;
+   if(!h.element){
+     h.element=document.createElement('div');
+     h.element.className='boss-attack '+h.kind;
+     h.element.textContent={ice:'❄',fire:'焰',stomp:'▼'}[h.kind];
+     document.getElementById('gameContainer').append(h.element);
+   }
+   const board=gameState.boardRect;
+   const target=gameState.plants.filter(p=>p.element&&p.row===h.row).reduce((col,p)=>Math.max(col,p.col),0);
+   const impact=(target+.5)*gameState.cellSize.width;
+   const progress=Math.min(1,Math.max(0,1-h.left/4500));
+   h.element.style.left=(board.left+(h.kind==='stomp'?impact:board.width+(impact-board.width)*progress))+'px';
+   h.element.style.top=(board.top+(h.row+.5)*gameState.cellSize.height-(h.kind==='stomp'?(1-progress)*gameState.cellSize.height:0))+'px';
+ }
  ice.onclick=()=>{
    const b=gameState.boss;if(!b||gameState.isPaused||gameState.isGameOver||b.iceReady||b.hazard?.kind!=='fire')return;
    clearBall(b);b.iceReady=8000;
@@ -20,7 +35,7 @@ const GardenBoss=(()=>{
  function pepper(row){const b=gameState.boss;if(b?.hazard?.kind==='ice'&&b.hazard.row===row)clearBall(b)}
  function step(dt){
    const b=gameState.boss;
-   if(!b?.z.element){panel.hidden=true;return}
+   if(!b?.z.element){if(b)clearBall(b);panel.hidden=true;return}
    b.iceReady=Math.max(0,b.iceReady-dt);b.left-=dt;
    if(b.hazard){
      b.hazard.left-=dt;
@@ -43,6 +58,7 @@ const GardenBoss=(()=>{
        if(gameState.zombies.filter(z=>z.element).length<10)spawnZombie('normal',(b.z.row+1)%5);
      }
    }
+   if(b.hazard)drawAttack(b.hazard);
    panel.querySelector('progress').value=b.z.health;
    b.z.element.classList.toggle('exposed',b.exposed);
    ice.disabled=!b.hazard||b.hazard.kind!=='fire'||b.iceReady>0;
