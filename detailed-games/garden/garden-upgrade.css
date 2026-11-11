@@ -15,3 +15,14 @@
 
 @media(orientation:portrait) and (max-width:768px){#ui{height:218px}#gameBoard{top:234px!important}#plantSelection{padding-bottom:5px}}
 .campaign-locked{filter:grayscale(1);opacity:.6}.campaign-locked .cost::after{content:" · 未解鎖"}#plantSelection{overflow-x:auto}
+#garden-guide{margin:auto;width:min(700px,92vw);max-height:88dvh;overflow:auto;padding:16px;background:#fff5d9;color:#274631;border:2px solid #947845;border-radius:14px}
+#garden-guide::backdrop{background:#14251dc9}
+#garden-guide header{display:flex;align-items:center;justify-content:space-between}
+.guide-layout{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.guide-layout nav{display:grid;grid-template-columns:repeat(2,1fr);align-content:start;gap:4px}
+#garden-guide button{padding:6px;background:#e4e7ca;color:#254c33;border:1px solid #91a482;border-radius:5px}
+#garden-guide button[aria-pressed=true]{background:#2f6343;color:white}
+.guide-art svg{height:clamp(70px,23vh,150px);animation:guide-idle 1.8s ease-in-out infinite alternate}
+.guide-layout article{background:#e9e6c8;border-radius:8px;padding:10px;text-align:center}.guide-layout output,.guide-layout small{display:block;margin-top:5px}
+@keyframes guide-idle{to{transform:translateY(-3px) rotate(2deg)}}
+@media(prefers-reduced-motion:reduce){.guide-art svg{animation:none}}

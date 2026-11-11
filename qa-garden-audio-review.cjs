@@ -26,6 +26,15 @@ try {
  });
  await p.goto('http://127.0.0.1:'+server.address().port+'/games/garden/');
  await p.locator('#garden-start').click();
+ await p.locator('#open-guide').click();
+ const guide=p.locator('#garden-guide');
+ await guide.locator('[data-plant-type=spike]').click();
+ assert.match(await guide.locator('small').innerText(),/第 4 關解鎖 · 尚未解鎖/);
+ assert.match(await guide.locator('output').innerText(),/100 陽光/);
+ await guide.locator('[data-plant-type=mine]').click();
+ assert.equal(await guide.locator('.guide-art svg').count(),1);
+ await p.screenshot({path:'qa-garden-guide.png'});
+ await guide.locator('.guide-close').click();
  await p.locator('[data-plant=mine]').click();
  await p.locator('.cell[data-row="0"][data-col="2"]').click();
  assert.equal(await p.evaluate(()=>gameState.plants.some(plant=>plant.type==='mine')),true);
