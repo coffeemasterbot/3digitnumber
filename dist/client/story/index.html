@@ -618,6 +618,48 @@ for(const item of m.gems)if(!item.got)spirit(item.x,item.y+(quiet?0:Math.sin(t*3
 for(let i=0;i<2;i++)arch(875+i*45,425,36,75,m.gems.every(x=>x.got),i);
 for(const p of g.players){oval(p.x+14,p.y+34,17,4,'#0a292688');window.MoneyArt?.element(c,p.x+14,p.y+7,quiet?0:t,{type:p.type,active:g.active===p.type,immunity:p.immunity,vx:p.vx,scale:1.15});rune(p.x+29,p.y+27,p.type,.28)}
 if(!quiet){for(const p of g.particles){c.globalAlpha=Math.max(0,p.life/.7);oval(p.x,p.y,3,3,p.color)}for(let i=0;i<12;i++){c.globalAlpha=.12;oval((i*83+t*5)%960,100+(i*47)%380,1,1,'#ffedbc')}}c.globalAlpha=1;c.restore()};})();
+</script><script>/* The embedding page can be portrait even when the arcade iframe is wide. */
+window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
+  const dialog = document.createElement('dialog');
+  dialog.style.cssText = 'margin:auto;max-width:90vw;padding:24px;border:2px solid #ab8c50;border-radius:14px;background:#fff3d6;color:#254b3b;text-align:center';
+  dialog.innerHTML = '<h2>請橫放裝置</h2><p>橫向畫面可以睇清路線同操作掣。</p><button type="button">繼續</button> <button type="button">返回選單</button>';
+  const [next, back] = dialog.querySelectorAll('button');
+  const heading = dialog.querySelector('h2');
+  document.body.append(dialog);
+  let host = window;
+  try { if (window.top.document) host = window.top; } catch { /* cross-origin embeds use the local viewport */ }
+  let interrupted = false;
+  function portrait() { return host.innerHeight > host.innerWidth || innerHeight > innerWidth; }
+  function update() {
+    const blocked = portrait();
+    if (blocked && playing()) { interrupted = true; pause(); }
+    if (blocked || interrupted) {
+      heading.textContent = blocked ? '請橫放裝置' : '準備好繼續？';
+      next.hidden = blocked;
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) dialog.close();
+  }
+  function guard(event) {
+    if (!dialog.open) return;
+    if (event.type === 'keydown' && ['Tab','Enter','Space'].includes(event.code) && dialog.contains(event.target)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+  next.onclick = () => {
+    if (portrait()) return;
+    interrupted = false;
+    dialog.close();
+    if (!playing()) resume();
+    window.dispatchEvent(new Event('resize'));
+  };
+  back.onclick = leave;
+  dialog.oncancel = event => event.preventDefault();
+  const listeners = new AbortController();
+  for (const target of new Set([window,host])) target.addEventListener('resize',update,{signal:listeners.signal});
+  window.addEventListener('keydown',guard,{capture:true,signal:listeners.signal});
+  update();
+  return () => { listeners.abort(); dialog.remove(); };
+};
 </script><script>/* Original resource defense and cooperative platform adventures. */
 (()=>{'use strict';
 const prior={open:window.openMini,start:window.startArcade,finish:window.finishArcade,pause:window.arcadePause,close:window.closeModal,help:window.guideHelp,text:window.arcadeText};
@@ -632,7 +674,8 @@ let g=null,raf=0,events=null,stamp=0,acc=0;
 const $=id=>document.getElementById(id),isNew=k=>!!meta[k],reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const hit=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
-function stop(){document.body.classList.remove('forest-active','forest-help');window.moneyJourneyMusic?.(null);cancelAnimationFrame(raf);events?.abort();events=null;g=null;stamp=0;acc=0;}
+let removeOrientationGate;
+function stop(){removeOrientationGate?.();removeOrientationGate=null;document.body.classList.remove('forest-active','forest-help');window.moneyJourneyMusic?.(null);cancelAnimationFrame(raf);events?.abort();events=null;g=null;stamp=0;acc=0;}
 function say(message){if(!g)return;g.message=message;g.messageLife=4;const node=$('journey-feedback');if(node)node.textContent=message;}
 function on(target,type,fn,options={}){target.addEventListener(type,fn,{...options,signal:events.signal});}
 function overlay(title,body,button,action){window.moneyJourneyMusic?.(g.key,true);if(g.phase==='between')window.moneyJourneySound?.('success');$('journey-overlay').hidden=false;$('journey-overlay').innerHTML=`<div><span class="journey-eyebrow">${g.key==='instalments'?'預留・應對・再安排':'行動・規劃・一齊到終點'}</span><h3>${title}</h3><p>${body}</p><button class="btn" id="journey-next">${button}</button></div>`;$('journey-next').onclick=action;$('journey-next').focus({preventScroll:true});}
@@ -644,7 +687,7 @@ window.openMini=function(key){stop();prior.open(key);if(!isNew(key))return;const
 window.startArcade=function(key){if(!isNew(key)){stop();return prior.start(key)}const difficulty=$('journey-difficulty')?.value||'standard',cfg=difficulties[difficulty]||difficulties.standard,speed=cfg.speed,mode=$('journey-mode')?.value||'solo',chosenNames=ForestRules.playerNames([$('duo-name-0')?.value??savedNames()[0],$('duo-name-1')?.value??savedNames()[1]]);if(key==='pause')try{localStorage.setItem('forest-player-names-v1',JSON.stringify(chosenNames))}catch{}stop();prior.open(key);const v=meta[key];
 modal(v.title,`<div class="journey-top"><div><div class="kicker">${v.genre}</div><h2>${v.title}</h2></div><div class="journey-actions"><button class="btn secondary" id="journey-pause" onclick="window.arcadePause()">暫停</button><button class="textbtn" id="journey-sound">聲音</button><button class="textbtn" id="journey-full">全螢幕 ↗</button><button class="textbtn" id="journey-exit" onclick="window.finishArcade()">結束</button></div></div><div class="journey-hud"><strong id="journey-state"></strong><span id="journey-resources"></span><span id="journey-time"></span></div><p id="journey-feedback" role="status">${v.goal}</p>${key==='instalments'?'<div class="plant-palette" role="group" aria-label="揀一種植物"><button data-plant="sun" class="selected"><span><svg class="game-icon" viewBox="0 0 64 64" aria-hidden="true"><use href="../assets/game-icons.svg#sun"></use></svg> 儲備花</span><small>50 點・每 5 秒生產 25</small></button><button data-plant="pea"><span><svg class="game-icon" viewBox="0 0 64 64" aria-hidden="true"><use href="../assets/game-icons.svg#pea"></use></svg> 記帳苗</span><small>75 點・對付同一路帳單</small></button><button data-plant="wall"><span><svg class="game-icon" viewBox="0 0 64 64" aria-hidden="true"><use href="../assets/game-icons.svg#shield"></use></svg> 緩衝牆</span><small>50 點・畀你多啲安排時間</small></button><button data-plant="frost"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#frost"></use></svg> 冷靜苗</span><small>100 點・減慢同路敵人</small></button><button data-plant="twin"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#twin"></use></svg> 雙發苗</span><small>150 點・快速連射</small></button><button data-plant="bloom"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#bloom"></use></svg> 應急花</span><small>125 點・延時炸附近三路</small></button><button data-plant="shovel"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#shovel"></use></svg> 移走植物</span><small>唔退點數・重新部署</small></button></div>':'<div class="duo-palette"><button id="duo-fire" class="selected" onclick="window.journeySwitch(0)">火仔・行動 <small>Q 換角色</small></button><button id="duo-ice" onclick="window.journeySwitch(1)">冰仔・規劃 <small>一齊先過關</small></button></div>'}<div class="journey-stage"><canvas id="journey-canvas" tabindex="0" aria-label="${key==='instalments'?'方向鍵揀草地，Enter種植；數字1至6揀植物':'方向鍵移動，空白鍵跳，Q換角色；雙人用WAD及方向鍵'}"></canvas><div id="journey-overlay" hidden></div></div>${key==='pause'?'<div class="duo-controls" aria-label="觸控操作"><button data-hold="left" aria-label="向左行">◀</button><button data-hold="right" aria-label="向右行">▶</button><button id="duo-drop" onclick="window.journeyDrop()">落台 ↓</button><button id="duo-interact">拉桿 E</button><button data-hold="jump" aria-label="跳起">跳起 ↑</button></div>':'<div class="enemy-guide" aria-label="敵人種類"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#enemy-basic"></use></svg>帳單怪</span><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#enemy-fast"></use></svg>快腳怪</span><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#enemy-armour"></use></svg>鐵帽怪</span><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#enemy-tank"></use></svg>大隻怪</span></div><p class="journey-key-hint">1–6 揀植物・方向鍵揀草地・Enter 種植</p>'}<details class="journey-help"><summary>玩法同操作</summary><p>${key==='instalments'?'儲備花生產資源；記帳苗只會攻擊同一路；緩衝牆頂住帳單。每 6 秒亦有基本資源。冷靜苗減速、雙發苗連射、應急花1秒後清走附近三路敵人。快腳怪跑得快、鐵帽怪同大隻怪更耐打。撳空格種植，已種嘅格唔會扣第二次。第 2 波起要兼顧五條路。':'火仔可以行橙池，冰仔可以行藍池；深紫池兩個都唔得。精靈有顏色同形狀：火形／水滴。收齊兩人嘅精靈，再壓住機關開閘。貼住木箱行就會推郁，可以跳上箱做墊腳位。石球有慣性；推入有圓紋嘅凹槽後會卡實，固定壓住機關。普通壓板只會喺同色角色或物件壓住時開門。先一個過門踩另一邊，再接同伴。壓板需踩住；拉桿可用 E 切換並保持狀態。第2關兩個拉桿共同開門，第3關火拉桿啟動升降台、水拉桿開門。單人：方向鍵或AD移動、空白或W跳、Q切換。雙人：火仔WAD，冰仔方向鍵。落台：↓ 或 S；手機用「落台」。手機可同時按方向同跳。標準／挑戰關卡有間歇電閘：等熄燈再過，或者跳過。'}</p></details><div class="journey-bottom"><button class="textbtn" onclick="window.journeyRetry()">重試呢一關</button><button class="textbtn" onclick="window.arcadeText('${key}')">轉文字版</button><button class="btn secondary" onclick="window.finishArcade()">結束並回顧</button></div>`);
 g={key,v,speed,mode,names:chosenNames,difficulty,cfg,stageHits:0,remaining:0,limit:0,playSeconds:0,level:1,phase:'ready',paused:false,time:0,waveTime:0,active:0,keys:new Set(),selected:'sun',cursor:{row:2,col:1},particles:[],message:'',messageLife:0,score:0,hits:0,retries:0,cleared:0,canvas:$('journey-canvas'),hudAt:0};events=new AbortController();g.ctx=g.canvas.getContext('2d');resize();
-if(key==='instalments')setupGarden();else{document.body.classList.add('forest-active');setupDuo();document.querySelectorAll('.duo-palette button').forEach((b,i)=>{b.innerHTML=avatar(i)+'<span class="duo-player-copy"><strong></strong><small>'+(i?'規劃 · 水靈':'行動 · 火靈')+'</small></span>';b.querySelector('strong').textContent=g.names[i];b.setAttribute('aria-label','選擇'+g.names[i]+(i?'，冰角色':'，火角色'))})}bindInput();updateHUD();draw();
+if(key==='instalments')setupGarden();else{document.body.classList.add('forest-active');setupDuo();document.querySelectorAll('.duo-palette button').forEach((b,i)=>{b.innerHTML=avatar(i)+'<span class="duo-player-copy"><strong></strong><small>'+(i?'規劃 · 水靈':'行動 · 火靈')+'</small></span>';b.querySelector('strong').textContent=g.names[i];b.setAttribute('aria-label','選擇'+g.names[i]+(i?'，冰角色':'，火角色'))})}bindInput();updateHUD();draw();if(key==='pause')removeOrientationGate=installLandscapeGate({playing:()=>g?.phase==='playing'&&!g.paused,pause:()=>window.arcadePause(),resume:()=>{if(g?.paused)window.arcadePause()},leave:()=>window.closeModal()});
 overlay(key==='instalments'?'第一波：先種一棵。':'第一關：行動，等埋規劃。',key==='instalments'?'先用 50 點種儲備花，再用 75 點種記帳苗。帳單會由右邊出現。':'各自搵齊兩隻精靈。貼住木箱行就可以推，跳上箱再去高台。踩同形狀壓板接同伴過閘；將石球滾入有圓紋嘅凹槽，就可以固定壓住機關。橙池只限火，藍池只限水，紫色信用卡池兩個都要避開。','準備好，開始',()=>{if(!g)return;g.phase='playing';removeOverlay();say(key==='instalments'?'揀儲備花，再撳一格草地。':'方向鍵行、空白跳；Q 換角色。慢慢試。')});raf=requestAnimationFrame(loop);};
 function resize(){if(!g)return;const d=Math.min(2,devicePixelRatio||1);g.canvas.width=960*d;g.canvas.height=560*d;g.ctx.setTransform(d,0,0,d,0,0);}
 function setupGarden(){g.limit=g.cfg.garden[g.level-1]+30;g.remaining=g.limit;g.stageHits=0;g.energy=g.cfg.energy;g.plants=[];g.enemies=[];g.bullets=[];g.pending=[];g.breaches=0;g.waveTime=0;g.drip=0;g.spawned=0;g.charges=Array(5).fill(true);const rows=g.difficulty==='relaxed'?(g.level===1?[2,1,3]:g.level===2?[0,4,2,1,3,4]:[2,0,4,1,3,2,0,4,2]):g.level===1?(g.difficulty==='hard'?[2,1,3,2,0,4]:[2,1,3,2]):Array.from({length:g.level===2?(g.difficulty==='hard'?10:8):(g.difficulty==='hard'?15:12)},(_,i)=>[2,0,4,1,3][i%5]);g.pending=rows.map((row,i)=>({row,at:7+i*(g.difficulty==='relaxed'?(g.level===1?6:4.2):g.difficulty==='hard'?2.9:3.6),type:g.level===1?'basic':['basic','fast','armour','tank'][i%4],heavy:g.level===3&&i%3===0}));}

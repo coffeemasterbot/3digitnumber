@@ -6,4 +6,10 @@ const uiTimer=setInterval(()=>{const s=state();document.getElementById('shell-ti
 window.addEventListener('pagehide',()=>{if(typeof musicTimer!=='undefined')clearInterval(musicTimer);clearInterval(uiTimer);ctx?.close().catch(()=>{})});
 window.detailedMusicStatus=()=>({kind,muted,running:ctx?.state==='running',state:state().state});
 if(kind==='garden'){window.detailedGameSnapshot=()=>{const s=state();return {...s,sun:gameState.sun,plants:gameState.plants.length,zombies:gameState.zombies.length}};window.addEventListener('load',()=>{togglePause();document.getElementById('pauseMenu').style.display='none';const intro=document.createElement('div');intro.id='garden-intro';intro.innerHTML='<section><small>完整植物防守 · 20 波挑戰</small><h1>守住你嘅花園</h1><p>十種植物・逐波升級嘅敵人<br>先種生產，再安排防線；點陽光收集資源。</p><p>揀上方植物，再撳草地。手機建議橫向。</p><button id="garden-start">開始守護</button></section>';document.body.append(intro);document.getElementById('garden-start').onclick=()=>{intro.remove();resumeGame()}})}
+window.addEventListener('load',()=>installLandscapeGate({
+  playing:()=>state().state==='playing',
+  pause:()=>kind==='garden'?togglePause():window.orientationPause?.(),
+  resume:()=>kind==='garden'?resumeGame():window.orientationPause?.(),
+  leave:()=>document.getElementById('shell-back').click()
+}));
 })();

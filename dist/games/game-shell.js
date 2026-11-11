@@ -1,3 +1,46 @@
+/* The embedding page can be portrait even when the arcade iframe is wide. */
+window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
+  const dialog = document.createElement('dialog');
+  dialog.style.cssText = 'margin:auto;max-width:90vw;padding:24px;border:2px solid #ab8c50;border-radius:14px;background:#fff3d6;color:#254b3b;text-align:center';
+  dialog.innerHTML = '<h2>請橫放裝置</h2><p>橫向畫面可以睇清路線同操作掣。</p><button type="button">繼續</button> <button type="button">返回選單</button>';
+  const [next, back] = dialog.querySelectorAll('button');
+  const heading = dialog.querySelector('h2');
+  document.body.append(dialog);
+  let host = window;
+  try { if (window.top.document) host = window.top; } catch { /* cross-origin embeds use the local viewport */ }
+  let interrupted = false;
+  function portrait() { return host.innerHeight > host.innerWidth || innerHeight > innerWidth; }
+  function update() {
+    const blocked = portrait();
+    if (blocked && playing()) { interrupted = true; pause(); }
+    if (blocked || interrupted) {
+      heading.textContent = blocked ? '請橫放裝置' : '準備好繼續？';
+      next.hidden = blocked;
+      if (!dialog.open) dialog.showModal();
+    } else if (dialog.open) dialog.close();
+  }
+  function guard(event) {
+    if (!dialog.open) return;
+    if (event.type === 'keydown' && ['Tab','Enter','Space'].includes(event.code) && dialog.contains(event.target)) return;
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+  next.onclick = () => {
+    if (portrait()) return;
+    interrupted = false;
+    dialog.close();
+    if (!playing()) resume();
+    window.dispatchEvent(new Event('resize'));
+  };
+  back.onclick = leave;
+  dialog.oncancel = event => event.preventDefault();
+  const listeners = new AbortController();
+  for (const target of new Set([window,host])) target.addEventListener('resize',update,{signal:listeners.signal});
+  window.addEventListener('keydown',guard,{capture:true,signal:listeners.signal});
+  update();
+  return () => { listeners.abort(); dialog.remove(); };
+};
+
 (()=>{const kind=document.body.dataset.game;let musicTimer=null;let muted=localStorage.getItem('arcade-music-muted')==='true',ctx,bus,beat=0,last=0;const bar=document.createElement('div');bar.className='shell-controls';bar.innerHTML='<button id="shell-sound">音樂：開</button><span id="shell-timer" style="font-size:12px;padding:6px;color:#ffe0a1"></span><button id="shell-full">全螢幕 ↗</button><button id="shell-back">遊戲選單</button>';document.body.append(bar);const sound=document.getElementById('shell-sound');const label=()=>sound.textContent=muted?'音樂：關':'音樂：開';label();document.getElementById('shell-back').onclick=()=>{if(parent!==window)parent.postMessage({type:'website-v1-back'},location.origin);else location.href='../../#play'};document.getElementById('shell-full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}};sound.onclick=()=>{muted=!muted;localStorage.setItem('arcade-music-muted',String(muted));if(bus)bus.gain.value=muted?0:.16;label()};if(kind==='jet')sound.hidden=true;
 function note(freq,dur,vol,type){if(!ctx)return;const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(bus);o.start();o.stop(t+dur);o.onended=()=>{o.disconnect();g.disconnect()}}
 function state(){if(kind==='garden'){try{return {state:gameState.isGameOver?'gameover':gameState.isVictory?'victory':gameState.isPaused?'paused':'playing',score:gameState.score,wave:gameState.wave}}catch{return {state:'start'}}}return window.detailedGameSnapshot?.()||{state:'start'}}
@@ -6,4 +49,10 @@ const uiTimer=setInterval(()=>{const s=state();document.getElementById('shell-ti
 window.addEventListener('pagehide',()=>{if(typeof musicTimer!=='undefined')clearInterval(musicTimer);clearInterval(uiTimer);ctx?.close().catch(()=>{})});
 window.detailedMusicStatus=()=>({kind,muted,running:ctx?.state==='running',state:state().state});
 if(kind==='garden'){window.detailedGameSnapshot=()=>{const s=state();return {...s,sun:gameState.sun,plants:gameState.plants.length,zombies:gameState.zombies.length}};window.addEventListener('load',()=>{togglePause();document.getElementById('pauseMenu').style.display='none';const intro=document.createElement('div');intro.id='garden-intro';intro.innerHTML='<section><small>完整植物防守 · 20 波挑戰</small><h1>守住你嘅花園</h1><p>十種植物・逐波升級嘅敵人<br>先種生產，再安排防線；點陽光收集資源。</p><p>揀上方植物，再撳草地。手機建議橫向。</p><button id="garden-start">開始守護</button></section>';document.body.append(intro);document.getElementById('garden-start').onclick=()=>{intro.remove();resumeGame()}})}
+window.addEventListener('load',()=>installLandscapeGate({
+  playing:()=>state().state==='playing',
+  pause:()=>kind==='garden'?togglePause():window.orientationPause?.(),
+  resume:()=>kind==='garden'?resumeGame():window.orientationPause?.(),
+  leave:()=>document.getElementById('shell-back').click()
+}));
 })();
