@@ -1,6 +1,7 @@
 /* Durations are active simulation milliseconds. */
 const GardenAbilities = (() => {
   const cards = {
+    lily:['浮葉基座',0,3,'先鋪浮葉，再種水上植物','M8 62Q13 20 56 26Q91 28 90 66Q68 84 30 78L54 49Z'],
     mine:['薯仔地雷',25,1,'布防後踩中引爆','M14 70Q17 38 49 40Q82 39 88 70Z M49 42V23'],
     squash:['守備瓜',50,1,'鎖定後躍起壓落','M18 75Q8 60 25 48Q33 30 54 26Q87 22 83 57Q80 83 18 75Z'],
     chomper:['吞食花',150,2,'吞食後需要消化','M18 49Q30 11 72 20L48 43L84 45Q72 79 44 66L39 91'],
@@ -13,6 +14,7 @@ const GardenAbilities = (() => {
   }
   function damage(z,amount){
     if(!z.element)return;
+    if(z.type==='boss'){if(!gameState.boss?.exposed)return;amount=Math.min(amount,12)}
     z.health-=amount;updateZombieHealth(z);
     if(z.health>0)return;
     addScore(zombieTypes[z.type].points);z.element.remove();z.element=null;gameState.zombiesDefeated++;
@@ -32,9 +34,9 @@ const GardenAbilities = (() => {
     }else if(p.type==='squash'){
       if(close.length&&p.targetX===undefined){p.targetX=close[0].x;p.rest=450;p.element.style.translate='0 -22px'}
       if(p.targetX!==undefined&&!p.rest){row.filter(z=>Math.abs(z.x-p.targetX)<width).forEach(z=>damage(z,70));consume(p)}
-    }else if(p.type==='pepper'&&p.age>=650){row.forEach(z=>damage(z,z.type==='giant'?70:999));consume(p)}
+    }else if(p.type==='pepper'&&p.age>=650){GardenBoss.pepper(p.row);for(const key in gameState.iceTracks){if(key.startsWith(p.row+','))gameState.iceTracks[key]=0}row.forEach(z=>damage(z,z.type==='giant'?70:999));consume(p)}
     else if(p.type==='chomper'&&!p.rest&&close.length){
-      const z=close[0],large=['giant','zomboni','boss'].includes(z.type);
+      const z=close.find(e=>!e.submerged);if(!z)return;const large=['giant','zomboni','boss'].includes(z.type);
       damage(z,large?4:z.health);p.rest=large?1200:8000;
     }else if(p.type==='spike'&&!p.rest){close.forEach(z=>damage(z,z.type==='zomboni'?z.health:2));p.rest=650;if(close.some(z=>z.type==='zomboni'))consume(p)}
     if(p.element&&p.type==='chomper')p.element.title=p.rest?'消化中':'準備吞食';
@@ -58,6 +60,7 @@ const GardenAbilities = (() => {
       card.innerHTML='<span class="emoji"></span><span class="name">'+name+'</span><span class="cost">'+cost+'</span>';
       document.getElementById('plantSelection').append(card);
     }
+    if(type==='lily')card.dataset.cost='0';
     card.title=description+' · 第 '+level+' 關';
   }
   return {cards,step,icon,crossing};

@@ -1,0 +1,22 @@
+const fs=require('fs'),http=require('http'),path=require('path'),assert=require('assert/strict');
+const {chromium}=require('C:/Users/danie/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+(async()=>{const server=http.createServer((q,r)=>{let f=path.join('dist',decodeURIComponent(new URL(q.url,'http://localhost').pathname));if(fs.existsSync(f)&&fs.statSync(f).isDirectory())f=path.join(f,'index.html');if(!fs.existsSync(f)){r.writeHead(404).end();return}r.setHeader('Content-Type',({'.html':'text/html','.js':'application/javascript','.css':'text/css','.svg':'image/svg+xml'})[path.extname(f)]||'application/octet-stream');fs.createReadStream(f).pipe(r)});await new Promise(ok=>server.listen(0,'127.0.0.1',ok));let b;
+try{
+ b=await chromium.launch({channel:'msedge'});
+ const p=await b.newPage({viewport:{width:932,height:430}});
+ await p.addInitScript(()=>localStorage.setItem('garden-campaign-v1',JSON.stringify({version:1,unlocked:3})));
+ await p.goto('http://127.0.0.1:'+server.address().port+'/games/garden/');
+ await p.locator('#garden-start').click();
+ const cell=p.locator('.cell[data-row="2"][data-col="2"]');
+ const sun=()=>p.evaluate(()=>gameState.sun);
+ const initial=await sun();
+ await p.locator('[data-plant=peashooter]').click();await cell.click();
+ assert.equal(await sun(),initial);
+ await p.locator('[data-plant=lily]').click();await cell.click();
+ assert.equal(await cell.getAttribute('data-base'),'true');assert.equal(await sun(),initial);
+ await p.locator('[data-plant=peashooter]').click();await cell.click();
+ assert.equal(await sun(),initial-100);
+ await p.waitForFunction(()=>gameState.zombies.some(z=>['diver','float'].includes(z.type)),null,{timeout:35000});
+ assert.ok(await p.evaluate(()=>gameState.zombies.filter(z=>['diver','float'].includes(z.type)).every(z=>z.row===2)));
+ await p.screenshot({path:'qa-garden-water.png'});console.log('PASS restored level 3, illegal planting, free base, one debit, water spawns');
+}finally{await b?.close();server.closeAllConnections();server.close()}})().catch(e=>{console.error(e);process.exitCode=1});

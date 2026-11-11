@@ -1660,12 +1660,12 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 
                 gameState.zombies.forEach(zombie => {
                     if (!zombie.element || zombie.row !== proj.row) return;
-                    if (proj.hitZombies.includes(zombie)) return;
+                    if (zombie.submerged || proj.hitZombies.includes(zombie)) return;
                     
                     const zombieRect = zombie.element.getBoundingClientRect();
                     
                     if (projRect.left < zombieRect.right && projRect.right > zombieRect.left) {
-                        zombie.health -= proj.damage;
+                        GardenEnemies.projectile(zombie,proj.damage);
                         updateZombieHealth(zombie);
                         zombie.element.classList.add('damage-effect');
                         
@@ -1732,7 +1732,8 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                     zombie.element.classList.remove('slowed');
                 }
                 
-                const baseSpeed = zombieTypes[zombie.type].speed;
+                GardenEnemies.step(zombie,deltaTime*gameState.gameSpeed);
+                const baseSpeed = zombie.roar?0:zombie.type==='pole'&&zombie.vaulted?9:zombie.type==='paper'&&!zombie.armor?18:zombieTypes[zombie.type].speed;
                 const currentSpeed = zombie.slowed ? baseSpeed * 0.5 : baseSpeed;
                 
                 if (!zombie.attacking) {
@@ -1750,6 +1751,9 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                     if (!plant.element || plant.row !== zombie.row) return;
                     
                     if (plant.col === zombieCol) {
+                        if(plant.type==='spike')return;
+                        if(zombie.type==='pole'&&!zombie.vaulted){zombie.vaulted=true;zombie.x=(plant.col-.15)*gameState.cellSize.width;return}
+                        if(zombie.type==='zomboni'){plant.element.remove();plant.element=null;return}
                         zombie.attacking = true;
                         zombie.element.classList.add('eating');
                         
@@ -1765,9 +1769,9 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                             return;
                         }
                         
-                        if (Date.now() - zombie.lastAttack > 1000) {
-                            zombie.lastAttack = Date.now();
-                            const damage = getZombieDamage(zombieTypes[zombie.type].damage);
+                        if (zombie.attackClock===0) {
+                            zombie.attackClock=1000;
+                            const damage = zombie.type==='giant'?plant.health:getZombieDamage(zombieTypes[zombie.type].damage);
                             plant.health -= damage;
                             updatePlantHealth(plant);
                             plant.element.classList.add('plant-damage-effect');
@@ -1854,7 +1858,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 lastChomped: 0
             };
             
-            gameState.zombies.push(zombieObj);
+            GardenEnemies.init(zombieObj);gameState.zombies.push(zombieObj);
         }
 
         // Show Points Popup
@@ -2272,5 +2276,5 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             }
         });
     </script>
-<script src="../game-shell.js"></script><script>document.addEventListener("keydown",e=>{if(e.target.matches(".plantCard")&&["Enter"," "].includes(e.key)){e.preventDefault();e.target.click()}else if(/^[1-9]$/.test(e.key))document.querySelectorAll(".plantCard")[Number(e.key)-1]?.click()})</script><script src="garden-rules.js"></script><script src="garden-abilities.js"></script><script src="garden-mechanics.js"></script><script src="garden-battle.js"></script><script src="garden-upgrade.js"></script><dialog id="garden-guide" aria-labelledby="guide-title"><header><h2 id="guide-title">植物圖鑑</h2><button class="guide-close">返回花園</button></header><div class="guide-layout"><nav aria-label="植物"></nav><article aria-live="polite"><div class="guide-art"></div><h3></h3><p></p><output></output><small></small></article></div></dialog><script src="garden-guide.js"></script></body>
+<script src="../game-shell.js"></script><script>document.addEventListener("keydown",e=>{if(e.target.matches(".plantCard")&&["Enter"," "].includes(e.key)){e.preventDefault();e.target.click()}else if(/^[1-9]$/.test(e.key))document.querySelectorAll(".plantCard")[Number(e.key)-1]?.click()})</script><script src="garden-rules.js"></script><script src="garden-enemies.js"></script><script src="garden-abilities.js"></script><script src="garden-mechanics.js"></script><script src="garden-boss.js"></script><script src="garden-battle.js"></script><script src="garden-upgrade.js"></script><dialog id="garden-guide" aria-labelledby="guide-title"><header><h2 id="guide-title">植物圖鑑</h2><button class="guide-close">返回花園</button></header><div class="guide-layout"><nav aria-label="植物"></nav><article aria-live="polite"><div class="guide-art"></div><h3></h3><p></p><output></output><small></small></article></div></dialog><script src="garden-guide.js"></script></body>
 </html>

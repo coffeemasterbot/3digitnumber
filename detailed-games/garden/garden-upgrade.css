@@ -26,3 +26,5 @@
 .guide-layout article{background:#e9e6c8;border-radius:8px;padding:10px;text-align:center}.guide-layout output,.guide-layout small{display:block;margin-top:5px}
 @keyframes guide-idle{to{transform:translateY(-3px) rotate(2deg)}}
 @media(prefers-reduced-motion:reduce){.guide-art svg{animation:none}}
+.cell.water-lane{background:repeating-linear-gradient(172deg,#6aaab1 0 12px,#8fc4c5 13px 15px)}.cell[data-base=true]{background:radial-gradient(ellipse,#82ac64 0 53%,#3d7761 55% 62%,#7bbabc 63%)}.cell[data-iced=true]{background:repeating-linear-gradient(125deg,#b6dfee 0 10px,#e6f8ff 11px 16px)}
+#mechanical-boss:not([hidden]){position:fixed;bottom:6px;left:2%;z-index:99;display:flex;align-items:center;gap:6px;background:#253b37;color:#fff1ce;border:1px solid #dcac54;border-radius:8px;padding:5px;font-size:11px}#mechanical-boss progress{width:70px}.mechanical-body .habit-body{display:block;background:#697879;border:4px double #d8cccc;border-radius:20%}.mechanical-body.exposed .habit-body{background:#bb7043;transform:scaleY(.8)}
