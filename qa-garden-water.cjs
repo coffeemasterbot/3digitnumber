@@ -6,7 +6,7 @@ try{
  const p=await b.newPage({viewport:{width:932,height:430}});
  await p.addInitScript(()=>localStorage.setItem('garden-campaign-v1',JSON.stringify({version:1,unlocked:3})));
  await p.goto('http://127.0.0.1:'+server.address().port+'/games/garden/');
- await p.locator('#garden-start').click();
+ const stages=p.getByRole('combobox',{name:'戰役選關'});assert.equal(await stages.inputValue(),'7');assert.equal(await stages.locator('option').count(),15);assert.equal(await stages.locator('option:disabled').count(),8);await stages.selectOption('1');await stages.selectOption('7');await p.locator('#garden-start').click();
  const cell=p.locator('.cell[data-row="2"][data-col="2"]');
  const sun=()=>p.evaluate(()=>gameState.sun);
  const initial=await sun();
