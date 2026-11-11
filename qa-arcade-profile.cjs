@@ -6,7 +6,7 @@ try{
  await p.goto('http://127.0.0.1:'+server.address().port);
  const profile=p.locator('#arcade-profile');await profile.locator('summary').click();
  const file=profile.locator('input[type=file]');
- const backup={version:2,profile:{name:'測試玩家',recent:'coins'},records:{coins:{best:150,plays:2}}};
+ const backup={version:2,profile:{name:'測試玩家',recent:'coins'},records:{coins:{best:150,plays:2}},progress:{gardenStage:7,runnerBest:150,jetBest:89}};
  await file.setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
  await profile.locator('[data-import]').click();
  assert.match(await profile.locator('ul').innerText(),/150 分 · 2 局/);

@@ -1,3 +1,4 @@
+import {trainSupport} from '../../../../source/runner-rules.mjs';
 import{POWER_DURATION}from'../../../../source/runner-rules.mjs';
 import { CanvasTexture } from 'three';
 import { extras } from './extras';
@@ -77,7 +78,10 @@ export function Game() {
       y: playerRef.current.position?.y ?? 0,
     };
 
-    const roof=spawnedItems.obstacles.some(o=>['block','moving'].includes(o.type)&&Math.abs(o.lane-[-2,0,2][playerState.lane])<.2&&o.z+distanceRef.current>=-1.4&&o.z+distanceRef.current<=7.5);playerRef.current.setSurface(roof&&playerState.y-.85>=2.9?3.12:0);
+    const lane=[-2,0,2][playerState.lane];
+    const support=spawnedItems.obstacles.reduce((height,o)=>Math.max(height,trainSupport(o,lane,-distanceRef.current,playerState.y-.85)),0);
+    playerRef.current.setSurface(support);
+    if(support)playerState.y=Math.max(playerState.y,support+.9);
     // Check obstacle collision
     const hitObstacle = checkObstacleCollision(
       spawnedItems.obstacles,

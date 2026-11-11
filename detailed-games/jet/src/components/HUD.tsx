@@ -24,8 +24,11 @@ const POWERUP_CONFIG: Record<PowerUpType, { icon: string; color: string; label: 
   magnet: { icon: '🧲', color: '#ff44ff', label: 'MAGNET'  },
   boost:  { icon: '⚡', color: '#00ff88', label: 'BOOST'   },
   mecha:{icon:'🤖',color:'#f3b948',label:'儲備機甲 · 自動擋擊'},
-  glider:{icon:'🛩',color:'#efd6aa',label:'計劃滑翔翼 · 緩慢下墜'},
-  drill:{icon:'⚙',color:'#de8057',label:'界線鑽頭 · 衝破誘惑'},
+  glider:{icon:'🛩',color:'#efd6aa',label:'計劃滑翔翼 · 點按拍翼'},
+  drill:{icon:'⚙',color:'#de8057',label:'界線鑽頭 · 著地點按跳躍'},
+  gravity:{icon:"↕",color:"#abe6e3",label:"重力裝置 · 點按翻轉"},
+  blink:{icon:"◇",color:"#f4c7f0",label:"瞬移裝置 · 點按轉移"},
+  dragon:{icon:"翼",color:"#ef9165",label:"龍型載具 · 按住下降"},
   none:   { icon: '',   color: 'transparent', label: ''    },
 };
 

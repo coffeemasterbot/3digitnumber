@@ -25,6 +25,17 @@
   try{profile=validateProfile(read('arcade-profile-v2',profile))}catch{}
   name.value=profile.name;
   function save(){try{localStorage.setItem('arcade-profile-v2',JSON.stringify(profile))}catch{status.textContent='瀏覽器未能保存。請匯出備份。'}}
+  function gameProgress(){
+    const garden=read('garden-campaign-v2',null);
+    const legacy=read('garden-campaign-v1',null);
+    const stage=garden?.unlocked??(legacy?3*legacy.unlocked-2:1);
+    return validateProgress({gardenStage:stage,runnerBest:read('runner-detailed-best',0),jetBest:read('jj_highscore',0)});
+  }
+  function validateProgress(p){
+    if(!p||!Number.isInteger(p.gardenStage)||p.gardenStage<1||p.gardenStage>15)throw Error();
+    for(const value of [p.runnerBest,p.jetBest])if(!Number.isSafeInteger(value)||value<0)throw Error();
+    return {gardenStage:p.gardenStage,runnerBest:p.runnerBest,jetBest:p.jetBest};
+  }
   function records(){
     const saved=read('website-v1-records',{}),result={};
     for(const key of Object.keys(games)){
@@ -54,7 +65,7 @@
   name.onchange=()=>{profile.name=name.value.trim().slice(0,30)||'玩家';name.value=profile.name;save()};
   panel.querySelector('[data-export]').onclick=()=>{
     try{
-      const data={version:2,profile,records:records()};
+      const data={version:2,profile,records:records(),progress:gameProgress()};
       const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
       const a=document.createElement('a');a.href=url;a.download='arcade-records-v2.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);
     }catch{status.textContent='未能讀取本機紀錄。'}
@@ -70,8 +81,8 @@
         if(!Object.hasOwn(games,k)||!v||!Number.isFinite(v.best)||v.best<0||!Number.isSafeInteger(v.plays)||v.plays<0)throw Error();
         safe[k]={best:v.best,plays:v.plays};
       }
-      pending={profile:validateProfile(d.profile),records:safe};
-      status.textContent='V2 · '+pending.profile.name+' · '+Object.keys(safe).length+' 款遊戲有紀錄。確認後合併最佳成績及局數。';confirm.hidden=false;
+      pending={profile:validateProfile(d.profile),records:safe,progress:d.progress===undefined?null:validateProgress(d.progress)};
+      status.textContent='V2 · '+pending.profile.name+' · '+Object.keys(safe).length+' 款遊戲有紀錄。'+(pending.progress?'花園第 '+pending.progress.gardenStage+' 關。':'')+'確認後合併最佳成績及局數。';confirm.hidden=false;
     }catch{status.textContent='格式或版本有誤，請重新選擇備份。'}
   };
   confirm.onclick=()=>{
@@ -81,6 +92,12 @@
       for(const [k,v] of Object.entries(pending.records)){
         const prev=current[k]||{};
         current[k]={...prev,best:Math.max(prev.best||0,v.best),plays:Math.max(prev.plays||0,v.plays)};
+      }
+      if(pending.progress){
+        const saved=gameProgress(),incoming=pending.progress;
+        localStorage.setItem('garden-campaign-v2',JSON.stringify({version:2,unlocked:Math.max(saved.gardenStage,incoming.gardenStage)}));
+        localStorage.setItem('runner-detailed-best',String(Math.max(saved.runnerBest,incoming.runnerBest)));
+        localStorage.setItem('jj_highscore',String(Math.max(saved.jetBest,incoming.jetBest)));
       }
       localStorage.setItem('website-v1-records',JSON.stringify(current));
       profile=pending.profile;save();name.value=profile.name;pending=null;confirm.hidden=true;render();status.textContent='已匯入成績。';

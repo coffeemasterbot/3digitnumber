@@ -60,7 +60,8 @@ function generateBuildings(count: number, yBase: number, palette: string[]): Bac
 const FAR_PALETTE=['#e7bd92','#d5ad85','#edcda7'];
 const MID_PALETTE=['#bd765b','#ca9874','#d5ac82'];
 
-export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
+const vehicles: PowerUpType[]=['mecha','glider','drill','gravity','blink','dragon'];
+export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode:string,vehicle:string) {
   const canvasRef  = useRef<HTMLCanvasElement | null>(null);
   const rafRef     = useRef<number>(0);
   const frameRef   = useRef(0);
@@ -84,6 +85,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
   const livesRef      = useRef(MAX_LIVES);
   const speedRef      = useRef(BASE_SPEED[difficulty]);
   const scrollRef     = useRef(0);
+  const tappedRef=useRef(false);
   const thrustingRef  = useRef(false);
   const thrustTickRef = useRef(0); // throttle sound
 
@@ -117,11 +119,11 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
 
   // ── Sync high score from localStorage ────────
   useEffect(() => {
-    const stored = parseInt(localStorage.getItem('jj_highscore') ?? '0', 10);
+    const stored = parseInt(localStorage.getItem(mode==="practice"?"jj_highscore":"jet-best-"+mode) ?? '0', 10);
     highScoreRef.current = stored;
     setHighScore(stored);
     setUIState(prev => ({ ...prev, highScore: stored }));
-  }, []);
+  }, [mode]);
 
   // ── Player factory ────────────────────────────
   function createPlayer(): Player {
@@ -158,17 +160,18 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
     missileTimerRef.current = MISSILE_SPAWN_BASE;
     coinTimerRef.current    = 20;
     powerUpTimerRef.current = 90;vehicleCycle.current=0;blastRef.current=0;
-    thrustingRef.current    = false;
+    tappedRef.current=false;thrustingRef.current=false;
   }, [difficulty]);
 
   // ── Start / restart game ──────────────────────
   const startGame = useCallback(() => {
     resetGame();
+    if(mode==="trial"&&vehicles.includes(vehicle as PowerUpType)){playerRef.current.powerUp=vehicle as PowerUpType;playerRef.current.powerUpTimer=1200;powerUpTimerRef.current=1500}
     gameStateRef.current = 'playing';
     play('start');
     play('bgm');
     syncUI();
-  }, [resetGame, play]);
+  }, [resetGame, play,mode,vehicle]);
 
   // ── Pause / resume ────────────────────────────
   const togglePause = useCallback(() => {
@@ -186,6 +189,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
 
   // ── Thrust (press/hold) ───────────────────────
   const setThrusting = useCallback((value: boolean) => {
+    if(value&&!thrustingRef.current&&gameStateRef.current==='playing')tappedRef.current=true;
     thrustingRef.current = value;
     playerRef.current.isThrusting = value;
   }, []);
@@ -214,7 +218,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
       gameStateRef.current = 'dying' as any;deathFrames.current=0;
       const hs = Math.max(highScoreRef.current, Math.floor(scoreRef.current));
       highScoreRef.current = hs;
-      localStorage.setItem('jj_highscore', String(hs));
+      localStorage.setItem(mode==='practice'?'jj_highscore':'jet-best-'+mode, String(hs));
       setHighScore(hs);
       syncUI(); // ← must call here; the game loop exits early on 'gameover' so syncUI
                 //   would never run otherwise
@@ -240,7 +244,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
       highScore: highScoreRef.current, // ← ref, always current
       distance: Math.floor(distanceRef.current),
       coins: coinsCountRef.current,
-      activePowerUp: p.powerUp,
+      activePowerUp: p.powerUp!=='none'?p.powerUp:(p.shieldFrames||0)>0?'shield':(p.magnetFrames||0)>0?'magnet':'none',
       powerUpTimeLeft: p.powerUpTimer > 0
         ? p.powerUpTimer / getPowerUpDuration(p.powerUp)
         : 0,
@@ -254,13 +258,13 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean) {
     if (t === 'shield') return SHIELD_DURATION;
     if (t === 'magnet') return MAGNET_DURATION;
     if (t === 'boost')  return BOOST_DURATION;
-    if(['mecha','glider','drill'].includes(t))return 600;
+    if(vehicles.includes(t))return 1200;
     return 1;
   }
 
   const deathFrames=useRef(0),lastClock=useRef(0),fixedAcc=useRef(0);
   (window as any).orientationPause=togglePause;
-  (window as any).detailedGameSnapshot=()=>({state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,distance:distanceRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
+  (window as any).detailedGameSnapshot=()=>({mode,state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,distance:distanceRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,magnet:playerRef.current.magnetFrames,shield:playerRef.current.shieldFrames,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
   function endVehicle(p:Player,reason:string){p.expiredType=p.powerUp;p.expiredTimer=100;p.expiredReason=reason;for(let i=0;i<(matchMedia('(prefers-reduced-motion:reduce)').matches?0:16);i++){const a=i*Math.PI/8;p.particles.push({x:p.x+p.width/2,y:p.y+p.height/2,vx:Math.cos(a)*3,vy:Math.sin(a)*3,life:40,maxLife:40,size:4,color:'#e9bc66'})}play('powerup')}
   // ── Main game loop ────────────────────────────
   const gameLoop = useCallback(() => {
@@ -297,8 +301,22 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
 
     // Player physics
     const p = playerRef.current;
-    if (thrustingRef.current) {
-      p.velocity = Math.max(p.velocity + THRUST, MAX_RISE_SPEED);
+    const tapped=tappedRef.current;tappedRef.current=false;
+    if(p.powerUp==='drill'||p.powerUp==='glider'){
+      const canJump=p.powerUp==='glider'||p.y+p.height>=GROUND_Y-1;
+      p.velocity=tapped&&canJump?-8:Math.min(MAX_FALL_SPEED,p.velocity+GRAVITY);
+    }else if(p.powerUp==='gravity'){
+      if(tapped)p.invertedGravity=!p.invertedGravity;
+      p.velocity=Math.max(-7,Math.min(7,p.velocity+(p.invertedGravity?-GRAVITY:GRAVITY)));
+    }else if(p.powerUp==='blink'){
+      p.velocity=0;
+      if(tapped){
+        const destinations=[CEILING_Y+12,(GROUND_Y+CEILING_Y-p.height)/2,GROUND_Y-p.height-10];
+        const safe=destinations.filter(y=>Math.abs(p.y-y)>10&&!missilesRef.current.some(m=>m.active&&rectIntersects({...p,y},m)));
+        if(safe.length)p.y=p.y<destinations[1]?safe.at(-1)!:safe[0];
+      }
+    }else if (p.powerUp==='dragon'?!thrustingRef.current:thrustingRef.current) {
+      p.velocity = Math.max(p.velocity + THRUST*(p.powerUp==='mecha'?.65:1), MAX_RISE_SPEED);
       // Jetpack flame particles
       if (frame % 2 === 0) {
         p.particles.push({
@@ -318,8 +336,6 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       p.velocity = Math.min(p.velocity + GRAVITY, MAX_FALL_SPEED);
     }
 
-    if(p.powerUp==='glider'){p.velocity=Math.max(-5,Math.min(3,p.velocity*.92));}
-    if(p.powerUp==='drill'&&thrustingRef.current)p.velocity=Math.max(-8,p.velocity-0.25);
     if(p.powerUp==='mecha'&&frame%24===0){const target=missilesRef.current.find(m=>m.active&&m.x>p.x&&m.x<p.x+450&&Math.abs(m.y-p.y)<90);if(target){target.active=false;blastRef.current=8;scoreRef.current+=5;play('powerup')}}
     blastRef.current=Math.max(0,blastRef.current-1);
     if (p.powerUp === 'boost') {
@@ -346,12 +362,14 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       if (p.invincibleTimer <= 0) p.invincible = false;
     }
 
+    p.magnetFrames=Math.max(0,(p.magnetFrames||0)-1);
+    p.shieldFrames=Math.max(0,(p.shieldFrames||0)-1);
     p.expiredTimer=Math.max(0,(p.expiredTimer||0)-1);
     // Power-up timer
     if (p.powerUp !== 'none') {
       p.powerUpTimer--;
       if (p.powerUpTimer <= 0) {
-        if(['mecha','glider','drill'].includes(p.powerUp))endVehicle(p,'時間已到');
+        if(vehicles.includes(p.powerUp))endVehicle(p,'時間已到');
         p.powerUp = 'none';
         p.powerUpTimer = 0;
       }
@@ -379,7 +397,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
 
     powerUpTimerRef.current--;
     if (powerUpTimerRef.current <= 0) {
-      const pickup=spawnPowerUp();pickup.type=(['mecha','glider','drill','shield','magnet','boost'] as PowerUpType[])[Math.floor(Math.random()*6)];pickup.x=450;pickup.y=Math.max(CEILING_Y+15,Math.min(GROUND_Y-50,p.y));powerUpsRef.current.push(pickup);
+      const pickup=spawnPowerUp();pickup.type=([...vehicles,'shield','magnet','boost'] as PowerUpType[])[Math.floor(Math.random()*9)];pickup.x=450;pickup.y=Math.max(CEILING_Y+15,Math.min(GROUND_Y-50,p.y));powerUpsRef.current.push(pickup);
       powerUpTimerRef.current = POWERUP_SPAWN_INTERVAL;
     }
 
@@ -412,7 +430,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
         x -= speed;
 
         // Magnet attraction
-        if (p.powerUp === 'magnet') {
+        if ((p.magnetFrames||0)>0) {
           const cx = x + COIN_SIZE / 2;
           const cy = y + COIN_SIZE / 2;
           const pcx = p.x + p.width / 2;
@@ -442,10 +460,10 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       for (const m of missilesRef.current) {
         if (!m.active) continue;
         if (rectIntersects(p, m)) {
-          if(p.powerUp==='drill'){m.active=false;p.powerUpTimer=Math.max(0,p.powerUpTimer-90);play('hit');continue}
-          if (p.powerUp === 'shield'||p.powerUp==='mecha') {
+          if ((p.shieldFrames||0)>0||vehicles.includes(p.powerUp)) {
             // Shield absorbs hit
-            if(p.powerUp==='mecha')endVehicle(p,'擋擊後解除');
+            if((p.shieldFrames||0)>0){p.shieldFrames=0;m.active=false;p.invincible=true;p.invincibleTimer=60;continue}
+            endVehicle(p,'擋擊後解除');
             p.powerUp = 'none';
             p.powerUpTimer = 0;
             p.invincible = true;
@@ -478,9 +496,10 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       if (!pu.active) continue;
       if (rectIntersects(p, pu, 0.1, 0.1)) {
         pu.active = false;
-        p.powerUp = pu.type;
+        if(pu.type==='magnet'||pu.type==='shield'){if(pu.type==='magnet')p.magnetFrames=MAGNET_DURATION;else p.shieldFrames=SHIELD_DURATION;play('powerup');continue}
+        p.powerUp = pu.type;p.invertedGravity=false;
         p.powerUpTimer =
-          ['mecha','glider','drill'].includes(pu.type)?600:pu.type === 'shield' ? SHIELD_DURATION :
+          vehicles.includes(pu.type)?1200:pu.type === 'shield' ? SHIELD_DURATION :
           pu.type === 'magnet' ? MAGNET_DURATION :
           BOOST_DURATION;
         play('powerup');
@@ -490,11 +509,11 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
     // Sync UI every 10 frames
     if (frame % 10 === 0) syncUI();
 
-    if(frameRef.current>=5400){gameStateRef.current='gameover';highScoreRef.current=Math.max(highScoreRef.current,Math.floor(scoreRef.current));localStorage.setItem('jj_highscore',String(highScoreRef.current));stopBGM();syncUI()}
+    if(mode==='practice'&&frameRef.current>=5400){gameStateRef.current='gameover';highScoreRef.current=Math.max(highScoreRef.current,Math.floor(scoreRef.current));localStorage.setItem(mode==='practice'?'jj_highscore':'jet-best-'+mode,String(highScoreRef.current));stopBGM();syncUI()}
     }
     // ── Draw ────────────────────────────────────
     renderFrame(ctx);
-  }, [difficulty, play, stopBGM, highScore]);
+  }, [difficulty, play, stopBGM, highScore,mode]);
 
   function renderFrame(ctx: CanvasRenderingContext2D) {
     const frame = frameRef.current;
@@ -526,7 +545,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
 
     if((p.expiredTimer||0)>0){const k=matchMedia('(prefers-reduced-motion:reduce)').matches?0:1-(p.expiredTimer||0)/100,cx=p.x+p.width/2,cy=p.y+p.height/2;ctx.save();ctx.globalAlpha=1-k;ctx.strokeStyle='#fff0c5';ctx.lineWidth=3;ctx.setLineDash([8,5]);ctx.beginPath();ctx.arc(cx,cy,32+k*45,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=Math.min(1,(p.expiredTimer||0)/20);ctx.fillStyle='#fff2d4';ctx.fillRect(p.x-25,p.y-42,210,26);ctx.fillStyle='#765131';ctx.font='bold 13px Microsoft JhengHei';ctx.textAlign='left';ctx.fillText((p.expiredType==='mecha'?'儲備機甲':p.expiredType==='glider'?'計劃滑翔翼':'界線鑽頭')+' · '+p.expiredReason,p.x-18,p.y-24);ctx.restore()}
     // Magnet field hint
-    if (p.powerUp === 'magnet') {
+    if ((p.magnetFrames||0)>0) {
       ctx.save();
       ctx.globalAlpha = 0.12 + Math.sin(frame * 0.1) * 0.06;
       ctx.strokeStyle = '#ff44ff';

@@ -115,6 +115,12 @@ export function drawPlayer(
 
   ctx.save();
 
+  if((player.shieldFrames||0)>0){ctx.save();ctx.strokeStyle='#50d0ed';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cx,cy,width*.85,0,Math.PI*2);ctx.stroke();ctx.restore()}
+  if(['gravity','blink','dragon'].includes(powerUp)){
+    ctx.save();ctx.strokeStyle='#3a443d';ctx.fillStyle=powerUp==='dragon'?'#dc8355':powerUp==='blink'?'#c18fce':'#7db6af';
+    ctx.beginPath();ctx.moveTo(x-20,cy);ctx.lineTo(cx,y-17);ctx.lineTo(x+width+19,cy);ctx.lineTo(cx,y+height+12);ctx.closePath();ctx.fill();ctx.stroke();
+    ctx.restore();
+  }
   if(['mecha','glider','drill'].includes(powerUp)){
     const metal=ctx.createLinearGradient(x,y,x+width,y+height);metal.addColorStop(0,powerUp==='mecha'?'#ffdc7c':powerUp==='glider'?'#afdbbf':'#edb18a');metal.addColorStop(1,powerUp==='mecha'?'#a56b2e':powerUp==='glider'?'#3b776a':'#a14b32');ctx.fillStyle=metal;ctx.strokeStyle='#463e2e';ctx.lineWidth=3;
     if(powerUp==='glider'){ctx.beginPath();ctx.moveTo(x-42,y+15);ctx.lineTo(cx,y-35);ctx.lineTo(x+width+42,y+15);ctx.lineTo(x+width,y+23);ctx.lineTo(cx,y+height+8);ctx.lineTo(x,y+23);ctx.closePath();ctx.fill();ctx.stroke();ctx.beginPath();ctx.moveTo(cx,y-35);ctx.lineTo(cx,y+height);ctx.moveTo(x-40,y+15);ctx.lineTo(cx,y);ctx.lineTo(x+width+40,y+15);ctx.stroke()}

@@ -13,6 +13,8 @@ import MobileControls from './MobileControls';
 
 export default function Game() {
   // ── User preferences ──────────────────────────
+  const [mode,setMode]=useState("endless");
+  const [vehicle,setVehicle]=useState("mecha");
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [soundEnabled, setSoundEnabled] = useState(()=>{try{return localStorage.getItem('jet-sound-enabled')==='true'}catch{return false}});
 
@@ -22,7 +24,7 @@ export default function Game() {
     startGame,
     togglePause,
     setThrusting,
-  } = useGameEngine(difficulty, soundEnabled);
+  } = useGameEngine(difficulty, soundEnabled,mode,vehicle);
 
   (window as any).detailedUIState=uiState;
   const prevScoreRef = useRef(0);
@@ -113,7 +115,7 @@ export default function Game() {
         <AnimatePresence>
           {uiState.gameState === 'start' && (
             <StartScreen
-              key="start"
+              key="start" mode={mode} vehicle={vehicle} setMode={setMode} setVehicle={setVehicle}
               difficulty={difficulty}
               onDifficultyChange={setDifficulty}
               onStart={startGame}
