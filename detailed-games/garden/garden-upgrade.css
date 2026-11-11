@@ -14,3 +14,4 @@
 #campaign-track{bottom:43px}#gameBoard{bottom:82px!important}
 
 @media(orientation:portrait) and (max-width:768px){#ui{height:218px}#gameBoard{top:234px!important}#plantSelection{padding-bottom:5px}}
+.campaign-locked{filter:grayscale(1);opacity:.6}.campaign-locked .cost::after{content:" · 未解鎖"}#plantSelection{overflow-x:auto}
