@@ -1,0 +1,13 @@
+<section class="wrap lab" id="cashflow">
+<header><p class="eyebrow">HK$ · 七日模擬</p><h2>現金流實驗室</h2><p>手上有幾多，到帳之前又要用幾多？改一個日期，睇清邊日要預留現金。</p></header>
+<fieldset id="quick-fields"><legend>快速試算 · 方案 A</legend></fieldset>
+<p id="quick-result" aria-live="polite"></p>
+<details id="lab-detail"><summary>開啟詳細比較</summary>
+<p>每日先計預計收入，再計支出。負結餘代表當日資金缺口。同日實際扣款時間可能有差異。</p>
+<div class="lab-grid"><div><fieldset><legend>編輯方案</legend><label><input type="radio" name="lab-tab" value="A" checked> A</label> <label><input type="radio" name="lab-tab" value="B"> B</label></fieldset>
+<fieldset id="lab-fields"><legend>收支安排（HK$）</legend></fieldset>
+<button id="lab-copy">複製 A 到 B</button> <button id="lab-delay">收入延遲兩日</button> <button id="lab-story">複製主線已知安排</button></div>
+<div><h3>七日比較</h3><div id="lab-table"></div><div id="lab-summary"></div></div></div>
+<p><button id="lab-save">保存 A／B</button> <button id="lab-reset">還原範例</button> <button id="lab-delete">刪除本機方案</button> <button id="lab-export">匯出兩個方案</button></p>
+<label>預覽匯入方案 <input id="lab-import" type="file" accept=".json"></label> <button id="lab-confirm" hidden>套用匯入</button> <button id="lab-cancel" hidden>取消匯入</button>
+<p id="lab-status" role="status"></p><label>帶去行動卡嘅建議（可以改） <input id="lab-habit" maxlength="120" value="付款前先睇到帳日同到期日"></label> <button data-play="plan" id="lab-action">開啟我的七日行動卡 →</button></details></section>

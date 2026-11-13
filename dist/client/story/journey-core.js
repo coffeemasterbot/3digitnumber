@@ -37,11 +37,39 @@
   return out;
  }
  function load(storage,defaults){try{const raw=storage.getItem(KEY);if(raw===null)return {state:{...defaults,...branch(),version:VERSION},status:'new',raw:null};try{return {state:validate(JSON.parse(raw),defaults),status:'ready',raw:null}}catch{return {state:{...defaults,...branch(),version:VERSION},status:'recovery',raw}}}catch{return {state:{...defaults,...branch(),version:VERSION},status:'unavailable',raw:null}}}
- function project(s){
-  const availableCents=5000,pendingIncomeCents=60000,payday=s.delay?5:3,ledger=[];let balanceCents=availableCents;
-  const rows=Array.from({length:7},(_,i)=>{const day=i+1,foodCents=s.basic?3000:4500,travelCents=s.basic?1200:2800,voucherCents=s.vouchers&&day<=2?3000:0,incomeCents=day===payday?pendingIncomeCents:0,phoneCents=day===5?5000:0,socialCostCents=day===2&&(s.social==='kept'||(s.social==='promise'&&!s.socialSettled))?28000:0,costCents=foodCents-voucherCents+travelCents+phoneCents+socialCostCents;
-   balanceCents+=incomeCents-costCents;ledger.push({day,incomeCents,foodCents,travelCents,voucherCents,phoneCents,socialCostCents,balanceCents});return {day,food:foodCents/100,travel:travelCents/100,voucher:voucherCents/100,income:incomeCents/100,cost:costCents/100,socialCost:socialCostCents/100,balance:balanceCents/100};});
-  return {availableCents,pendingIncomeCents,payday,ledger,rows,gapCents:Math.max(0,-Math.min(...ledger.map(x=>x.balanceCents))),closingCents:balanceCents};
+ function example(){
+  return {openingCents:5000,pendingIncomeCents:60000,payday:3,foodCents:3000,travelCents:1200,voucherCents:3000,phoneCents:5000,phoneDay:5,socialCostCents:0,socialDay:2};
  }
- return {VERSION,KEY,validate,load,branch,project};
+ function validateScenario(raw){
+  const scenario={};
+  for(const key of Object.keys(example())){
+   const value=raw?.[key], day=['payday','phoneDay','socialDay'].includes(key);
+   if(!Number.isSafeInteger(value)||value<(day?1:0)||value>(day?7:100000000))throw Error('數值超出範圍');
+   scenario[key]=value;
+  }
+  return scenario;
+ }
+ function storyScenario(s){
+  return {...example(),payday:s.delay?5:3,foodCents:s.basic?3000:4500,travelCents:s.basic?1200:2800,voucherCents:s.vouchers?3000:0,socialCostCents:s.social==='kept'||(s.social==='promise'&&!s.socialSettled)?28000:0};
+ }
+ function calculateCashflow(raw){
+  const s=validateScenario(raw), ledger=[], rows=[];
+  let balanceCents=s.openingCents, firstDeficitDay=null, gapCents=0;
+  for(let day=1;day<=7;day++){
+   const {foodCents,travelCents}=s;
+   const voucherCents=day<=2?Math.min(foodCents,s.voucherCents):0;
+   const incomeCents=day===s.payday?s.pendingIncomeCents:0;
+   const phoneCents=day===s.phoneDay?s.phoneCents:0;
+   const socialCostCents=day===s.socialDay?s.socialCostCents:0;
+   const costCents=foodCents-voucherCents+travelCents+phoneCents+socialCostCents;
+   balanceCents+=incomeCents-costCents;
+   if(balanceCents<0&&firstDeficitDay===null)firstDeficitDay=day;
+   gapCents=Math.max(gapCents,-balanceCents);
+   ledger.push({day,incomeCents,foodCents,travelCents,voucherCents,phoneCents,socialCostCents,balanceCents});
+   rows.push({day,food:foodCents/100,travel:travelCents/100,voucher:voucherCents/100,income:incomeCents/100,cost:costCents/100,socialCost:socialCostCents/100,balance:balanceCents/100});
+  }
+  return {availableCents:s.openingCents,pendingIncomeCents:s.pendingIncomeCents,payday:s.payday,ledger,rows,gapCents,firstDeficitDay,closingCents:balanceCents};
+ }
+ function project(s){return calculateCashflow(storyScenario(s))}
+ return {VERSION,KEY,validate,load,branch,project,example,storyScenario,validateScenario,calculateCashflow};
 });

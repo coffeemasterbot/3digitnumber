@@ -19,13 +19,32 @@ const GardenEnemies=(()=>{
    z.armor=kinds[z.type]?.[4]||({bucket:14,cone:6}[z.type]||0);
    z.submerged=z.type==='diver';z.summon=5000;z.attackClock=0;
  }
- function projectile(z,damage){
-   if(z.type==='boss'&&!gameState.boss?.exposed)return;
-   if(z.armor){
+ function applyDamage(z,damage,source){
+   if(!z.element)return;
+   if(z.type==='boss'&&source!=='mower'){
+     if(!gameState.boss?.exposed)return;
+     if(source==='ability'||source==='blast'||source==='chomp')damage=Math.min(damage,12);
+   }
+   if(z.armor&&(source==='projectile'||source==='burn')){
      const absorbed=Math.min(damage,z.armor);z.armor-=absorbed;damage-=absorbed;
      if(z.armor===0&&z.type==='paper')z.roar=550;
    }
-   z.health-=damage;
+   z.health=Math.max(0,z.health-damage);updateZombieHealth(z);
+   if(z.health>0)return;
+   const points=zombieTypes[z.type].points*(source==='chomp'?2:1);
+   showPointsPopup(z.element,points);createParticleEffect(z.element,source==='mower'?'✦':'💀');
+   z.element.remove();z.element=null;
+   addScore(points);gameState.zombiesDefeated++;
+ }
+ function stepBurn(z,dt){
+   const remaining=z.burnLeft||0;
+   if(remaining<=0)return;
+   z.burnLeft=Math.max(0,remaining-dt);
+   const elapsed=(z.burnElapsed||0)+Math.min(remaining,dt);
+   const ticks=Math.floor(elapsed/400);
+   z.burnElapsed=z.burnLeft?elapsed%400:0;
+   if(ticks)applyDamage(z,ticks,'burn');
+   z.element?.classList.toggle('burning',z.burnLeft>0);
  }
  function step(z,dt){
    z.attackClock=Math.max(0,z.attackClock-dt);
@@ -58,5 +77,5 @@ const GardenEnemies=(()=>{
      }
    }
  }
- return {spawn,init,projectile,step,reinforcements,kinds};
+ return {spawn,init,applyDamage,stepBurn,step,reinforcements,kinds};
 })();

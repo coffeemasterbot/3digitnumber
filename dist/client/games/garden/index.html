@@ -1665,8 +1665,8 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                     const zombieRect = zombie.element.getBoundingClientRect();
                     
                     if (projRect.left < zombieRect.right && projRect.right > zombieRect.left) {
-                        GardenEnemies.projectile(zombie,proj.damage);
-                        updateZombieHealth(zombie);
+                        GardenEnemies.applyDamage(zombie,proj.damage,'projectile');
+                        if(!zombie.element){if(!proj.pierce)hit=true;return}
                         zombie.element.classList.add('damage-effect');
                         
                         if (proj.slow) {
@@ -1685,17 +1685,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                             }
                         }, 300);
                         
-                        if (zombie.health <= 0) {
-                            if (zombie.element) {
-                                const points = zombieTypes[zombie.type].points;
-                                showPointsPopup(zombie.element, points);
-                                addScore(points);
-                                createParticleEffect(zombie.element, '💀');
-                                zombie.element.remove();
-                                zombie.element = null;
-                            }
-                            gameState.zombiesDefeated++;
-                        }
+
                         
                         if (!proj.pierce) {
                             hit = true;
@@ -1759,13 +1749,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                         
                         if (zombie.type!=='giant'&&plantTypes[plant.type].melee && Date.now() - zombie.lastChomped > 1000) {
                             zombie.lastChomped = Date.now();
-                            const points = zombieTypes[zombie.type].points * 2;
-                            showPointsPopup(zombie.element, points);
-                            addScore(points);
-                            createParticleEffect(zombie.element, '💀');
-                            zombie.element.remove();
-                            zombie.element = null;
-                            gameState.zombiesDefeated++;
+                            GardenEnemies.applyDamage(zombie,zombie.health,'chomp');
                             return;
                         }
                         

@@ -1,5 +1,5 @@
 (() => {
-  const games={instalments:'植物防守',pause:'冰火人',shipping:'Jetpack',coins:'街頭跑酷',defence:'預算防衛戰'};
+  const games=Object.fromEntries(window.gameCatalogue.map(game=>[game.key,game.title]));
   const panel=document.getElementById('arcade-profile');
   const name=panel.querySelector('input[type=text]'),status=panel.querySelector('output');
   const file=panel.querySelector('input[type=file]'),confirm=panel.querySelector('[data-import]');
@@ -40,9 +40,13 @@
     const list=panel.querySelector('ul');list.replaceChildren();
     for(const [key,title] of Object.entries(games)){
       const li=document.createElement('li');li.textContent=title+' · '+(scores[key]?'最佳 '+scores[key].best+' 分 · '+scores[key].plays+' 局':'未有紀錄');list.append(li);
+      const progress=document.querySelector('[data-game-card="'+key+'"] [data-game-progress]');
+      if(progress){progress.textContent=scores[key]?'本機最佳 '+scores[key].best+' · 已玩 '+scores[key].plays+' 局':'未有本機局數紀錄';if(key==='instalments')try{progress.textContent+=' · 已開放至第 '+gameProgress().gardenStage+' 關'}catch{}}
     }
     const resume=panel.querySelector('[data-resume]');resume.hidden=!profile.recent;
-    if(profile.recent)resume.textContent='再玩'+games[profile.recent];
+    const homeResume=document.querySelector('[data-home-resume]');
+    homeResume.hidden=resume.hidden;
+    if(profile.recent){homeResume.textContent=resume.textContent='繼續遊玩 · '+games[profile.recent];homeResume.onclick=()=>resume.click()}
   }
   panel.querySelector('[data-resume]').onclick=()=>document.querySelector('[data-play="'+profile.recent+'"]').click();
   document.addEventListener('click',e=>{

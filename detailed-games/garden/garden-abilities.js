@@ -12,13 +12,7 @@ const GardenAbilities = (() => {
   function icon(type){
     return '<svg viewBox="0 0 100 100" aria-hidden="true"><path d="'+cards[type][4]+'" stroke="#34482e" stroke-width="5" fill="'+({mine:'#d4a260',pepper:'#ed7452',torch:'#edac45',chomper:'#ac82c7'}[type]||'#86b975')+'"/></svg>';
   }
-  function damage(z,amount){
-    if(!z.element)return;
-    if(z.type==='boss'){if(!gameState.boss?.exposed)return;amount=Math.min(amount,12)}
-    z.health-=amount;updateZombieHealth(z);
-    if(z.health>0)return;
-    addScore(zombieTypes[z.type].points);z.element.remove();z.element=null;gameState.zombiesDefeated++;
-  }
+  function damage(z,amount){GardenEnemies.applyDamage(z,amount,'ability')}
   function consume(p){p.element.remove();p.element=null}
   function step(p,dt){
     if(!cards[p.type]||p.type==='torch')return;

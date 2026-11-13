@@ -34,7 +34,7 @@ arcade = arcade.slice(0,arcade.lastIndexOf('})();')) + '\n' + fs.readFileSync(pa
 const freeBridge=`<script>
 (()=>{const q=new URLSearchParams(location.search),key=q.get('arcade');const standalone=['coins','shipping','instalments','pause'].includes(key);const embedded=parent!==window;const close=window.closeModal;function back(){if(embedded)parent.postMessage({type:'website-v1-back'},location.origin);else location.href='../#arcade'}
 if(standalone){enterDemo();document.body.classList.add('standalone');const finish=window.finishArcade;window.finishArcade=function(){finish();try{const r=JSON.parse(localStorage.getItem('website-v1-arcade')||'{}');if(s.arcade?.[key])r[key]={...s.arcade[key],demo:false};localStorage.setItem('website-v1-arcade',JSON.stringify(r))}catch{}};window.closeModal=function(){close();back()};window.openMini(key)}
-else if(q.has('plan')&&s.budgetDone){s.started=true;s.stage=4;s.complete=false;render(true)}
+else if(q.has('plan')){document.body.classList.add('personal-card');render=function(){document.getElementById('app').innerHTML=planCard();const hint=window.frameElement?.dataset.habit;if(hint&&!s.habit)document.getElementById('habit').value=hint};render()}
 document.getElementById('dialog').addEventListener('cancel',()=>{if(standalone)back()});
 if(!embedded){const a=document.createElement('a');a.className='site-return';a.href='../';a.textContent='← 戶口三位數 website v1';document.body.prepend(a)}
 })();</script>`;
@@ -64,6 +64,7 @@ fs.copyFileSync(path.join(root,'garden-duo.css'),path.join(dist,'garden-duo.css'
 if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missing talk poster asset');
 const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v1');
 
+fs.copyFileSync(path.join(root,'source/cashflow-lab.js'),path.join(dist,'cashflow-lab.js'));
 fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'presentation.js'));require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
 
 if(!process.argv.includes('--preserve-arcade'))require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});
