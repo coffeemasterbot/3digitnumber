@@ -1,0 +1,27 @@
+const {chromium}=require(process.env.PLAYWRIGHT_PATH||'C:/Users/danie/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const assert=require('node:assert/strict');
+(async()=>{const b=await chromium.launch({channel:'msedge'});try{
+ const open=async game=>{const p=await b.newPage({viewport:{width:1100,height:700}});p.on('pageerror',e=>console.error('PAGE ERROR',e));await p.goto('http://127.0.0.1:8789/games/'+game+'/');return p};
+ const g=await open('garden');const picker=g.locator('.garden-picker');await picker.waitFor();assert.equal(await picker.locator('.picker-tray button').count(),8);
+ const clock=await g.evaluate(()=>gameState.activeClock||0);await g.waitForTimeout(600);assert.equal(await g.evaluate(()=>gameState.activeClock||0),clock);
+ await picker.locator('.picker-tray button').first().click();assert.equal(await picker.locator('.picker-tray button').count(),7);
+ await picker.getByRole('button',{name:'開始守護'}).click();await g.waitForFunction(()=>!gameState.isPaused);await g.close();
+ const a=await open('budget-defence');await a.locator('[data-action=begin]').click();await a.locator('[data-action=start]').click();const snap=()=>a.evaluate(()=>fpsSnapshot());
+ assert.equal((await snap()).enemies.length,4);const initial=(await snap()).view.yaw;
+ await a.mouse.move(470,400);await a.mouse.move(570,400);assert.equal((await snap()).view.yaw,initial);
+ await a.mouse.down();await a.mouse.move(620,405);await a.mouse.up();const turned=(await snap()).view.yaw;assert.notEqual(turned,initial);
+ await a.mouse.move(700,400);await a.keyboard.press('ArrowLeft');await a.keyboard.press('j');assert.equal((await snap()).view.yaw,turned);
+ await a.mouse.click(600,405,{button:'right'});assert.ok((await snap()).shots>=1);await a.reload();
+ const c=await open('budget-defence');
+ for(const p of [a,c])await p.locator('[data-action=coop]').click();
+ await a.locator('[data-create]').click();await a.waitForFunction(()=>/房間 [0-9A-F]{8}/.test(document.querySelector('dialog[open] [role=status]').textContent));
+ const status=p=>p.locator('dialog[open] [role=status]').innerText();
+ const code=(await status(a)).match(/房間 ([A-F0-9]{8})/)[1];
+ await c.locator('dialog[open] input').nth(1).fill(code);await c.locator('[data-join]').click();
+ for(const p of [a,c])await p.locator('[data-ready]').click();
+ await a.locator('[data-field] canvas').waitFor();await c.locator('[data-field] canvas').waitFor();
+ await a.locator('[data-field] canvas').focus();await a.keyboard.down('w');await a.waitForTimeout(3230);await a.keyboard.up('w');await a.keyboard.press('e');
+ await a.keyboard.down('w');await a.waitForTimeout(2050);await a.keyboard.up('w');await a.keyboard.press('f');
+ await a.locator('[data-offer] button').first().click({timeout:5000});await a.locator('[data-field] canvas').focus();await a.keyboard.down('e');await a.waitForFunction(()=>document.querySelector('dialog[open] [role=status]').textContent.includes('合作拆解成功'),null,{timeout:15000});await a.keyboard.up('e');
+ assert.match(await status(c),/合作拆解成功/);console.log('Edge',b.version(),'Garden selection, solo FPS drag and two isolated clients completed shared room'); 
+ }finally{await b.close()}})().catch(e=>{console.error(e);process.exitCode=1});

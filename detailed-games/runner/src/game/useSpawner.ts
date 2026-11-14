@@ -1,3 +1,4 @@
+import {airRoute} from '../../../../source/runner-air.mjs';
 import{canSpawnObstacle}from'../../../../source/runner-rules.mjs';
 import { useRef, useCallback } from 'react';
 import { LANES, CHUNK_LENGTH } from '../utils/constants';
@@ -35,6 +36,16 @@ export function useSpawner() {
     lastSpawnZ: -50,
   });
 
+  const reserved=useRef<{near:number,far:number}|null>(null);
+  const reserveAirRoute=useCallback((kind:'jetpack'|'pogo',distance:number,speed:number,start:number)=>{
+    const duration=kind==='jetpack'?8:2;
+    const near=distance-10,far=distance+duration*(speed+1)+18;
+    reserved.current={near,far};
+    const state=stateRef.current;
+    state.obstacles=state.obstacles.filter(o=>-o.z<near||-o.z>far+(o.type==='moving'?9*duration:0));
+    for(let t=.5;t<duration;t+=.5)for(const lane of LANES)
+      state.coins.push({id:generateId(),lane,z:-distance-speed*t,y:airRoute(kind,t,start).height+1.35});
+  },[]);
   const spawn = useCallback((currentZ: number) => {
     const state = stateRef.current;
     const spawnAheadDistance = CHUNK_LENGTH * 3;
@@ -52,7 +63,9 @@ export function useSpawner() {
         const lane = randomLane();
         const type = randomObstacleType();
         
-        const candidate={id:generateId(),lane,type,z:state.lastSpawnZ};if(canSpawnObstacle(state.obstacles,candidate))state.obstacles.push(candidate);
+        const candidate={id:generateId(),lane,type,z:state.lastSpawnZ};const corridor=reserved.current;
+        const reservedHere=corridor&&-candidate.z>=corridor.near&&-candidate.z<=corridor.far+(type==='moving'?72:0);
+        if(!reservedHere&&canSpawnObstacle(state.obstacles,candidate))state.obstacles.push(candidate);
         
         // Maybe spawn coins in other lanes
         if (Math.random() < 0.5) {
@@ -96,7 +109,7 @@ export function useSpawner() {
   }, []);
 
   const removeCoin = useCallback((id: string) => {
-    stateRef.current.coins = stateRef.current.coins.filter(c => c.id !== id);
+    const before=stateRef.current.coins.length;stateRef.current.coins=stateRef.current.coins.filter(c=>c.id!==id);return before!==stateRef.current.coins.length;
   }, []);
 
   const reset = useCallback(() => {
@@ -105,8 +118,8 @@ export function useSpawner() {
       coins: [],
       lastSpawnZ: -50,
     };
-    idCounter = 0;
+    reserved.current=null;idCounter = 0;
   }, []);
 
-  return { spawn, removeObstacle, removeCoin, reset };
+  return { spawn,reserveAirRoute, removeObstacle, removeCoin, reset };
 }

@@ -27,6 +27,8 @@ export interface Player extends Rect {
   magnetFrames?: number;
   shieldFrames?: number;
   invertedGravity?: boolean;
+  teleportPreview?: {targets:{id:string,y:number,safe:boolean}[],nextId:string|null};
+  vehicleVisualState?: {gravity:'up'|'down', airborne:boolean, active:PowerUpType, velocityY:number};
   expiredType?: PowerUpType;
   expiredTimer?: number;
   expiredReason?: string;

@@ -1,49 +1,49 @@
 function configureGardenSeeds(stageControl,startButton) {
-  const seeds=Array.from(document.querySelectorAll('#plantSelection [data-plant]'));
+  const cards=Array.from(document.querySelectorAll('#plantSelection [data-plant]'));
   const selected=new Set();
-  const field=document.createElement('fieldset');
-  const title=document.createElement('legend');
-  const grid=document.createElement('div');
-  const notice=document.createElement('output');
-  const recommend=document.createElement('button');
-  field.className='seed-loadout';
-  recommend.type='button';
-  recommend.textContent='推薦配置';
-  field.append(title,grid,recommend,notice);
-  stageControl.after(field);
-  const buttons=new Map();
-  function draw(){
-    const world=gardenLevel();
-    for(const card of seeds){
-      const type=card.dataset.plant;
-      const button=buttons.get(type);
-      button.disabled=(GardenAbilities.cards[type]?.[2]||1)>world;
-      button.setAttribute('aria-pressed',String(selected.has(type)));
-      card.hidden=!selected.has(type);
+  const host=document.createElement('div');
+  stageControl.after(host);
+  startButton.hidden=true;
+  const unlock=id=>GardenAbilities.cards[id]?.[2]||1;
+  function plants(){
+    return cards.map(card=>{
+      const id=card.dataset.plant,world=unlock(id);
+      return {id,name:card.querySelector('.name').textContent,cost:Number(card.dataset.cost),
+        art:card.querySelector('.emoji'),locked:world>gardenLevel(),unlockText:'世界 '+world+' 開放'};
+    });
+  }
+  function enemies(){
+    const ids=new Set(),level=gardenLevel();
+    for(let wave=1;wave<=5;wave++){
+      const state=GardenRules.wave(wave,level,(Number(stageControl.value)-1)%3);
+      for(let n=0;n<state.total;n++)ids.add(level>=4&&wave===5&&n===0?'giant':GardenEnemies.spawn(level,wave,n+1,(wave+n*2)%5));
     }
-    startButton.disabled=selected.size===0;
-    title.textContent='出戰植物 '+selected.size+' / 8';
-    notice.textContent=world===3&&!selected.has('lily')?'水行需要浮葉基座':world===5&&!selected.has('pepper')?'辣椒可清除 Boss 冰球':'';
+    if(ids.has('dancer'))ids.add('backup');
+    if(Number(stageControl.value)===15)ids.add('boss');
+    const names={normal:'信用卡超支',cone:'情緒消費',bucket:'分期疊加',giant:'債務巨人',boss:'機械博士'};
+    return Array.from(ids,id=>{
+      const art=document.createElement('span');art.textContent=zombieTypes[id]?.emoji||'';
+      return {id,name:GardenEnemies.kinds[id]?.[0]||names[id]||id,art};
+    });
   }
-  for(const card of seeds){
-    const type=card.dataset.plant,button=document.createElement('button');
-    button.type='button';button.textContent=card.querySelector('.name').textContent;
-    button.onclick=()=>{
-      if(selected.has(type))selected.delete(type);
-      else if(selected.size<8)selected.add(type);
-      else{notice.textContent='已選八張，請先移除一張。';return}
-      draw();
-    };
-    buttons.set(type,button);grid.append(button);
+  function draw(){
+    for(const card of cards)card.hidden=!selected.has(card.dataset.plant);
+    startButton.disabled=!selected.size;
+    renderPicker({plants:plants(),selected:Array.from(selected),enemies:enemies(),canStart:!!selected.size,
+      notice:gardenLevel()===3&&!selected.has('lily')?'水行種植需要浮葉基座。':''});
   }
-  function defaults(){
+  function recommend(){
     selected.clear();
     const special=gardenLevel()===3?'lily':gardenLevel()>=4?'pepper':'snowpea';
-    for(const key of ['sunflower','peashooter','wallnut','mine','squash','repeater',special,'cherrybomb'])selected.add(key);
+    for(const id of ['sunflower','peashooter','wallnut','mine','squash','repeater',special,'cherrybomb'])if(unlock(id)<=gardenLevel())selected.add(id);
     draw();
   }
-  recommend.onclick=defaults;
-  stageControl.addEventListener('change',defaults);
-  defaults();
-  return defaults;
+  const renderPicker=createGardenSeedPicker(host,{
+    toggle(id){if(!cards.some(c=>c.dataset.plant===id)||unlock(id)>gardenLevel())return;
+      if(selected.has(id))selected.delete(id);else if(selected.size<8)selected.add(id);draw()},
+    recommend,start(){if(selected.size&&!startButton.disabled)startButton.click()}
+  });
+  stageControl.addEventListener('change',recommend);
+  recommend();
+  return recommend;
 }

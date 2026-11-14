@@ -13,8 +13,8 @@ import MobileControls from './MobileControls';
 
 export default function Game() {
   // ── User preferences ──────────────────────────
-  const [mode,setMode]=useState("endless");
-  const [vehicle,setVehicle]=useState("mecha");
+  const [mode,setMode]=useState((window as any).arcadeTest?'trial':'endless');
+  const [vehicle,setVehicle]=useState((window as any).arcadeTest?.target||'mecha');
   const [difficulty, setDifficulty] = useState<Difficulty>('medium');
   const [soundEnabled, setSoundEnabled] = useState(()=>{try{return localStorage.getItem('jet-sound-enabled')==='true'}catch{return false}});
 

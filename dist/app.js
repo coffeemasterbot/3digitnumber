@@ -2,7 +2,7 @@
 const labels={story:'人生失物認領處 ／ 主線故事',plan:'我的七日行動',...Object.fromEntries(window.gameCatalogue.map(game=>[game.key,game.title+' ／ '+game.genre.split(' / ').pop()]))};
 const $=id=>document.getElementById(id);let active=null,originFocus=null;
 function read(key,fallback){try{const value=JSON.parse(localStorage.getItem(key));return value&&typeof value==='object'&&!Array.isArray(value)?value:fallback}catch{return fallback}}
-function launch(kind,habitSuggestion=''){if(!labels[kind])return;originFocus=document.activeElement;active=kind;$('landing').hidden=true;$('play-panel').hidden=false;document.querySelector('footer').hidden=true;$('player-title').textContent=labels[kind];const frame=document.createElement('iframe');frame.title=labels[kind];frame.id='game-frame';frame.allow='autoplay; fullscreen';if(kind==='plan'&&habitSuggestion)frame.dataset.habit=habitSuggestion.slice(0,120);frame.src=({defence:'games/budget-defence/index.html',coins:'games/runner/index.html',shipping:'games/jet/index.html',instalments:'games/garden/index.html'}[kind])||'story/index.html'+(kind==='story'?'':kind==='plan'?'?plan=1':'?arcade='+encodeURIComponent(kind));$('frame-host').replaceChildren(frame);history.replaceState(null,'','#play-'+kind);window.scrollTo({top:0,behavior:'instant'})}
+function launch(kind,habitSuggestion='',testTarget=null){if(!labels[kind])return;originFocus=document.activeElement;active=kind;$('landing').hidden=true;$('play-panel').hidden=false;document.querySelector('footer').hidden=true;$('player-title').textContent=labels[kind];const frame=document.createElement('iframe');frame.title=labels[kind];frame.id='game-frame';if(testTarget)frame.name='arcade-test-v1/'+kind+'/'+testTarget;frame.allow='autoplay; fullscreen';if(kind==='plan'&&habitSuggestion)frame.dataset.habit=habitSuggestion.slice(0,120);frame.src=({defence:'games/budget-defence/index.html',coins:'games/runner/index.html',shipping:'games/jet/index.html',instalments:'games/garden/index.html'}[kind])||'story/index.html'+(kind==='story'?'':kind==='plan'?'?plan=1':'?arcade='+encodeURIComponent(kind));$('frame-host').replaceChildren(frame);history.replaceState(null,'',testTarget?'#dev-tools':'#play-'+kind);window.scrollTo({top:0,behavior:'instant'})}
 function home(){const f=$('game-frame');if(f)f.remove();active=null;$('play-panel').hidden=true;$('landing').hidden=false;document.querySelector('footer').hidden=false;history.replaceState(null,'','#arcade');document.getElementById('arcade').scrollIntoView();if(originFocus?.isConnected)originFocus.focus({preventScroll:true})}
 document.querySelectorAll('[data-play]').forEach(b=>b.addEventListener('click',()=>launch(b.dataset.play,b.id==='lab-action'?document.getElementById('lab-habit').value:'')));$('back-home').onclick=home;$('player-reload').onclick=()=>{const f=$('game-frame');if(f)f.src=f.src};
 document.querySelectorAll('.site-header a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{if(active){$('game-frame')?.remove();active=null;$('play-panel').hidden=true;$('landing').hidden=false;document.querySelector('footer').hidden=false}}));
@@ -13,3 +13,16 @@ window.addEventListener('message',e=>{const f=$('game-frame');if(e.source!==f?.c
 const start=location.hash.replace('#play-','');if(location.hash.startsWith('#play-')&&labels[start])launch(start);
 // Keep the iframe in sync when browser Back/Forward crosses an anchor navigation.
 window.addEventListener('popstate',()=>{const key=location.hash.replace('#play-','');if(location.hash.startsWith('#play-')&&labels[key]){if(active!==key)launch(key)}else if(active){$('game-frame')?.remove();active=null;$('play-panel').hidden=true;$('landing').hidden=false;document.querySelector('footer').hidden=false;document.getElementById(location.hash.slice(1))?.scrollIntoView()}});
+
+const devGame=document.getElementById('dev-game'),devTarget=document.getElementById('dev-target');
+if(devGame){
+ for(const game of window.gameCatalogue)devGame.add(new Option(game.title,game.key));
+ const options=()=>devTarget.replaceChildren(...window.arcadeDevTargets[devGame.value].map(id=>new Option(id,id)));
+ devGame.onchange=options;options();
+ document.getElementById('dev-start').onclick=()=>launch(devGame.value,'',devTarget.value);
+ window.addEventListener('message',e=>{
+  const f=document.getElementById('game-frame'),m=e.data;
+  if(!f||e.source!==f.contentWindow||e.origin!==location.origin||m?.type!=='arcade-test-v1'||f.name!=='arcade-test-v1/'+m.game+'/'+m.target||m.runId!==f.contentWindow.arcadeTest?.runId)return;
+  const list=window.arcadeDevTargets[m.game];if(m.action==='end')home();else if(m.action==='restart'||m.action==='next')launch(m.game,'',m.action==='restart'?m.target:list[(list.indexOf(m.target)+1)%list.length]);
+ });
+}

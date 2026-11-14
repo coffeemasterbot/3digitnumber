@@ -1,0 +1,1 @@
+{"name":"budget-defence-coop","private":true,"type":"module","dependencies":{"ws":"^8.18.0"},"scripts":{"start":"node local.mjs"}}
