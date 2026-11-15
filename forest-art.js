@@ -19,17 +19,27 @@ for(let k=3;k<p.w-6;k+=19){
  if(k%3===0)line([[x+4,p.y+3],[x+5,p.y+8],[x+8,p.y+10]],'#4c743e',2);
 }
 rect(p.x,p.y+p.h-3,p.w,3,'#514838',1);if(p.h<30){for(let x=p.x+10;x<p.x+p.w-3;x+=24)line([[x,p.y+8],[x+5,p.y+14]],'#3b5646',2);if(p.lift){line([[p.x+7,p.y],[p.x+7,70]],'#a59362',2);line([[p.x+p.w-7,p.y],[p.x+p.w-7,70]],'#a59362',2)}}else for(let x=12;x<950;x+=38)rect(x,p.y+11,25,3,'#82936755',1)}
-for(const pool of m.pools){const color=['#d57f45','#57a5ad','#9063a2'][pool.type];stone(pool.x-3,487,pool.w+6,23);rect(pool.x,491,pool.w,15,'#102e29');rect(pool.x+2,495,pool.w-4,10,color);for(let x=pool.x+6;x<pool.x+pool.w-4;x+=13)oval(x,499+(quiet?0:Math.sin(t*3+x)*2),4,2,'#f4f2ce77');if(pool.type===2){rect(pool.x+pool.w/2-12,521,24,15,'#c4b887');line([[pool.x+pool.w/2-7,524],[pool.x+pool.w/2+7,532]],'#684175',4);line([[pool.x+pool.w/2+7,524],[pool.x+pool.w/2-7,532]],'#684175',4)}}
-for(const d of m.doors){for(const p of d.plates){const pressed=ForestRules.platePressed(m,g.players,p),color=p.type?'#83cdd2':'#ebba6b';line([[p.x,540],[p.x,551],[d.x+11,551],[d.x+11,508]],d.open?'#b7c98b':'#6f7e59',3);stone(p.x-24,483,48,19);oval(p.x,pressed?497:490,20,5,'#756a47');oval(p.x,pressed?494:487,16,4,pressed?'#d4dda2':color);rune(p.x,470,p.type,.6)}
-// A carved sealing stone replaces the thin metal shutter.
-rect(d.x-16,96,d.w+32,404,'#142f28');for(let y=104;y<500;y+=44){stone(d.x-15,y,12,43,true);stone(d.x+d.w+3,y,12,43,true)}stone(d.x-20,89,d.w+40,19,true);stone(d.x-22,496,d.w+44,8,true);for(let i=0;i<3;i++)line([[d.x-11+i*18,94],[d.x-6+i*18,98],[d.x-11+i*18,101]],'#6c7656',1);if(!d.open){stone(d.x,110,d.w,386);for(let y=137;y<475;y+=44){line([[d.x+5,y],[d.x+d.w-5,y],[d.x+d.w-5,y+14],[d.x+7,y+14]],'#b7b88c',2)}oval(d.x+d.w/2,287,16,22,'#a98d51');oval(d.x+d.w/2,287,12,17,'#5b6950');rect(d.x+d.w/2-4,282,8,10,'#d1c58b',1)}else{rect(d.x,110,d.w,18,'#bcba8b');c.save();c.globalAlpha=.35;rect(d.x+3,130,d.w-6,360,'#b0d0a1',1);c.restore()}for(let i=0;i<4;i++)oval(d.x-11,120+i*17,7,3,'#607b48')}
+for(const pool of m.pools){const color=['#d57f45','#57a5ad','#9063a2'][pool.type];const py=pool.y??500;stone(pool.x-3,py-13,pool.w+6,23);rect(pool.x,py-9,pool.w,15,'#102e29');rect(pool.x+2,py-5,pool.w-4,10,color);for(let x=pool.x+6;x<pool.x+pool.w-4;x+=13)oval(x,py-1+(quiet?0:Math.sin(t*3+x)*2),4,2,'#f4f2ce77');if(pool.type===2){rect(pool.x+pool.w/2-12,py+21,24,15,'#c4b887');line([[pool.x+pool.w/2-7,py+24],[pool.x+pool.w/2+7,py+32]],'#684175',4);line([[pool.x+pool.w/2+7,py+24],[pool.x+pool.w/2-7,py+32]],'#684175',4)}}
+for(const d of m.doors){
+ const top=d.y??110,height=d.h??390,bottom=top+height;
+ for(const plate of d.plates||[]){
+  const pressed=ForestRules.platePressed(m,g.players,plate),py=plate.y??500,color=plate.type?'#83cdd2':'#ebba6b';
+  stone(plate.x-24,py-12,48,12,true);oval(plate.x,py-(pressed?3:7),17,4,pressed?'#d4dda2':color);rune(plate.x,py-27,plate.type,.42);
+ }
+ rect(d.x-6,top-5,d.w+12,height+10,'#142f28');stone(d.x-7,top-7,d.w+14,8,true);
+ if(!d.open){
+  stone(d.x,top,d.w,height);
+  for(let y=top+20;y<bottom-8;y+=42)line([[d.x+4,y],[d.x+d.w-4,y]],'#b7b88c',2);
+  oval(d.x+d.w/2,top+height/2,Math.min(12,d.w/3),14,'#a98d51');
+ }else{rect(d.x,top,d.w,7,'#bcba8b')}
+}
 for(const h of m.hazards){stone(h.x-7,h.y-8,h.w+14,8);stone(h.x-7,h.y+h.h,h.w+14,8);if(h.on){c.save();c.shadowColor='#ed8060';c.shadowBlur=quiet?0:13;rect(h.x,h.y,h.w,h.h,'#d6634b',2);rect(h.x+h.w/2-2,h.y,4,h.h,'#fff0b9',1);c.restore()}else{c.setLineDash([3,5]);line([[h.x+h.w/2,h.y],[h.x+h.w/2,h.y+h.h]],'#a2aa7d',1);c.setLineDash([])}}
 for(const l of m.levers||[]){stone(l.x-17,l.y-8,34,29,true);oval(l.x,l.y+7,8,5,'#5d6549');line([[l.x,l.y+5],[l.x+(l.on?11:-11),l.y-17]],'#ac8051',6);oval(l.x+(l.on?11:-11),l.y-17,7,7,l.on?'#c7d9a3':l.type?'#87cbd4':'#e4b666');rune(l.x,l.y-41,l.type,.65);line([[l.x+16,l.y+8],[l.x+33,l.y+8],[l.x+33,550]],l.on?'#b5bf87':'#5e7655',2)}
 // Socket bowl uses a carved spiral; a seated stone keeps its pressure circuit lit.
 for(const dock of m.docks||[]){const seated=m.bodies.some(b=>b.dock===dock.id);stone(dock.x-29,494,58,10,true);c.strokeStyle=seated?'#e1f5ac':'#c7ca97';c.lineWidth=2;c.beginPath();c.ellipse(dock.x,494,23,6,0,0,Math.PI);c.stroke();for(const side of [-1,1])line([[dock.x+side*27,481],[dock.x+side*22,487],[dock.x+side*27,491]],seated?'#e1f5ac':'#c7ca97',2)}
 for(const b of m.bodies||[]){if(b.kind==='box'){const wood=c.createLinearGradient(b.x,b.y,b.x+b.w,b.y+b.h);wood.addColorStop(0,'#c29458');wood.addColorStop(1,'#7d5938');rect(b.x,b.y,b.w,b.h,wood,4);for(let i=0;i<4;i++)line([[b.x+5+i*12,b.y+4],[b.x+5+i*12,b.y+b.h-4]],'#5d4d34',1);line([[b.x+5,b.y+5],[b.x+b.w-5,b.y+b.h-5]],'#e2ba76',6);line([[b.x+b.w-5,b.y+5],[b.x+5,b.y+b.h-5]],'#b98b53',6);c.strokeStyle='#ead2a1';c.lineWidth=3;c.strokeRect(b.x+2,b.y+2,b.w-4,b.h-4);for(const x of [b.x+7,b.x+b.w-7])for(const y of [b.y+7,b.y+b.h-7])oval(x,y,2,2,'#4c5141');line([[b.x+17,b.y+27],[b.x+24,b.y+18],[b.x+31,b.y+27]],'#fff0b9',2);line([[b.x+24,b.y+18],[b.x+24,b.y+34]],'#fff0b9',2)}else{const cx=b.x+b.w/2,cy=b.y+b.h/2,r=b.w/2;c.save();if(b.locked){c.shadowColor='#d6eb9d';c.shadowBlur=quiet?0:13}const rock=c.createRadialGradient(cx-8,cy-10,1,cx,cy,r);rock.addColorStop(0,'#bdc4aa');rock.addColorStop(1,'#627b68');oval(cx,cy,r,r,rock);c.strokeStyle=b.locked?'#d3e9a8':'#3e594d';c.lineWidth=2;c.beginPath();c.arc(cx,cy,r-1,0,7);c.stroke();c.translate(cx,cy);c.rotate(b.angle);line([[-16,-8],[-6,-12],[1,-2],[12,-6],[15,4]],'#425d5099',2);c.strokeStyle=b.locked?'#e5f4b7':'#d2d7ad';c.lineWidth=2;c.beginPath();for(let i=0;i<45;i++){const a=i*.16,r=1+i*.28;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();c.restore()}}
-if(m.light){
- const {source,receiver,mirrors,segments,lit}=m.light;
+for(const circuit of (m.lights || (m.light?[m.light]:[]))){
+ const {source,receiver,mirrors,segments,lit}=circuit;
  for(const [x,y,nx,ny] of segments){line([[x,y],[nx,ny]],'#edbd6444',6);line([[x,y],[nx,ny]],'#ffeaa3',2)}
  for(const mirror of mirrors){const {x,y,turned}=mirror;stone(x-9,y+7,18,6,true);oval(x,y,8,8,'#695f50');const slope=turned?-1:1;line([[x-9,y-9*slope],[x+9,y+9*slope]],'#a7ece3',4)}
  oval(source[0],source[1],6,6,'#ffda72');oval(receiver[0],receiver[1],9,9,'#625c49');oval(receiver[0],receiver[1],5,5,lit?'#bdff9c':'#9d927a');
@@ -44,7 +54,7 @@ for(const item of m.gems)if(!item.got){
  spirit(0,-12,item.type,.62);
  c.restore();
 }
-for(let i=0;i<2;i++)arch(875+i*45,425,36,75,m.gems.every(x=>x.got),i);
+for(const [i,exit] of (m.exits||[{x:893,y:500},{x:938,y:500}]).entries())arch(exit.x-18,exit.y-75,36,75,m.gems.every(x=>x.got),i);
 for(const p of g.players){oval(p.x+14,p.y+34,17,4,'#0a292688');c.save();
 const center=p.x+14;
 c.translate(center,p.y+30);

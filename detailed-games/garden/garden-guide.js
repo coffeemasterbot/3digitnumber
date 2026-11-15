@@ -17,13 +17,13 @@
   function inspect(card) {
     const type = card.dataset.plant;
     const info = GardenAbilities.cards[type];
-    const level = info?.[2] || 1;
+    const level = type==='repeater'?2:info?.[2] || 1;
     const name = card.querySelector('.name').textContent;
     preview.querySelector('.guide-art').replaceChildren(card.querySelector('.emoji svg').cloneNode(true));
     preview.querySelector('h3').textContent = name;
     preview.querySelector('p').textContent = info?.[3] || uses[type];
     preview.querySelector('output').textContent = card.dataset.cost+' 陽光 · 冷卻 '+gardenPlantCooldown(type)/1000+' 秒';
-    preview.querySelector('small').textContent = '第 '+level+' 關解鎖 · '+(gardenLevel()>=level?'可種植':'尚未解鎖');
+    preview.querySelector('small').textContent = '第 '+level+' 關解鎖 · '+((type==='repeater'?gardenRepeaterAvailable():gardenLevel()>=level)?'可種植':'尚未解鎖');
     for(const button of grid.children) button.setAttribute('aria-pressed',String(button.dataset.plantType===type));
   }
   for(const card of document.querySelectorAll('#plantSelection [data-plant]')) {

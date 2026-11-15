@@ -10,7 +10,7 @@ test('GitHub Pages build is static and describes local-only scores', () => {
   assert.ok(fs.existsSync(path.join(root, 'index.html')));
   assert.ok(fs.existsSync(path.join(root, 'downloads/lost-found-money-offline.html')));
   assert.match(read('index.html'), /最佳分數只保存在本機，不設共用排行榜/);
-  assert.match(read('index.html'), /location\.href\.split\("#"\)\[0\]\+"#play"/);
+  assert.ok(read('index.html').includes('value="https://coffeemasterbot.github.io/3digitnumber/#play"'));
   assert.match(read('app.js'), /只在本機保存跑酷及飛行最佳分數/);
   assert.match(read('presentation.js'), /Runner and flight best scores stay in this browser/);
   assert.match(read('presentation.js'), /跑酷與飛行的最佳分數只保存在本機/);

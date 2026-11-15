@@ -191,6 +191,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
 
   // ── Thrust (press/hold) ───────────────────────
   const setThrusting = useCallback((value: boolean) => {
+    if(value && gameStateRef.current !== 'playing') return;
     if(value&&!thrustingRef.current&&gameStateRef.current==='playing')tappedRef.current=true;
     thrustingRef.current = value;
     playerRef.current.isThrusting = value;
@@ -214,13 +215,14 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     livesRef.current--;
     play('hit');
     if (livesRef.current <= 0) {
-      // Game over — update high score and immediately sync UI so the overlay appears
+      tappedRef.current=false;
+      thrustingRef.current=false;
+      p.isThrusting=false;
       play('death');
       stopBGM();
-      gameStateRef.current = 'dying' as any;deathFrames.current=0;
-
-      syncUI(); // ← must call here; the game loop exits early on 'gameover' so syncUI
-                //   would never run otherwise
+      gameStateRef.current = 'dying';
+      deathFrames.current=0;
+      syncUI();
     } else {
       // Flash invincible and respawn to center so the player doesn't keep touching
       // the floor/ceiling and re-trigger die() once invincibility expires
@@ -254,7 +256,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       score: Math.floor(scoreRef.current),
       highScore: highScoreRef.current, // ← ref, always current
       distance: Math.floor(distanceRef.current),
-      coins: coinsCountRef.current,
+      coins: coinsCountRef.current-spent.current,
       activePowerUp: p.powerUp!=='none'?p.powerUp:(p.shieldFrames||0)>0?'shield':(p.magnetFrames||0)>0?'magnet':'none',
       powerUpTimeLeft: p.powerUpTimer > 0
         ? p.powerUpTimer / getPowerUpDuration(p.powerUp)
@@ -287,7 +289,21 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     rafRef.current = requestAnimationFrame(gameLoop);
 
     const clockNow=performance.now(),delta=lastClock.current?Math.min(.1,(clockNow-lastClock.current)/1000):0;lastClock.current=clockNow;const gs = gameStateRef.current;
-if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.current;p.y=Math.min(GROUND_Y-p.height,p.y+deathFrames.current*.28);p.particles=p.particles.map(pt=>({...pt,x:pt.x+pt.vx,y:pt.y+pt.vy,life:pt.life-1})).filter(pt=>pt.life>0);renderFrame(ctx);if(deathFrames.current>65){if(!spent.current&&coinsCountRef.current>=100){gameStateRef.current='revive';syncUI()}else settle()}return;}
+    if (gs === 'dying') {
+      deathFrames.current += delta * 60;
+      const player=playerRef.current;
+      player.y=Math.min(GROUND_Y-player.height,player.y+deathFrames.current*.28);
+      player.particles=player.particles.map(pt=>({...pt,x:pt.x+pt.vx,y:pt.y+pt.vy,life:pt.life-1})).filter(pt=>pt.life>0);
+      renderFrame(ctx);
+      if (deathFrames.current > 65) {
+        if (spent.current) settle();
+        else {
+          gameStateRef.current='revive';
+          syncUI();
+        }
+      }
+      return;
+    }
     if (gs === 'start' || gs === 'gameover') {
       // Still draw background on start/gameover for visual richness
       drawBackground(ctx, scrollRef.current, starsRef.current, buildingsRef.current, buildingsFarRef.current);
@@ -492,6 +508,8 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       }
     }
 
+    if (gameStateRef.current !== 'playing') break;
+
     // ── Collision: player ↔ coins ─────────────
     for (const c of coinsRef.current) {
       if (!c.active || c.collected) continue;
@@ -588,7 +606,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
 
   // ── Keyboard input ────────────────────────────
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {if(e.target instanceof Element&&e.target.closest('input,textarea,dialog'))return;
+    const onKeyDown = (e: KeyboardEvent) => {if(e.target instanceof Element&&e.target.closest('input,textarea,dialog,[role=dialog],button'))return;
       if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
         e.preventDefault();
         if (gameStateRef.current === 'start' || gameStateRef.current === 'gameover') {

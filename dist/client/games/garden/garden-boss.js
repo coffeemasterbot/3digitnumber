@@ -1,15 +1,16 @@
 /* Boss and hazards advance on gardenActiveStep, including all response windows. */
 const GardenBoss=(()=>{
+ const rules=GardenRules.BOSS;
  const panel=document.createElement('section');
  panel.id='mechanical-boss';panel.hidden=true;
- panel.innerHTML='<strong>財務風暴 · 機械博士</strong> <progress max="90" value="90" aria-label="機械博士生命"></progress><span role="status"></span><button type="button">冰凍應急卡</button>';
+ panel.innerHTML='<strong>財務風暴 · 機械博士</strong> <progress max="'+rules.hp+'" value="'+rules.hp+'" aria-label="機械博士生命"></progress><span role="status"></span><button type="button">冰凍應急卡</button>';
  document.getElementById('gameContainer').append(panel);
  const status=panel.querySelector('span'),ice=panel.querySelector('button');
- zombieTypes.boss={emoji:'⚙',health:90,maxHealth:90,speed:0,damage:0,points:2500};
+ zombieTypes.boss={emoji:'⚙',health:rules.hp,maxHealth:rules.hp,speed:0,damage:0,points:2500};
  function start(){
    spawnZombie('boss',2);
    const z=gameState.zombies.at(-1);z.x=gameState.boardRect.width-gameState.cellSize.width*.6;
-   gameState.boss={z,cycle:0,left:7000,exposed:true,hazard:null,iceReady:0};
+   gameState.boss={z,cycle:0,left:rules.exposed,exposed:true,hazard:null,iceReady:0};
    panel.hidden=false;z.element.classList.add('mechanical-body');
  }
  function clearBall(b){b.hazard?.element?.remove();b.hazard=null}
@@ -24,7 +25,7 @@ const GardenBoss=(()=>{
    const board=gameState.boardRect;
    const target=gameState.plants.filter(p=>p.element&&p.row===h.row).reduce((col,p)=>Math.max(col,p.col),0);
    const impact=(target+.5)*gameState.cellSize.width;
-   const progress=Math.min(1,Math.max(0,1-h.left/4500));
+   const progress=Math.min(1,Math.max(0,1-h.left/rules.response));
    h.element.style.left=(board.left+(h.kind==='stomp'?impact:board.width+(impact-board.width)*progress))+'px';
    h.element.style.top=(board.top+(h.row+.5)*gameState.cellSize.height-(h.kind==='stomp'?(1-progress)*gameState.cellSize.height:0))+'px';
  }
@@ -47,15 +48,15 @@ const GardenBoss=(()=>{
      }
    }
    if(b.left<=0){
-     b.exposed=!b.exposed;b.left=b.exposed?6500:5500;
+     b.exposed=!b.exposed;b.left=b.exposed?rules.exposed:rules.armored;
      if(b.exposed){b.z.row=(b.z.row+2)%5}
      else{
        const kind=['fire','ice','stomp'][b.cycle++%3];
-       if(kind==='stomp'||(kind==='fire'&&!b.iceReady)||(kind==='ice'&&gameState.sun>=125&&!gameState.cooldowns?.pepper)){
+       if(kind==='stomp'||(kind==='fire'&&!b.iceReady)||(kind==='ice'&&gameState.sun>=125&&!gameState.cooldowns?.pepper&&document.querySelector('[data-plant="pepper"]:not([hidden])'))){
          const row=b.z.row;
-         b.hazard={kind,row,left:4500};
+         b.hazard={kind,row,left:rules.response};
        }
-       if(gameState.zombies.filter(z=>z.element).length<10)spawnZombie('normal',(b.z.row+1)%5);
+       if(gameState.zombies.filter(z=>z.element&&z.type!=='boss').length<rules.minions)spawnZombie('normal',(b.z.row+1)%5);
      }
    }
    if(b.hazard)drawAttack(b.hazard);

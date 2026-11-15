@@ -9,11 +9,15 @@ try{
  const backup={version:2,profile:{name:'測試玩家',recent:'coins'},records:{coins:{best:150,plays:2}},progress:{gardenStage:2,seedRules:1,legacyRepeater:false,runnerBest:150,jetBest:89}};
  await file.setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
  await profile.locator('[data-import]').click();
- const campaign=await p.evaluate(()=>localStorage.getItem('garden-campaign-v2'));
- assert.equal(require('./source/garden-rules.js').campaign({getItem:k=>k==='garden-campaign-v2'?campaign:null}).repeater,false);
+ const campaign=await p.evaluate(()=>localStorage.getItem('garden-campaign-v3'));
+ assert.equal(require('./source/garden-rules.js').campaign({getItem:k=>k==='garden-campaign-v3'?campaign:null}).repeater,false);
  assert.match(await profile.locator('ul').innerText(),/150 分 · 2 局/);
  const [download]=await Promise.all([p.waitForEvent('download'),profile.locator('[data-export]').click()]);
- assert.deepEqual(JSON.parse(fs.readFileSync(await download.path())),backup);
+ const exported=JSON.parse(fs.readFileSync(await download.path()));
+ assert.deepEqual(exported,{...backup,progress:{...backup.progress,campaignVersion:3,gardenStage:1}});
+ await file.setInputFiles({name:'current.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(exported))});
+ await profile.locator('[data-import]').click();
+ assert.equal(await p.evaluate(()=>localStorage.getItem('garden-campaign-v3')),campaign);
  await file.setInputFiles({name:'bad.json',mimeType:'application/json',buffer:Buffer.from('null')});
  await profile.locator('output').filter({hasText:'格式或版本有誤'}).waitFor();
  await profile.locator('[data-resume]').click();await p.frameLocator('#game-frame').getByText('開始跑酷',{exact:true}).waitFor();

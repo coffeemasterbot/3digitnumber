@@ -15,16 +15,15 @@
   name.value=profile.name;
   function save(){try{localStorage.setItem('arcade-profile-v2',JSON.stringify(profile))}catch{status.textContent='瀏覽器未能保存。請匯出備份。'}}
   function gameProgress(){
-    const garden=read('garden-campaign-v2',null);
-    const legacy=read('garden-campaign-v1',null);
-    const stage=garden?.unlocked??(legacy?3*legacy.unlocked-2:1);
-    return validateProgress({gardenStage:stage,seedRules:1,legacyRepeater:!!(garden?(garden.seedRules===undefined||garden.legacyRepeater===true):legacy),runnerBest:read('runner-detailed-best',0),jetBest:read('jj_highscore',0)});
+    const garden=GardenRules.campaign(localStorage).progress;
+    return validateProgress({campaignVersion:garden.version,gardenStage:garden.unlocked,seedRules:1,legacyRepeater:garden.legacyRepeater,runnerBest:read('runner-detailed-best',0),jetBest:read('jj_highscore',0)});
   }
   function validateProgress(p){
     if(!p||!Number.isInteger(p.gardenStage)||p.gardenStage<1||p.gardenStage>15)throw Error();
     for(const value of [p.runnerBest,p.jetBest])if(!Number.isSafeInteger(value)||value<0)throw Error();
     if(p.seedRules!==undefined&&(p.seedRules!==1||typeof p.legacyRepeater!=="boolean"))throw Error();
-    return {gardenStage:p.gardenStage,seedRules:1,legacyRepeater:p.seedRules===undefined||p.legacyRepeater,runnerBest:p.runnerBest,jetBest:p.jetBest};
+    const garden=GardenRules.normalize({version:p.campaignVersion??2,unlocked:p.gardenStage,seedRules:p.seedRules,legacyRepeater:p.legacyRepeater});
+    return {campaignVersion:garden.version,gardenStage:garden.unlocked,seedRules:1,legacyRepeater:garden.legacyRepeater,runnerBest:p.runnerBest,jetBest:p.jetBest};
   }
   function records(){
     const saved=read('website-v1-records',{}),result={};
@@ -89,7 +88,7 @@
       }
       if(pending.progress){
         const saved=gameProgress(),incoming=pending.progress;
-        localStorage.setItem('garden-campaign-v2',JSON.stringify({version:2,unlocked:Math.max(saved.gardenStage,incoming.gardenStage),seedRules:1,legacyRepeater:saved.legacyRepeater||incoming.legacyRepeater}));
+        localStorage.setItem('garden-campaign-v3',JSON.stringify({version:3,unlocked:Math.max(saved.gardenStage,incoming.gardenStage),seedRules:1,legacyRepeater:saved.legacyRepeater||incoming.legacyRepeater}));
         localStorage.setItem('runner-detailed-best',String(Math.max(saved.runnerBest,incoming.runnerBest)));
         localStorage.setItem('jj_highscore',String(Math.max(saved.jetBest,incoming.jetBest)));
       }

@@ -33,6 +33,10 @@ export function Coin({ position }: CoinProps) {
         metalness={0.8}
         roughness={0.2}
       />
+      <mesh position={[0,.045,0]} rotation={[-Math.PI/2,0,0]}>
+        <ringGeometry args={[.19,.225,20]} />
+        <meshBasicMaterial color="#fff0a2" />
+      </mesh>
     </mesh>
   );
 }

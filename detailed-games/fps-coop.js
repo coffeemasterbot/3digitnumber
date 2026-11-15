@@ -1,7 +1,8 @@
+import {createRocketVisuals} from './rocket-visuals.mjs';
 import {addWeaponFinish} from './weapon-finish.mjs';
 import * as THREE from 'three';
 import {createMap,OFFERS} from '../source/fps/rules.mjs';
-export function openCoop(){
+export function openCoop(onRocketImpact){
  const local=['localhost','127.0.0.1'].includes(location.hostname);
  const endpoint=local?'ws://127.0.0.1:8791/rooms':document.querySelector('meta[name=coop-endpoint]')?.content;
  const dialog=document.createElement('dialog');dialog.style.cssText='width:min(960px,96vw);max-height:96dvh;background:#173a32;color:#fff6da;padding:12px;overflow:auto';
@@ -10,11 +11,19 @@ export function openCoop(){
  const q=selector=>dialog.querySelector(selector),status=q('[role=status]'),canvas=q('canvas'),inputs=dialog.querySelectorAll('input'),abort=new AbortController();
  const on=(el,event,fn)=>el.addEventListener(event,fn,{signal:abort.signal});let socket,id,code,token,seq=0,state,renderer,scene,camera,raf,timer,drag=false,fire=false,yaw=0,pitch=0,ref=null,suspended=false,leaving=false;
  const keys=new Set(),objects=new Map();
- const send=data=>{if(socket?.readyState===1)socket.send(JSON.stringify({v:1,seq:++seq,...data}))};
+ const send=data=>{if(socket?.readyState===1)socket.send(JSON.stringify({v:2,seq:++seq,...data}))};
  const clear=()=>{keys.clear();fire=drag=false;sendInput()};
  function sendInput(){send({type:'input',f:Number(keys.has('KeyW'))-Number(keys.has('KeyS')),r:Number(keys.has('KeyD'))-Number(keys.has('KeyA')),fire,use:keys.has('KeyE'),yaw,pitch})}
  function box(w,h,d,color,x,y,z){const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),new THREE.MeshStandardMaterial({color}));mesh.position.set(x,y,z);scene.add(mesh);return mesh}
- let viewmodel,shownWeapon;
+ let viewmodel,shownWeapon,rocketVisuals,previousProjectiles=new Map(),snapshotTime=0,lastDraw=0,pendingImpacts=[];
+ function drawRockets(now){
+  const mix=Math.min(1,(now-snapshotTime)/100);
+  const positions=state.projectiles.map(rocket=>{
+   const from=previousProjectiles.get(rocket.id)?.position||rocket.previousPosition,to=rocket.position;
+   return {...rocket,position:{x:from.x+(to.x-from.x)*mix,y:from.y+(to.y-from.y)*mix,z:from.z+(to.z-from.z)*mix}};
+  });
+  rocketVisuals.update(positions,pendingImpacts.splice(0),Math.min(.1,(now-lastDraw)/1000));lastDraw=now;
+ }
  function setup(){
   renderer=new THREE.WebGLRenderer({canvas,antialias:true});scene=new THREE.Scene();scene.background=new THREE.Color(0xc8bea2);
   camera=new THREE.PerspectiveCamera(72,1,.08,65);scene.add(new THREE.HemisphereLight(0xffeec0,0x61745a,2.5));
@@ -33,6 +42,7 @@ export function openCoop(){
     if(viewmodel){camera.remove(viewmodel);viewmodel.traverse(o=>{o.geometry?.dispose();o.material?.dispose()})}
     shownWeapon=me?.weapon;viewmodel=new THREE.Group();viewmodel.position.set(.34,-.33,-.65);viewmodel.scale.setScalar(.74);camera.add(viewmodel);scene.add(camera);addWeaponFinish(viewmodel,shownWeapon);
    }
+   if(rocketVisuals)drawRockets(performance.now());
    renderer.render(scene,camera);
   };draw();
  }
@@ -52,12 +62,21 @@ export function openCoop(){
   const url=new URL(endpoint);url.searchParams.set('action',type);if(type!=='create')url.searchParams.set('code',type==='reconnect'?session?.code:inputs[1].value.trim().toUpperCase());
   socket=new WebSocket(local?endpoint:url);status.textContent='連線中…';
   socket.onopen=()=>send({type,code:type==='reconnect'?session?.code:inputs[1].value.trim().toUpperCase(),token:type==='reconnect'?session?.token:undefined,name:inputs[0].value});
-  socket.onmessage=e=>{const m=JSON.parse(e.data);if(m.type==='joined'){({id,code,token}=m);try{sessionStorage.setItem('coop-room-session',JSON.stringify({code,token}))}catch{}q('.room-controls').hidden=true;return}
-   if(m.type==='state'){state=m;show()}else if(m.type==='error')status.textContent=m.message};
+  socket.onmessage=e=>{const m=JSON.parse(e.data);if(m.v!==2){status.textContent='合作版本不同，請更新遊戲同房間伺服器。';socket.close();return}if(m.type==='joined'){({id,code,token}=m);try{sessionStorage.setItem('coop-room-session',JSON.stringify({code,token}))}catch{}q('.room-controls').hidden=true;return}
+   if(m.type==='state'){
+    const fresh=state?.round!==m.round;
+    previousProjectiles=new Map((fresh?[]:state.projectiles).map(r=>[r.id,r]));
+    if(fresh||m.phase!=='playing'){rocketVisuals?.dispose();rocketVisuals=null;pendingImpacts=[]}
+    state=m;snapshotTime=performance.now();show();
+    if(state.phase==='playing'){
+     rocketVisuals??=createRocketVisuals(scene,{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,onImpact:onRocketImpact});
+     pendingImpacts.push(...m.impacts);
+    }
+   }else if(m.type==='error')status.textContent=m.message};
   socket.onerror=()=>status.textContent='房間伺服器未能連線。';
   socket.onclose=()=>{if(leaving)return;clear();q('[data-field]').hidden=q('[data-ready]').hidden=true;q('.room-controls').hidden=false;q('[data-resume]').hidden=!token;status.textContent+=' · 連線已關閉'};
  }
- function close(){leaving=true;clearInterval(timer);cancelAnimationFrame(raf);abort.abort();socket?.close();scene?.traverse(o=>{o.geometry?.dispose();o.material?.dispose()});renderer?.dispose();renderer?.forceContextLoss();dialog.remove()}
+ function close(){leaving=true;clearInterval(timer);cancelAnimationFrame(raf);abort.abort();rocketVisuals?.dispose();socket?.close();scene?.traverse(o=>{o.geometry?.dispose();o.material?.dispose()});renderer?.dispose();renderer?.forceContextLoss();dialog.remove()}
  q('[data-exit]').onclick=close;on(dialog,'cancel',e=>{e.preventDefault();suspended=!suspended;clear();if(state)show()});on(window,'pagehide',close);
  if(window.offlineEdition||!endpoint){q('.room-controls').hidden=true;status.textContent=window.offlineEdition?'離線版可玩單人；合作需要網絡。':'公開合作伺服器尚未連接。';return}
  try{q('[data-resume]').hidden=!sessionStorage.getItem('coop-room-session')}catch{}

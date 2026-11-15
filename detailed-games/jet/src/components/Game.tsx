@@ -9,6 +9,7 @@ import StartScreen from './StartScreen';
 import GameOverScreen from './GameOverScreen';
 import PauseMenu from './PauseMenu';
 import HUD from './HUD';
+import { ReviveCard } from './ReviveCard';
 import MobileControls from './MobileControls';
 
 export default function Game() {
@@ -129,7 +130,7 @@ export default function Game() {
             />
           )}
 
-          {uiState.gameState==='revive'&&<div className="jet-guide"><section><h2>再飛一次？</h2><p>本局收集 {uiState.coins} 枚金幣。復活會用 100 枚，恢復一條生命。</p><button onClick={revive}>用 100 金幣復活</button><button onClick={settle}>結束本局</button></section></div>}
+          {uiState.gameState==='revive' && <ReviveCard available={uiState.coins} onRevive={revive} onFinish={settle} />}
           {uiState.gameState === 'gameover' && (
             <GameOverScreen
               key="gameover"

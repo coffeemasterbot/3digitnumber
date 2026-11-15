@@ -77,7 +77,7 @@ const audioManifest=JSON.parse(fs.readFileSync(path.join(audioDir,'manifest.json
 fs.cpSync(path.join(root,'source/game-covers'),path.join(dist,'assets/game-covers'),{recursive:true});
 fs.mkdirSync(path.join(dist,'assets/game-audio'),{recursive:true});
 for(const f of Object.values(audioManifest))fs.copyFileSync(path.join(audioDir,f),path.join(dist,'assets/game-audio',f));
-const devScript=fs.readFileSync(path.join(root,'source/dev-session.js'),'utf8');
+const devScript=fs.readFileSync(path.join(root,'source/garden-rules.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'source/dev-session.js'),'utf8');
 for(const rel of ['index.html','story/index.html',...['budget-defence','runner','jet','garden'].map(game=>'games/'+game+'/index.html')]){
  const target=path.join(dist,rel),page=fs.readFileSync(target,'utf8');
  fs.writeFileSync(target,page.replace('<head>',()=>{let scripts='<script>'+devScript+'</script>';if(rel!=='index.html'){const base=rel.startsWith('story')?'../':'../../';const sources=Object.fromEntries(Object.entries(audioManifest).map(([k,v])=>[k,base+'assets/game-audio/'+v]));scripts+='<script>'+fs.readFileSync(path.join(audioDir,'player.js'),'utf8')+';window.gameAudio=createGameAudio('+JSON.stringify(sources)+');</script>'}return '<head>'+scripts}));

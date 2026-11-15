@@ -1,9 +1,10 @@
 import {airRoute} from '../../../../source/runner-air.mjs';
 import {trainSupport} from '../../../../source/runner-rules.mjs';
 import{POWER_DURATION}from'../../../../source/runner-rules.mjs';
-import { CanvasTexture } from 'three';
+import { createRunnerIconTexture } from './runner-icon-texture';
+import type { RunnerIconKind } from './runner-icons';
 import { extras } from './extras';
-import { useRef, useState, useLayoutEffect, useMemo } from 'react';
+import { useRef, useState, useLayoutEffect, useEffect, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { useGameStore } from '../state/gameStore';
 import { useUIStore } from '../state/uiStore';
@@ -17,7 +18,11 @@ import { useCollision } from './useCollision';
 import { SPEED_INCREMENT, MAX_SPEED } from '../utils/constants';
 
 export function Game() {
-  const powerTextures=useMemo(()=>Object.fromEntries(['board','shoes','magnet','double','jetpack','pogo'].map(kind=>{const canvas=document.createElement('canvas');canvas.width=128;canvas.height=128;const c=canvas.getContext('2d')!;c.fillStyle='#102a3bdd';c.beginPath();c.arc(64,60,54,0,Math.PI*2);c.fill();c.strokeStyle='#ffe5a1';c.lineWidth=4;c.stroke();if(kind==='jetpack'||kind==='pogo'){c.font='bold 44px sans-serif';c.textAlign='center';c.fillText(kind==='pogo'?'↟':'↑',64,80)}else if(kind==='board'){c.fillStyle='#f7bd5e';c.beginPath();c.roundRect(20,42,88,28,14);c.fill();c.strokeStyle='#8b542d';c.lineWidth=6;c.beginPath();c.moveTo(46,45);c.lineTo(65,68);c.lineTo(82,46);c.stroke()}else if(kind==='shoes'){c.fillStyle='#7ed6ee';c.fillRect(34,24,25,45);c.beginPath();c.roundRect(34,60,65,25,8);c.fill();c.fillStyle='#fff0b1';c.fillRect(32,82,69,7)}else if(kind==='double'){c.fillStyle='#ffd74a';c.font='bold 64px sans-serif';c.textAlign='center';c.fillText('2×',64,80)}else{c.strokeStyle='#f19494';c.lineWidth=18;c.beginPath();c.moveTo(36,28);c.lineTo(36,59);c.arc(64,59,28,Math.PI,0,true);c.lineTo(92,28);c.stroke();c.fillStyle='#b6edf8';c.fillRect(27,24,18,19);c.fillRect(83,24,18,19)}c.fillStyle='#fff5cf';c.font='bold 16px Microsoft JhengHei';c.textAlign='center';c.fillText(kind==='board'?'滑板':kind==='shoes'?'彈跳鞋':kind==='double'?'雙倍里程':kind==='jetpack'?'噴射器':kind==='pogo'?'彈射':'磁石',64,116);return[kind,new CanvasTexture(canvas)]})),[]);
+  const powerTextures=useMemo(()=>{
+    const kinds: RunnerIconKind[]=['board','shoes','magnet','double','jetpack','pogo'];
+    return Object.fromEntries(kinds.map(kind=>[kind,createRunnerIconTexture(kind)]));
+  },[]);
+  useEffect(()=>()=>Object.values(powerTextures).forEach(texture=>texture.dispose()),[powerTextures]);
 
   const gameState = useGameStore((s) => s.gameState);
   const addDistance = useGameStore((s) => s.addDistance);

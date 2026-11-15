@@ -1,8 +1,77 @@
 <!doctype html>
 <html lang="zh-HK">
-<head><script>(() => {
+<head><script>(function(root,factory){
+  if(typeof module==='object')module.exports=factory();
+  else root.GardenRules=factory();
+})(globalThis,()=>{
+const DURATION=24000;
+const LEVELS=['基本預算','信用防線','流動資金池','消費壓力','財務風暴'];
+const WAVES=5;
+const STAGES=[
+  {id:'day',world:1,title:'日間 · 陽光儲備'},
+  {id:'night',world:2,title:'夜間 · 微光預算'},
+  {id:'pool',world:3,title:'水池 · 水上花園'},
+  {id:'ice',world:4,title:'冰道 · 分期壓力'},
+  {id:'roof',world:5,title:'屋頂 · 機械決戰'}
+];
+const BOSS={hp:60,exposed:9000,armored:3000,response:6000,minions:3};
+function wave(number=1,level=1){
+  const surge=number%5===0;
+  return {number,level,elapsed:0,clearTime:0,spawnClock:1300,spawned:0,
+    total:2+level+Math.floor(number/3)+(surge?2:0),done:false};
+}
+function step(state,dt,alive,bossAlive=false){
+  const events=[];
+  if(state.done||!(dt>0))return events;
+  state.elapsed+=dt;
+  state.spawnClock=Math.max(-dt,state.spawnClock-dt);
+  while(state.spawnClock<=0 && state.spawned<state.total && alive+events.length<(state.level===5&&state.number===WAVES?BOSS.minions+Number(bossAlive):12)){
+    events.push({type:'spawn',row:(state.number+state.spawned*2)%5,
+      giant:state.level===4 && state.number===WAVES && state.spawned===0});
+    state.spawned++;
+    state.spawnClock+=Math.max(850,1600-state.level*80-state.number*25);
+  }
+  if(state.spawned===state.total){
+    state.clearTime=alive===0&&!events.length?state.clearTime+dt:0;
+    if(state.number===WAVES ? state.clearTime>0 : state.elapsed>=DURATION && !(state.level===5&&state.number===WAVES-1&&alive>BOSS.minions)){
+      state.done=true;
+      events.push({type:state.number===WAVES?'victory':'next'});
+    }
+  }
+  return events;
+}
+function progress(s,victory=false){return victory?1:Math.min(.999,(s.number-1+Math.min(1,s.elapsed/DURATION))/WAVES)}
+function normalize(data){
+  if(!data||![1,2,3].includes(data.version)||!Number.isInteger(data.unlocked)||data.unlocked<1||data.unlocked>(data.version===2?15:STAGES.length))throw Error('Invalid garden progress');
+  const unlocked=data.version===2?Math.ceil(data.unlocked/3):data.unlocked;
+  const legacyRepeater=data.legacyRepeater===true||data.version===1||data.version===2&&(data.seedRules===undefined||data.unlocked>=3);
+  return {version:3,unlocked,seedRules:1,legacyRepeater};
+}
+function campaign(storage){
+  const key='garden-campaign-v3';
+  let progress=normalize({version:3,unlocked:1});
+  try{
+    const old=storage.getItem('pvz_gameState');
+    if(old&&!storage.getItem('pvz_gameState-pre-campaign'))storage.setItem('pvz_gameState-pre-campaign',old);
+    for(const source of [key,'garden-campaign-v2','garden-campaign-v1']){
+      const raw=storage.getItem(source);
+      if(!raw)continue;
+      progress=normalize(JSON.parse(raw));
+      if(source!==key)storage.setItem(key,JSON.stringify(progress));
+      break;
+    }
+  }catch{}
+  return {level:progress.unlocked,get repeater(){return progress.legacyRepeater||progress.unlocked>=2},get unlocked(){return progress.unlocked},get progress(){return {...progress}},complete(){
+    progress.unlocked=Math.max(progress.unlocked,Math.min(STAGES.length,this.level+1));
+    try{storage.setItem(key,JSON.stringify(progress))}catch{}
+  }};
+}
+function mowers(){return Array.from({length:5},(_,row)=>({row,x:-34,state:'ready'}))}function stepMowers(list,enemies,dt,width){const kills=[];for(const m of list){if(m.state==='ready'&&enemies.some(e=>e.row===m.row&&e.alive&&e.x<=8))m.state='active';if(m.state==='active'){m.x+=420*dt;for(const e of enemies)if(e.alive&&e.row===m.row&&e.x<=m.x+45){e.alive=false;kills.push(e.id)}if(m.x>width+60)m.state='spent'}}return kills}return {DURATION,WAVES,LEVELS,STAGES,BOSS,normalize,campaign,wave,step,progress,mowers,stepMowers};
+});
+
+(() => {
  const targets={defence:[1,2,3].map(n=>'round-'+n),pause:Array.from({length:9},(_,i)=>i+1).map(n=>'temple-'+n),
-  instalments:Array.from({length:15},(_,i)=>Array.from({length:5},(_,j)=>'garden-'+(i+1)+'-'+(j+1))).flat(),
+  instalments:GardenRules.STAGES.flatMap(stage=>Array.from({length:GardenRules.WAVES},(_,j)=>'garden-'+stage.world+'-'+(j+1))),
   shipping:['drill','gravity','blink','mecha','dragon','glider'],coins:['jetpack','pogo','magnet','shoes']};
  window.arcadeDevTargets=targets;
  if(parent===window)return;
@@ -608,59 +677,128 @@ const door=(x,near,far,a,b)=>({x,y:110,w:22,h:390,plates:[{x:near,type:a},{x:far
 function level(n){const third=n===3;const doors=n===1?[door(330,290,385,0,1),door(660,615,715,1,0)]:[door(300,260,350,0,1),door(580,540,630,1,0),door(820,780,875,1,0)];if(n>1){doors[1].mode='lever';doors[1].requires=n===2?['needs','reserve']:['reserve'];doors[1].plates=[]}const levers=n>1?[{id:'needs',x:425,y:405,type:0,on:false},{id:'reserve',x:495,y:330,type:1,on:false}]:[];const pools=doors.flatMap(d=>d.plates.map(p=>({x:p.x-23,w:46,type:p.type})));if(third)pools.push({x:470,w:44,type:2});else if(n===1)pools.push({x:470,w:38,type:2});
 const far=n===1?385:350;const bodies=[body('step-box','box',158,452,48,48),body('rolling-stone','boulder',n===1?390:360,456,44,44)];
 return {bodies,docks:[{id:'stone-seat',x:far,y:500,door:0}],levers,platforms:[{x:0,y:500,w:960,h:60},{x:210,y:380,w:n===1?85:75,h:18},...(n===1?[{x:480,y:425,w:95,h:18},{x:550,y:350,w:95,h:18}]:[{x:390,y:425,w:95,h:18},{x:455,y:350,w:95,h:18},...(third?[{x:595,y:425,w:75,h:18},{x:650,y:425,w:85,h:18,lift:true},{x:720,y:275,w:85,h:18}]:[])])],doors,pools,gems:[{x:180,y:458,type:0},{x:245,y:345,type:1},{x:n===1?515:third?750:425,y:third?240:390,type:0},{x:n===1?590:495,y:315,type:1}],hazards:n===1?[]:[{x:460,y:365,w:16,h:60},...(third?[{x:697,y:365,w:16,h:60}]:[])]}}
-// Arcade temples have independent layouts. Story chapters keep their original maps.
-const temples=[
- ['weight-box',295,490,630,330,0],['weight-stone',335,520,690,315,1],['weight-relay',365,550,720,285,1],
- ['motion-lift',320,505,655,290,2],['motion-counterweight',365,530,710,310,3],['motion-return',300,455,630,255,3],
- ['light-turn',335,495,645,305,4],['light-pair',355,535,705,285,5],['light-reunion',315,495,680,265,5]
+// Platforms are one-way ledges. Coordinates use canvas pixels, spawn/exit y is foot height.
+const ledge=(x,y,w,h=18)=>({x,y,w,h});
+const floor=(x,w)=>ledge(x,500,w,60);
+const leverAt=(id,type,x,y)=>({id,type,x,y,on:false});
+const plate=(id,type,x,y=500,kind)=>({id,type,x,y,kind});
+const gate=(x,y,h,requires,plates=[],any=[])=>({x,y,w:22,h,requires,plates,any,mode:'circuit',open:false,roomReady:false});
+const box=x=>body('step-box','box',x,452,48,48);
+const rock=x=>body('rolling-stone','boulder',x,456,44,44);
+const socket=x=>({id:'socket',x,y:500});
+const shaft=(x,base,top,w,control)=>({...ledge(x,base,w),lift:true,base,top,control});
+const beam=(id,source,receiver,mirrors)=>({id,source,receiver,mirrors:mirrors.map(([x,y,type])=>({x,y,type,turned:false})),segments:[],lit:false});
+const maps=[
+ {id:'weight-box',seconds:180,hint:'火仔推箱登上左邊高台，踩住上層壓板。冰仔由下路過閘，拉桿接返火仔。',
+  start:[[70,500],[115,500]],end:[[672,278],[725,278]],
+  platforms:[floor(0,960),ledge(200,372,174),ledge(494,420,90),ledge(568,350,112),ledge(633,278,145)],
+  bodies:[box(145)],doors:[gate(400,75,425,[],[plate('high',0,305,372)],['high','back'])],levers:[leverAt('back',1,536,478)],
+  gems:[[274,340,0],[690,253,0],[470,475,1],[603,326,1]],goals:['back']},
+ {id:'weight-stone',seconds:210,hint:'兩翼各有精靈。火仔將石球推入中央石槽，冰仔過閘登高台，拉桿開通右上出口。',
+  start:[[60,500],[100,423]],end:[[782,260],[834,260]],
+  platforms:[floor(0,960),ledge(55,423,98),ledge(155,350,116),ledge(514,427,97),ledge(614,353,147),ledge(721,278,85),ledge(770,260,140)],
+  bodies:[rock(240)],docks:[socket(408)],doors:[gate(470,60,440,['socket']),gate(748,90,230,['wing'])],levers:[leverAt('wing',1,657,329)],
+  pools:[{x:530,w:44,type:1}],gems:[[209,325,0],[491,474,0],[92,391,1],[660,322,1]],goals:['socket','wing']},
+ {id:'weight-relay',seconds:240,hint:'左翼推箱壓板接橋，右翼推石鎖閘；兩人由各自工作區向中央集合。',
+  start:[[65,500],[862,500]],end:[[454,315],[511,315]],
+  platforms:[floor(0,356),floor(598,362),ledge(215,425,106),ledge(622,420,102),ledge(392,315,190),shaft(348,480,376,82,'crate'),ledge(553,354,70)],
+  bodies:[box(134),rock(789)],docks:[socket(700)],doors:[gate(575,100,260,['socket']),gate(352,120,285,['crate'],[plate('crate',0,274,500,'box')])],
+  levers:[leverAt('relay',1,632,398)],gems:[[243,397,0],[422,289,0],[750,475,1],[635,392,1]],goals:['crate','socket','relay']},
+ {id:'motion-lift',seconds:210,hint:'火仔在下月台啟動升降台；冰仔乘台上去開高層閘，兩人再搭台會合。',
+  start:[[90,500],[225,481]],end:[[672,252],[721,252]],
+  platforms:[floor(0,364),floor(590,370),shaft(202,481,261,112,'motor'),ledge(307,269,205),ledge(493,320,118),ledge(594,252,176)],
+  levers:[leverAt('motor',0,123,479),leverAt('upper',1,433,247)],doors:[gate(560,70,285,['upper'])],
+  gems:[[140,477,0],[620,227,0],[358,246,1],[519,296,1]],goals:['motor','upper']},
+ {id:'motion-counterweight',seconds:240,hint:'冰仔先登左井，火仔將箱推上配重板。左井升、右井降；冰仔到高台拉桿，右井再升起接應。',
+  start:[[52,500],[260,478]],end:[[735,270],[790,270]],
+  platforms:[floor(0,960),shaft(239,478,252,98,'weight'),ledge(344,253,142),ledge(471,317,107),shaft(587,266,473,106,'lower'),ledge(702,270,161)],
+  bodies:[box(96)],levers:[leverAt('return',1,425,232)],doors:[gate(685,65,435,['return'],[plate('weight',0,179,500,'box')])],
+  gems:[[174,476,0],[758,245,0],[377,228,1],[503,294,1]],goals:['weight','return']},
+ {id:'motion-return',seconds:270,hint:'火仔拉桿啟動橫橋。冰仔經安全島避開週期光閘，到對岸解除返回路線。',
+  start:[[64,500],[120,430]],end:[[796,421],[848,421]],
+  platforms:[floor(0,242),floor(400,97),floor(704,256),ledge(74,430,106),{...ledge(203,437,99),moving:true,from:203,to:635,control:'ferry'},ledge(407,364,96),ledge(725,421,168)],
+  levers:[leverAt('ferry',0,124,410),leverAt('shore',1,670,415)],doors:[gate(746,80,420,['shore'])],
+  hazards:[{x:348,y:343,w:14,h:95},{x:569,y:322,w:14,h:115}],gems:[[94,402,0],[427,342,0],[456,472,1],[810,398,1]],goals:['shore','ferry']},
+ {id:'light-turn',seconds:240,hint:'火仔在上層轉鏡，讓橫光向上照中接收器；冰仔從下層穿門，打開返回出口。',
+  start:[[60,500],[120,500]],end:[[624,425],[679,425]],
+  platforms:[floor(0,960),ledge(110,428,113),ledge(208,355,183),ledge(470,425,114),ledge(570,425,170)],
+  lights:[beam('elbow',[172,329],[318,206],[[318,329,0]])],
+  levers:[leverAt('reunion',1,524,476)],doors:[gate(410,92,408,['elbow']),gate(574,120,315,['reunion'])],
+  pools:[{x:481,w:48,type:1}],gems:[[203,401,0],[317,330,0],[517,474,1],[650,399,1]],goals:['elbow','reunion']},
+ {id:'light-pair',seconds:270,hint:'先移開地面光源前的箱。冰仔喺地面轉第一塊鏡，火仔登左翼轉第二塊；接通之後到右翼開門。',
+  start:[[80,500],[363,500]],end:[[755,343],[813,343]],
+  platforms:[floor(0,960),ledge(143,428,105),ledge(236,351,171),ledge(521,424,152),ledge(658,343,215)],
+  bodies:[box(184)],lights:[beam('double',[98,473],[470,327],[[329,473,1],[329,327,0]])],
+  doors:[gate(488,95,405,['double']),gate(702,85,310,['far'])],levers:[leverAt('far',1,603,400)],
+  gems:[[170,401,0],[316,327,0],[348,473,1],[574,398,1]],goals:['double','far']},
+ {id:'light-reunion',seconds:300,hint:'兩翼各自完成一道光路，開啟對方的內閘。穿過兩座鏡台，喺中央上層出口會合。',
+  start:[[55,500],[858,500]],end:[[452,259],[503,259]],
+  platforms:[floor(0,960),ledge(87,424,124),ledge(176,349,149),ledge(309,334,95),ledge(399,259,161),ledge(545,327,121),ledge(641,366,107),ledge(747,426,112)],
+  lights:[beam('west',[99,325],[282,209],[[282,325,0]]),beam('east',[646,340],[717,227],[[717,340,1]])],
+  doors:[gate(364,70,430,['east']),gate(598,70,430,['west'])],
+  gems:[[193,324,0],[392,310,0],[815,400,1],[563,304,1]],goals:['east','west']}
 ];
+const temples=maps.map(m=>[m.id]);
 function temple(n){
- const [id,first,mid,last,upper,mechanic]=temples[n-1],m=level(1);
- m.id=id;m.platforms=[m.platforms[0],{x:165,y:425,w:85,h:18},{x:220,y:365,w:first-205,h:18},
-  {x:mid-90,y:425,w:90,h:18},{x:mid-40,y:365,w:95,h:18},{x:mid+15,y:upper,w:95,h:18},
-  {x:last+30,y:425,w:110,h:18}];
- m.levers=[{id:'bridge',x:first-38,y:342,type:0,on:false},{id:'return',x:mid+62,y:upper-18,type:1,on:false}];
- m.doors=[door(first,first-50,first+60,0,1),door(last,last-42,last+48,1,0)];
- m.doors[0].mode='relay';m.doors[0].requires=['bridge','return'];
- m.doors[1].mode='lever';m.doors[1].requires=['return'];
- m.bodies[0].x=m.bodies[0].startX=117;m.bodies[1].x=m.bodies[1].startX=first+76;
- m.docks=[{id:'stone-seat',x:mid-45,y:500,door:1}];m.pools=[{x:mid-12,w:35,type:2}];
- if(mechanic===1||mechanic===3)m.doors[1].weight=true;
- if(mechanic>=2){m.platforms[5]={...m.platforms[5],lift:true,base:425,top:upper,control:'bridge'};m.levers[1].x=mid+5;
-  if(mechanic===3)m.platforms[5].weighted=true}
- if(mechanic>=4){
-  m.light={source:[mid-78,upper-35],receiver:[mid+115,upper-110],mirrors:[{x:mid+40,y:upper-35,turned:false,type:1},{x:mid+40,y:upper-110,turned:mechanic===4,type:0}],segments:[],lit:false};
-  m.platforms.push({x:mid+8,y:upper-75,w:82,h:15});m.levers[1].x=mid+100;m.levers[1].y=upper-18;m.doors[1].light=true;
- }
- m.gems=[{x:205,y:390,type:0},{x:first-35,y:330,type:0},{x:mid+45,y:upper-35,type:1},{x:last+75,y:390,type:1}];
- return m;
+ const m=structuredClone(maps[n-1]);
+ m.spawns=m.start.map(([x,y])=>({x,y}));m.exits=m.end.map(([x,y])=>({x,y}));
+ m.gems=m.gems.map(([x,y,type])=>({x,y,type,got:false}));
+ for(const key of ['levers','bodies','pools','hazards','docks','lights'])m[key]??=[];
+ m.light=m.lights[0];m.signals={};m.clock=0;return m;
 }
-function traceLight(m){
- const l=m.light;if(!l)return;
+function traceLight(m){for(const l of m.lights??(m.light?[m.light]:[]))traceCircuit(l,m.bodies)}
+function traceCircuit(l,bodies){
  let [x,y]=l.source,dx=1,dy=0;l.segments=[];l.lit=false;
- for(let k=0;k<4;k++){
-  let hit=null,dist=1000;
+ for(let k=0;k<=l.mirrors.length;k++){
+  let hit=null,dist=dx>0?960-x:dx<0?x:dy>0?500-y:y;
   for(const object of [...l.mirrors,{x:l.receiver[0],y:l.receiver[1],receiver:true}]){
    const along=(object.x-x)*dx+(object.y-y)*dy,cross=(object.x-x)*dy-(object.y-y)*dx;
    if(along>.01&&along<dist&&Math.abs(cross)<2){dist=along;hit=object}
   }
-  for(const b of m.bodies){const near=dx>0?b.x-x:dx<0?x-b.x-b.w:dy>0?b.y-y:y-b.y-b.h;
-   if(near>0&&near<dist&&(dx?y>=b.y&&y<=b.y+b.h:x>=b.x&&x<=b.x+b.w)){dist=near;hit=null}}
+  for(const b of bodies){const near=dx>0?b.x-x:dx<0?x-b.x-b.w:dy>0?b.y-y:y-b.y-b.h;
+   const far=near+(dx?b.w:b.h);
+   if(far>=0&&near<dist&&(dx?y>=b.y&&y<=b.y+b.h:x>=b.x&&x<=b.x+b.w)){dist=Math.max(0,near);hit=null}}
   const nx=x+dx*dist,ny=y+dy*dist;l.segments.push([x,y,nx,ny]);x=nx;y=ny;
   if(!hit)break;if(hit.receiver){l.lit=true;break}
-  [dx,dy]=hit.turned?[-dy,-dx]:[dy,dx];
+  ;[dx,dy]=hit.turned?[-dy,-dx]:[dy,dx];
  }
 }
+function stepPlatforms(map,players,dt){
+ map.clock=(map.clock||0)+dt;
+ for(const p of map.platforms){
+  const x=p.x,y=p.y;
+  if(p.lift){
+   const on=map.id?map.signals[p.control]:map.levers.some(l=>l.id==='needs'&&l.on);
+   const target=on?(p.top??350):(p.base??425);
+   p.y+=Math.max(-60*dt,Math.min(60*dt,target-p.y));
+  }
+  if(p.moving&&map.signals[p.control]){
+   p.travel=(p.travel||0)+dt*92;
+   const span=p.to-p.from;p.x=p.from+span-Math.abs(p.travel%(2*span)-span);
+  }
+  p.dx=0;
+  for(const a of players)if(a.grounded&&Math.abs(a.y+a.h-y)<3&&a.x+a.w>x&&a.x<x+p.w){a.y+=p.y-y;a.x+=p.x-x}
+ }
+}
+function signals(map,players){
+ const state={};
+ for(const l of map.levers)state[l.id]=l.on;
+ for(const d of map.docks)state[d.id]=map.bodies.some(b=>b.dock===d.id&&b.locked);
+ for(const d of map.doors)for(const p of d.plates)state[p.id]=platePressed(map,players,p);
+ for(const l of map.lights)state[l.id]=l.lit;
+ if(map.id==='motion-counterweight')state.lower=state.weight&&!state.return;
+ map.signals=state;return state;
+}
 function savePoint(map,players,score){return structuredClone({map,players,score})}
-function onPlate(p,plate){return p.grounded&&p.y>445&&Math.abs(p.x+14-plate.x)<20&&p.type===plate.type}
-function update(map,players){traceLight(map);for(const d of map.doors){if(d.mode==='relay'){d.open=map.levers[1].on||players.some(p=>p.type===0&&Math.hypot(p.x+14-map.levers[0].x,p.y+17-map.levers[0].y)<55);map.levers[0].on=d.open;continue}d.open=d.mode==='lever'?d.requires.every(id=>map.levers.find(l=>l.id===id)?.on):d.plates.some(a=>platePressed(map,players,a));if(d.weight)d.open=d.open&&map.bodies.some(b=>b.locked);if(d.light)d.open=d.open&&map.light.lit}return map.doors}
-function checkpoint(map,players){for(const d of map.doors){if(!d.roomReady&&players.every(p=>p.x>d.x+d.w+3)){d.roomReady=true;for(const p of players){let x=(d.plates[1]?.x??d.x+52)+24+p.type*8;p.checkpoint=Math.min(910,x)}}}}
+function onPlate(p,plate){return !plate.kind&&p.grounded&&Math.abs(p.y+(p.h??34)-(plate.y??500))<4&&Math.abs(p.x+14-plate.x)<20&&p.type===plate.type}
+function update(map,players){traceLight(map);if(map.id){const state=signals(map,players);for(const d of map.doors)d.open=d.requires.every(id=>state[id])&&(!d.any.length||d.any.some(id=>state[id]));return map.doors}for(const d of map.doors){if(d.mode==='relay'){d.open=map.levers[1].on||players.some(p=>p.type===0&&Math.hypot(p.x+14-map.levers[0].x,p.y+17-map.levers[0].y)<55);map.levers[0].on=d.open;continue}d.open=d.mode==='lever'?d.requires.every(id=>map.levers.find(l=>l.id===id)?.on):d.plates.some(a=>platePressed(map,players,a));if(d.weight)d.open=d.open&&map.bodies.some(b=>b.locked);if(d.light)d.open=d.open&&map.light.lit}return map.doors}
+function checkpoint(map,players){if(map.id){if(!players.every(p=>p.grounded))return;for(const d of map.doors){if(d.roomReady||!d.open)continue;const passed=players.some((p,i)=>map.spawns[i].x<d.x?p.x>d.x+d.w+3:p.x+p.w<d.x-3);if(passed){d.roomReady=true;for(const p of players)p.checkpoint=p.x}}return}for(const d of map.doors){if(!d.roomReady&&players.every(p=>p.x>d.x+d.w+3)){d.roomReady=true;for(const p of players){let x=(d.plates[1]?.x??d.x+52)+24+p.type*8;p.checkpoint=Math.min(910,x)}}}}
 function doorCollision(p,doors,oldX){for(const d of doors){if(d.open||p.y+p.h<=d.y||p.y>=d.y+d.h)continue;if(p.x+p.w>d.x&&p.x<d.x+d.w){p.x=oldX+p.w/2<d.x+d.w/2?d.x-p.w:d.x+d.w;p.vx=0}}}
-function lever(map,p){const mirror=map.light?.mirrors.find(m=>m.type===p.type&&Math.hypot(p.x+14-m.x,p.y+17-m.y)<42);if(mirror){mirror.turned=!mirror.turned;traceLight(map);return true}const l=map.levers?.find(l=>l.type===p.type&&Math.hypot(p.x+14-l.x,p.y+17-l.y)<55);if(!l||(map.id&&l.id==='bridge'))return false;l.on=!l.on;return true}
+function lever(map,p){const mirror=(map.lights??(map.light?[map.light]:[])).flatMap(l=>l.mirrors).find(m=>m.type===p.type&&Math.hypot(p.x+14-m.x,p.y+17-m.y)<42);if(mirror){mirror.turned=!mirror.turned;traceLight(map);return true}const l=map.levers?.find(l=>l.type===p.type&&Math.hypot(p.x+14-l.x,p.y+17-l.y)<55);if(!l||(map.id&&l.id==='bridge'))return false;l.on=!l.on;return true}
 // Movable objects are authoritative map state. No DOM or wall-clock dependencies.
 function body(id,kind,x,y,w,h){return {id,kind,x,y,w,h,startX:x,startY:y,vx:0,vy:0,angle:0,locked:false,dock:null}}
 const overlap=(a,b)=>a.x<b.x+b.w-.001&&a.x+a.w>b.x+.001&&a.y<b.y+b.h-.001&&a.y+a.h>b.y+.001;
-function onWeight(b,plate){return Math.abs(b.y+b.h-500)<2&&Math.abs(b.x+b.w/2-plate.x)<19}
+function onWeight(b,plate){return (!plate.kind||b.kind===plate.kind)&&Math.abs(b.y+b.h-(plate.y??500))<2&&Math.abs(b.x+b.w/2-plate.x)<19}
 function platePressed(map,players,plate){return players.some(p=>onPlate(p,plate))||(map.bodies||[]).some(b=>onWeight(b,plate))}
 function dockBody(map,b,oldX=b.x){if(b.kind!=='boulder'||b.locked||Math.abs(b.y+b.h-500)>2)return false;const a=oldX+b.w/2,z=b.x+b.w/2;const d=map.docks?.find(d=>Math.abs(z-d.x)<8||(a-d.x)*(z-d.x)<0);if(!d)return false;const seat={...b,x:d.x-b.w/2};if(map.bodies.some(other=>other!==b&&overlap(seat,other))||map.doors.some(door=>!door.open&&overlap(seat,door)))return false;b.x=seat.x;b.vx=b.vy=0;b.locked=true;b.dock=d.id;return true}
 function moveBody(map,b,amount,players=[],actor=null){if(b.locked||!amount)return 0;const old=b.x;let next=Math.max(12,Math.min(948-b.w,old+amount));const obstacles=[...map.platforms,...map.doors.filter(d=>!d.open),...map.bodies.filter(o=>o!==b),...players.filter(p=>p!==actor&&!(p.grounded&&Math.abs(p.y+p.h-b.y)<2))];for(const o of obstacles){if(b.y>=o.y+o.h-.01||b.y+b.h<=o.y+.01)continue;if(amount>0&&old+b.w<=o.x+.01&&next+b.w>o.x)next=Math.min(next,o.x-b.w);if(amount<0&&old>=o.x+o.w-.01&&next<o.x+o.w)next=Math.max(next,o.x+o.w)}b.x=next;const moved=b.x-old;b.angle+=(b.kind==='boulder'?moved/(b.w/2):0);dockBody(map,b,old);return b.x-old}
@@ -668,7 +806,7 @@ function pushPlayer(map,p,oldX,players,dt){const dx=p.x-oldX;for(const b of map.
 function stepBodies(map,players,dt){for(const b of map.bodies||[]){if(b.locked)continue;const oldX=b.x,oldY=b.y,standing=players.filter(p=>p.grounded&&Math.abs(p.y+p.h-b.y)<2&&p.x+p.w>b.x&&p.x<b.x+b.w);const dx=moveBody(map,b,b.vx*dt,players);b.vx=Math.abs(dx)<.0001?0:b.vx*Math.exp(-7*dt);b.vy=Math.min(700,b.vy+1280*dt);b.y+=b.vy*dt;for(const o of [...map.platforms,...map.bodies.filter(o=>o!==b)]){if(b.vy>=0&&oldY+b.h<=o.y+.5&&b.y+b.h>=o.y&&b.x+b.w>o.x+.1&&b.x<o.x+o.w-.1){b.y=o.y-b.h;b.vy=0;break}}for(const p of standing){p.x+=b.x-oldX;p.y+=b.y-oldY}if(b.y>600){b.x=b.startX;b.y=b.startY;b.vx=b.vy=0;b.angle=0}dockBody(map,b,oldX)}}
 function landOnBodies(map,p,oldY){for(const b of map.bodies||[]){if(p.x+p.w<=b.x+.1||p.x>=b.x+b.w-.1)continue;if(p.vy>=0&&oldY+p.h<=b.y+1&&p.y+p.h>=b.y){p.y=b.y-p.h;p.vy=0;p.grounded=true;p.support=b.id;break}if(p.vy<0&&oldY>=b.y+b.h-.5&&p.y<b.y+b.h){p.y=b.y+b.h;p.vy=0}}}
 function playerNames(raw){const defaults=['火仔','冰仔'];return defaults.map((d,i)=>{const value=Array.isArray(raw)&&typeof raw[i]==='string'?raw[i]:'';return Array.from(value.replace(/[<>\x00-\x1f\x7f]/g,'').trim()).slice(0,16).join('')||d})}
-return {playerNames,level,temple,temples,traceLight,savePoint,onPlate,onWeight,platePressed,update,checkpoint,doorCollision,lever,moveBody,pushPlayer,stepBodies,landOnBodies,dockBody};
+return {stepPlatforms,playerNames,level,temple,temples,traceLight,savePoint,onPlate,onWeight,platePressed,update,checkpoint,doorCollision,lever,moveBody,pushPlayer,stepBodies,landOnBodies,dockBody};
 });
 </script><script>/* All game graphics are drawn locally, including original plant and element characters. */
 window.drawMoneyJourney=function(g){
@@ -738,17 +876,27 @@ for(let k=3;k<p.w-6;k+=19){
  if(k%3===0)line([[x+4,p.y+3],[x+5,p.y+8],[x+8,p.y+10]],'#4c743e',2);
 }
 rect(p.x,p.y+p.h-3,p.w,3,'#514838',1);if(p.h<30){for(let x=p.x+10;x<p.x+p.w-3;x+=24)line([[x,p.y+8],[x+5,p.y+14]],'#3b5646',2);if(p.lift){line([[p.x+7,p.y],[p.x+7,70]],'#a59362',2);line([[p.x+p.w-7,p.y],[p.x+p.w-7,70]],'#a59362',2)}}else for(let x=12;x<950;x+=38)rect(x,p.y+11,25,3,'#82936755',1)}
-for(const pool of m.pools){const color=['#d57f45','#57a5ad','#9063a2'][pool.type];stone(pool.x-3,487,pool.w+6,23);rect(pool.x,491,pool.w,15,'#102e29');rect(pool.x+2,495,pool.w-4,10,color);for(let x=pool.x+6;x<pool.x+pool.w-4;x+=13)oval(x,499+(quiet?0:Math.sin(t*3+x)*2),4,2,'#f4f2ce77');if(pool.type===2){rect(pool.x+pool.w/2-12,521,24,15,'#c4b887');line([[pool.x+pool.w/2-7,524],[pool.x+pool.w/2+7,532]],'#684175',4);line([[pool.x+pool.w/2+7,524],[pool.x+pool.w/2-7,532]],'#684175',4)}}
-for(const d of m.doors){for(const p of d.plates){const pressed=ForestRules.platePressed(m,g.players,p),color=p.type?'#83cdd2':'#ebba6b';line([[p.x,540],[p.x,551],[d.x+11,551],[d.x+11,508]],d.open?'#b7c98b':'#6f7e59',3);stone(p.x-24,483,48,19);oval(p.x,pressed?497:490,20,5,'#756a47');oval(p.x,pressed?494:487,16,4,pressed?'#d4dda2':color);rune(p.x,470,p.type,.6)}
-// A carved sealing stone replaces the thin metal shutter.
-rect(d.x-16,96,d.w+32,404,'#142f28');for(let y=104;y<500;y+=44){stone(d.x-15,y,12,43,true);stone(d.x+d.w+3,y,12,43,true)}stone(d.x-20,89,d.w+40,19,true);stone(d.x-22,496,d.w+44,8,true);for(let i=0;i<3;i++)line([[d.x-11+i*18,94],[d.x-6+i*18,98],[d.x-11+i*18,101]],'#6c7656',1);if(!d.open){stone(d.x,110,d.w,386);for(let y=137;y<475;y+=44){line([[d.x+5,y],[d.x+d.w-5,y],[d.x+d.w-5,y+14],[d.x+7,y+14]],'#b7b88c',2)}oval(d.x+d.w/2,287,16,22,'#a98d51');oval(d.x+d.w/2,287,12,17,'#5b6950');rect(d.x+d.w/2-4,282,8,10,'#d1c58b',1)}else{rect(d.x,110,d.w,18,'#bcba8b');c.save();c.globalAlpha=.35;rect(d.x+3,130,d.w-6,360,'#b0d0a1',1);c.restore()}for(let i=0;i<4;i++)oval(d.x-11,120+i*17,7,3,'#607b48')}
+for(const pool of m.pools){const color=['#d57f45','#57a5ad','#9063a2'][pool.type];const py=pool.y??500;stone(pool.x-3,py-13,pool.w+6,23);rect(pool.x,py-9,pool.w,15,'#102e29');rect(pool.x+2,py-5,pool.w-4,10,color);for(let x=pool.x+6;x<pool.x+pool.w-4;x+=13)oval(x,py-1+(quiet?0:Math.sin(t*3+x)*2),4,2,'#f4f2ce77');if(pool.type===2){rect(pool.x+pool.w/2-12,py+21,24,15,'#c4b887');line([[pool.x+pool.w/2-7,py+24],[pool.x+pool.w/2+7,py+32]],'#684175',4);line([[pool.x+pool.w/2+7,py+24],[pool.x+pool.w/2-7,py+32]],'#684175',4)}}
+for(const d of m.doors){
+ const top=d.y??110,height=d.h??390,bottom=top+height;
+ for(const plate of d.plates||[]){
+  const pressed=ForestRules.platePressed(m,g.players,plate),py=plate.y??500,color=plate.type?'#83cdd2':'#ebba6b';
+  stone(plate.x-24,py-12,48,12,true);oval(plate.x,py-(pressed?3:7),17,4,pressed?'#d4dda2':color);rune(plate.x,py-27,plate.type,.42);
+ }
+ rect(d.x-6,top-5,d.w+12,height+10,'#142f28');stone(d.x-7,top-7,d.w+14,8,true);
+ if(!d.open){
+  stone(d.x,top,d.w,height);
+  for(let y=top+20;y<bottom-8;y+=42)line([[d.x+4,y],[d.x+d.w-4,y]],'#b7b88c',2);
+  oval(d.x+d.w/2,top+height/2,Math.min(12,d.w/3),14,'#a98d51');
+ }else{rect(d.x,top,d.w,7,'#bcba8b')}
+}
 for(const h of m.hazards){stone(h.x-7,h.y-8,h.w+14,8);stone(h.x-7,h.y+h.h,h.w+14,8);if(h.on){c.save();c.shadowColor='#ed8060';c.shadowBlur=quiet?0:13;rect(h.x,h.y,h.w,h.h,'#d6634b',2);rect(h.x+h.w/2-2,h.y,4,h.h,'#fff0b9',1);c.restore()}else{c.setLineDash([3,5]);line([[h.x+h.w/2,h.y],[h.x+h.w/2,h.y+h.h]],'#a2aa7d',1);c.setLineDash([])}}
 for(const l of m.levers||[]){stone(l.x-17,l.y-8,34,29,true);oval(l.x,l.y+7,8,5,'#5d6549');line([[l.x,l.y+5],[l.x+(l.on?11:-11),l.y-17]],'#ac8051',6);oval(l.x+(l.on?11:-11),l.y-17,7,7,l.on?'#c7d9a3':l.type?'#87cbd4':'#e4b666');rune(l.x,l.y-41,l.type,.65);line([[l.x+16,l.y+8],[l.x+33,l.y+8],[l.x+33,550]],l.on?'#b5bf87':'#5e7655',2)}
 // Socket bowl uses a carved spiral; a seated stone keeps its pressure circuit lit.
 for(const dock of m.docks||[]){const seated=m.bodies.some(b=>b.dock===dock.id);stone(dock.x-29,494,58,10,true);c.strokeStyle=seated?'#e1f5ac':'#c7ca97';c.lineWidth=2;c.beginPath();c.ellipse(dock.x,494,23,6,0,0,Math.PI);c.stroke();for(const side of [-1,1])line([[dock.x+side*27,481],[dock.x+side*22,487],[dock.x+side*27,491]],seated?'#e1f5ac':'#c7ca97',2)}
 for(const b of m.bodies||[]){if(b.kind==='box'){const wood=c.createLinearGradient(b.x,b.y,b.x+b.w,b.y+b.h);wood.addColorStop(0,'#c29458');wood.addColorStop(1,'#7d5938');rect(b.x,b.y,b.w,b.h,wood,4);for(let i=0;i<4;i++)line([[b.x+5+i*12,b.y+4],[b.x+5+i*12,b.y+b.h-4]],'#5d4d34',1);line([[b.x+5,b.y+5],[b.x+b.w-5,b.y+b.h-5]],'#e2ba76',6);line([[b.x+b.w-5,b.y+5],[b.x+5,b.y+b.h-5]],'#b98b53',6);c.strokeStyle='#ead2a1';c.lineWidth=3;c.strokeRect(b.x+2,b.y+2,b.w-4,b.h-4);for(const x of [b.x+7,b.x+b.w-7])for(const y of [b.y+7,b.y+b.h-7])oval(x,y,2,2,'#4c5141');line([[b.x+17,b.y+27],[b.x+24,b.y+18],[b.x+31,b.y+27]],'#fff0b9',2);line([[b.x+24,b.y+18],[b.x+24,b.y+34]],'#fff0b9',2)}else{const cx=b.x+b.w/2,cy=b.y+b.h/2,r=b.w/2;c.save();if(b.locked){c.shadowColor='#d6eb9d';c.shadowBlur=quiet?0:13}const rock=c.createRadialGradient(cx-8,cy-10,1,cx,cy,r);rock.addColorStop(0,'#bdc4aa');rock.addColorStop(1,'#627b68');oval(cx,cy,r,r,rock);c.strokeStyle=b.locked?'#d3e9a8':'#3e594d';c.lineWidth=2;c.beginPath();c.arc(cx,cy,r-1,0,7);c.stroke();c.translate(cx,cy);c.rotate(b.angle);line([[-16,-8],[-6,-12],[1,-2],[12,-6],[15,4]],'#425d5099',2);c.strokeStyle=b.locked?'#e5f4b7':'#d2d7ad';c.lineWidth=2;c.beginPath();for(let i=0;i<45;i++){const a=i*.16,r=1+i*.28;const x=Math.cos(a)*r,y=Math.sin(a)*r;i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();c.restore()}}
-if(m.light){
- const {source,receiver,mirrors,segments,lit}=m.light;
+for(const circuit of (m.lights || (m.light?[m.light]:[]))){
+ const {source,receiver,mirrors,segments,lit}=circuit;
  for(const [x,y,nx,ny] of segments){line([[x,y],[nx,ny]],'#edbd6444',6);line([[x,y],[nx,ny]],'#ffeaa3',2)}
  for(const mirror of mirrors){const {x,y,turned}=mirror;stone(x-9,y+7,18,6,true);oval(x,y,8,8,'#695f50');const slope=turned?-1:1;line([[x-9,y-9*slope],[x+9,y+9*slope]],'#a7ece3',4)}
  oval(source[0],source[1],6,6,'#ffda72');oval(receiver[0],receiver[1],9,9,'#625c49');oval(receiver[0],receiver[1],5,5,lit?'#bdff9c':'#9d927a');
@@ -763,7 +911,7 @@ for(const item of m.gems)if(!item.got){
  spirit(0,-12,item.type,.62);
  c.restore();
 }
-for(let i=0;i<2;i++)arch(875+i*45,425,36,75,m.gems.every(x=>x.got),i);
+for(const [i,exit] of (m.exits||[{x:893,y:500},{x:938,y:500}]).entries())arch(exit.x-18,exit.y-75,36,75,m.gems.every(x=>x.got),i);
 for(const p of g.players){oval(p.x+14,p.y+34,17,4,'#0a292688');c.save();
 const center=p.x+14;
 c.translate(center,p.y+30);
@@ -837,12 +985,12 @@ function savedNames(){try{return ForestRules.playerNames(JSON.parse(localStorage
 const safeName=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function avatar(type){return '<svg class="duo-avatar" viewBox="0 0 64 64" aria-hidden="true"><defs><linearGradient id="duo-shade-'+type+'" x2="0" y2="1"><stop stop-color="'+(type?'#bdf9f4':'#ffe7a0')+'"/><stop offset="1" stop-color="'+(type?'#4fa9c7':'#ea8c46')+'"/></linearGradient></defs><ellipse cx="32" cy="57" rx="19" ry="4" fill="'+(type?'#3d859a44':'#9e693e44')+'"/><path d="'+(type?'M32 5C25 18 13 27 13 39a19 19 0 0038 0C51 27 39 18 32 5':'M34 4C33 21 15 23 13 39a19 19 0 0038 0c0-10-7-19-11-22l-3 12z')+'" fill="url(#duo-shade-'+type+')" stroke="'+(type?'#397a8e':'#a36b3e')+'" stroke-width="2.5"/><ellipse cx="24" cy="37" rx="3" ry="4" fill="#294a44"/><ellipse cx="40" cy="37" rx="3" ry="4" fill="#294a44"/><circle cx="25" cy="36" r="1" fill="white"/><circle cx="41" cy="36" r="1" fill="white"/><path d="M27 46q5 5 10 0" fill="none" stroke="#496d57" stroke-width="2" stroke-linecap="round"/><path d="M20 24q0-7 6-10" stroke="#fff9da" stroke-width="3" stroke-linecap="round" opacity=".8"/><circle cx="21" cy="44" r="3" fill="'+(type?'#8ee0df':'#f6b38c')+'"/><circle cx="43" cy="44" r="3" fill="'+(type?'#8ee0df':'#f6b38c')+'"/></svg>'}
 function removeOverlay(){window.moneyJourneyMusic?.(g.key,false);const o=$('journey-overlay');if(o)o.hidden=true;g.canvas.focus({preventScroll:true});}
-window.openMini=function(key){stop();prior.open(key);if(!isNew(key))return;const v=meta[key];modal(v.title,`<div class="kicker">${new URLSearchParams(location.search).has('arcade')?v.genre:'帳單疑點 ／ '+v.genre}</div><h2>${v.title}</h2>${new URLSearchParams(location.search).has('arcade')?'':'<p>'+v.lead+'</p>'}<div class="operation"><strong>先記住一件事</strong>${v.goal}</div><p>${key==='instalments'?'第一波先學種植，之後先加入更密嘅帳單。':'Q 換角色，方向鍵移動、空白鍵跳，E 操作同色拉桿；亦可以同機雙人玩。'}每關設倒數同重試。標準模式更講時機；輕鬆模式有更多時間。</p><div class="journey-options">${key==='pause'&&arcadeForest()?'<label>神殿 <select id="forest-stage">'+ForestRules.temples.map(([id],i)=>'<option value="'+(i+1)+'" '+(i>=forestUnlocked()?'disabled':'')+'>'+['重量','運動','光線'][Math.floor(i/3)]+' '+(i%3+1)+'</option>').join('')+'</select></label>':''}<label>難度 <select id="journey-difficulty"><option value="relaxed">輕鬆・多啲時間</option><option value="standard" selected>標準・限時挑戰</option><option value="hard">挑戰・更密更快</option></select></label>${key==='pause'?'<label>玩法 <select id="journey-mode"><option value="solo">一人切換</option><option value="coop">同機雙人</option></select></label>':''}</div>${key==='pause'?'<fieldset class="duo-name-setup"><legend>同你嘅拍檔改個名</legend>'+[0,1].map(i=>'<label>'+avatar(i)+'<span>'+(i?'冰仔・規劃':'火仔・行動')+'<input id="duo-name-'+i+'" maxlength="32" autocomplete="off" value="'+safeName(savedNames()[i])+'" aria-label="'+(i?'冰角色名稱':'火角色名稱')+'"></span></label>').join('')+'<small>最多 16 個字，只儲存喺呢部機。</small></fieldset>':''}<div class="actions"><button class="btn" onclick="window.startArcade('${key}')">進入${key==='instalments'?'花園':'森林'}</button><button class="btn secondary" onclick="window.arcadeText('${key}')">用文字版調查</button></div>`);};
+window.openMini=function(key){stop();prior.open(key);if(!isNew(key))return;const v=meta[key];modal(v.title,`<div class="kicker">${new URLSearchParams(location.search).has('arcade')?v.genre:'帳單疑點 ／ '+v.genre}</div><h2>${v.title}</h2>${new URLSearchParams(location.search).has('arcade')?'':'<p>'+v.lead+'</p>'}<div class="operation"><strong>先記住一件事</strong>${v.goal}</div><p>${key==='instalments'?'第一波先學種植，之後先加入更密嘅帳單。':'Q 換角色，方向鍵移動、空白鍵跳，E 操作同色拉桿；亦可以同機雙人玩。'}每關設倒數同重試。標準模式更講時機；輕鬆模式有更多時間。</p><div class="journey-options">${key==='pause'&&arcadeForest()?'<label>神殿 <select id="forest-stage">'+ForestRules.temples.map(([id],i)=>'<option value="'+(i+1)+'" '+(i>=forestUnlocked()?'disabled':'')+'>'+['重量','運動','光線'][Math.floor(i/3)]+' '+(i%3+1)+'</option>').join('')+'</select></label>':''}<label>難度 <select id="journey-difficulty"><option value="relaxed">輕鬆・${key==="pause"&&arcadeForest()?"無倒數":"多啲時間"}</option><option value="standard" selected>標準・限時挑戰</option><option value="hard">挑戰・更密更快</option></select></label>${key==='pause'?'<label>玩法 <select id="journey-mode"><option value="solo">一人切換</option><option value="coop">同機雙人</option></select></label>':''}</div>${key==='pause'?'<fieldset class="duo-name-setup"><legend>同你嘅拍檔改個名</legend>'+[0,1].map(i=>'<label>'+avatar(i)+'<span>'+(i?'冰仔・規劃':'火仔・行動')+'<input id="duo-name-'+i+'" maxlength="32" autocomplete="off" value="'+safeName(savedNames()[i])+'" aria-label="'+(i?'冰角色名稱':'火角色名稱')+'"></span></label>').join('')+'<small>最多 16 個字，只儲存喺呢部機。</small></fieldset>':''}<div class="actions"><button class="btn" onclick="window.startArcade('${key}')">進入${key==='instalments'?'花園':'森林'}</button><button class="btn secondary" onclick="window.arcadeText('${key}')">用文字版調查</button></div>`);};
 window.startArcade=function(key){if(!isNew(key)){stop();return prior.start(key)}const chosenStage=Number($('forest-stage')?.value)||1;const difficulty=$('journey-difficulty')?.value||'standard',cfg=difficulties[difficulty]||difficulties.standard,speed=cfg.speed,mode=$('journey-mode')?.value||'solo',chosenNames=ForestRules.playerNames([$('duo-name-0')?.value??savedNames()[0],$('duo-name-1')?.value??savedNames()[1]]);if(key==='pause')try{localStorage.setItem('forest-player-names-v1',JSON.stringify(chosenNames))}catch{}stop();prior.open(key);const v=meta[key];
 modal(v.title,`<div class="journey-top"><div><div class="kicker">${v.genre}</div><h2>${v.title}</h2></div><div class="journey-actions"><button class="btn secondary" id="journey-pause" onclick="window.arcadePause()">暫停</button><button class="textbtn" id="journey-sound">聲音</button><button class="textbtn" id="journey-full">全螢幕 ↗</button><button class="textbtn" id="journey-exit" onclick="window.finishArcade()">結束</button></div></div><div class="journey-hud"><strong id="journey-state"></strong><span id="journey-resources"></span><span id="journey-time"></span></div><p id="journey-feedback" role="status">${v.goal}</p>${key==='instalments'?'<div class="plant-palette" role="group" aria-label="揀一種植物"><button data-plant="sun" class="selected"><span><svg class="game-icon" viewBox="0 0 64 64" aria-hidden="true"><use href="../assets/game-icons.svg#sun"></use></svg> 儲備花</span><small>50 點・每 5 秒生產 25</small></button><button data-plant="pea"><span><svg class="game-icon" viewBox="0 0 64 64" aria-hidden="true"><use href="../assets/game-icons.svg#pea"></use></svg> 記帳苗</span><small>75 點・對付同一路帳單</small></button><button data-plant="wall"><span><svg class="game-icon" viewBox="0 0 64 64" aria-hidden="true"><use href="../assets/game-icons.svg#shield"></use></svg> 緩衝牆</span><small>50 點・畀你多啲安排時間</small></button><button data-plant="frost"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#frost"></use></svg> 冷靜苗</span><small>100 點・減慢同路敵人</small></button><button data-plant="twin"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#twin"></use></svg> 雙發苗</span><small>150 點・快速連射</small></button><button data-plant="bloom"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#bloom"></use></svg> 應急花</span><small>125 點・延時炸附近三路</small></button><button data-plant="shovel"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#shovel"></use></svg> 移走植物</span><small>唔退點數・重新部署</small></button></div>':'<div class="duo-palette"><button id="duo-fire" class="selected" onclick="window.journeySwitch(0)">火仔・行動 <small>Q 換角色</small></button><button id="duo-ice" onclick="window.journeySwitch(1)">冰仔・規劃 <small>一齊先過關</small></button></div>'}<div class="journey-stage"><canvas id="journey-canvas" tabindex="0" aria-label="${key==='instalments'?'方向鍵揀草地，Enter種植；數字1至6揀植物':'方向鍵移動，空白鍵跳，Q換角色；雙人用WAD及方向鍵'}"></canvas><div id="journey-overlay" hidden></div></div>${key==='pause'?'<div class="duo-controls" aria-label="觸控操作"><button data-hold="left" aria-label="向左行">◀</button><button data-hold="right" aria-label="向右行">▶</button><button id="duo-drop" onclick="window.journeyDrop()">落台 ↓</button><button id="duo-interact">拉桿 E</button><button data-hold="jump" aria-label="跳起">跳起 ↑</button></div>':'<div class="enemy-guide" aria-label="敵人種類"><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#enemy-basic"></use></svg>帳單怪</span><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#enemy-fast"></use></svg>快腳怪</span><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#enemy-armour"></use></svg>鐵帽怪</span><span><svg class="game-icon" viewBox="0 0 64 64"><use href="../assets/game-icons.svg#enemy-tank"></use></svg>大隻怪</span></div><p class="journey-key-hint">1–6 揀植物・方向鍵揀草地・Enter 種植</p>'}<details class="journey-help"><summary>玩法同操作</summary><p>${key==='instalments'?'儲備花生產資源；記帳苗只會攻擊同一路；緩衝牆頂住帳單。每 6 秒亦有基本資源。冷靜苗減速、雙發苗連射、應急花1秒後清走附近三路敵人。快腳怪跑得快、鐵帽怪同大隻怪更耐打。撳空格種植，已種嘅格唔會扣第二次。第 2 波起要兼顧五條路。':'火仔可以行橙池，冰仔可以行藍池；深紫池兩個都唔得。精靈有顏色同形狀：火形／水滴。收齊兩人嘅精靈，再壓住機關開閘。貼住木箱行就會推郁，可以跳上箱做墊腳位。石球有慣性；推入有圓紋嘅凹槽後會卡實，固定壓住機關。普通壓板只會喺同色角色或物件壓住時開門。先一個過門踩另一邊，再接同伴。壓板需踩住；拉桿可用 E 切換並保持狀態。第2關兩個拉桿共同開門，第3關火拉桿啟動升降台、水拉桿開門。單人：方向鍵或AD移動、空白或W跳、Q切換。雙人：火仔WAD，冰仔方向鍵。落台：↓ 或 S；手機用「落台」。手機可同時按方向同跳。標準／挑戰關卡有間歇電閘：等熄燈再過，或者跳過。'}</p></details><div class="journey-bottom"><button class="textbtn" onclick="window.journeyRetry()">重試呢一關</button><button class="textbtn" onclick="window.arcadeText('${key}')">轉文字版</button><button class="btn secondary" onclick="window.finishArcade()">結束並回顧</button></div>`);
 g={key,v,speed,mode,names:chosenNames,difficulty,cfg,stageHits:0,remaining:0,limit:0,playSeconds:0,level:key==='pause'&&window.arcadeTest?Number(window.arcadeTest.target.split('-')[1]):chosenStage,phase:'ready',paused:false,time:0,waveTime:0,active:0,keys:new Set(),selected:'sun',cursor:{row:2,col:1},particles:[],message:'',messageLife:0,score:0,hits:0,retries:0,cleared:0,canvas:$('journey-canvas'),hudAt:0};events=new AbortController();g.ctx=g.canvas.getContext('2d');resize();
 if(key==='instalments')setupGarden();else{document.body.classList.add('forest-active');setupDuo();document.querySelectorAll('.duo-palette button').forEach((b,i)=>{b.innerHTML=avatar(i)+'<span class="duo-player-copy"><strong></strong><small>'+(i?'規劃 · 水靈':'行動 · 火靈')+'</small></span>';b.querySelector('strong').textContent=g.names[i];b.setAttribute('aria-label','選擇'+g.names[i]+(i?'，冰角色':'，火角色'))})}bindInput();updateHUD();draw();if(key==='pause')removeOrientationGate=installLandscapeGate({playing:()=>g?.phase==='playing'&&!g.paused,pause:()=>window.arcadePause(),resume:()=>{if(g?.paused)window.arcadePause()},leave:()=>window.closeModal()});
-overlay(key==='instalments'?'第一波：先種一棵。':'第一關：行動，等埋規劃。',key==='instalments'?'先用 50 點種儲備花，再用 75 點種記帳苗。帳單會由右邊出現。':'各自搵齊兩隻精靈。貼住木箱行就可以推，跳上箱再去高台。踩同形狀壓板接同伴過閘；將石球滾入有圓紋嘅凹槽，就可以固定壓住機關。橙池只限火，藍池只限水，紫色信用卡池兩個都要避開。','準備好，開始',()=>{if(!g)return;g.phase='playing';removeOverlay();say(key==='instalments'?'揀儲備花，再撳一格草地。':'方向鍵行、空白跳；Q 換角色。慢慢試。')});raf=requestAnimationFrame(loop);};
+overlay(key==='instalments'?'第一波：先種一棵。':g.map?.id?'神殿 · 第 '+g.level+' 關':'第一關：行動，等埋規劃。',key==='instalments'?'先用 50 點種儲備花，再用 75 點種記帳苗。帳單會由右邊出現。':g.map?.hint||'各自搵齊兩隻精靈。貼住木箱行就可以推，跳上箱再去高台。踩同形狀壓板接同伴過閘；將石球滾入有圓紋嘅凹槽，就可以固定壓住機關。橙池只限火，藍池只限水，紫色信用卡池兩個都要避開。','準備好，開始',()=>{if(!g)return;g.phase='playing';removeOverlay();say(key==='instalments'?'揀儲備花，再撳一格草地。':'方向鍵行、空白跳；Q 換角色。慢慢試。')});raf=requestAnimationFrame(loop);};
 function resize(){if(!g)return;const d=Math.min(2,devicePixelRatio||1);g.canvas.width=960*d;g.canvas.height=560*d;g.ctx.setTransform(d,0,0,d,0,0);}
 function setupGarden(){g.limit=g.cfg.garden[g.level-1]+30;g.remaining=g.limit;g.stageHits=0;g.energy=g.cfg.energy;g.plants=[];g.enemies=[];g.bullets=[];g.pending=[];g.breaches=0;g.waveTime=0;g.drip=0;g.spawned=0;g.charges=Array(5).fill(true);const rows=g.difficulty==='relaxed'?(g.level===1?[2,1,3]:g.level===2?[0,4,2,1,3,4]:[2,0,4,1,3,2,0,4,2]):g.level===1?(g.difficulty==='hard'?[2,1,3,2,0,4]:[2,1,3,2]):Array.from({length:g.level===2?(g.difficulty==='hard'?10:8):(g.difficulty==='hard'?15:12)},(_,i)=>[2,0,4,1,3][i%5]);g.pending=rows.map((row,i)=>({row,at:7+i*(g.difficulty==='relaxed'?(g.level===1?6:4.2):g.difficulty==='hard'?2.9:3.6),type:g.level===1?'basic':['basic','fast','armour','tank'][i%4],heavy:g.level===3&&i%3===0}));}
 function burst(x,y,color,count=8){for(let i=0;i<count;i++)g.particles.push({x,y,vx:(Math.random()-.5)*85,vy:-25-Math.random()*70,life:.7,color});}
@@ -858,9 +1006,9 @@ if(!g.pending.length&&!g.enemies.length){g.cleared=g.level;g.phase='between';con
 function arcadeForest(){return new URLSearchParams(location.search).get('arcade')==='pause'}
 function forestCount(){return arcadeForest()?9:3}
 function forestUnlocked(){try{return Math.max(1,Math.min(9,Number(localStorage.getItem('forest-temples-v2'))||1))}catch{return 1}}
-function setupDuo(){g.score=(g.level-1)*4;g.limit=g.cfg.duo[(g.level-1)%3];g.remaining=g.limit;g.stageHits=0;g.map=arcadeForest()?ForestRules.temple(g.level):ForestRules.level(g.level);g.players=[0,1].map(i=>({type:i,name:g.names[i],x:70+i*55,y:465,w:28,h:34,vx:0,vy:0,grounded:false,coyote:0,buffer:0,immunity:0,gems:0,checkpoint:70+i*55}));if(g.difficulty==='relaxed')g.map.hazards=[];g.active=0;g.gateTime=0;g.gateOpen=false;g.plateLatch=false;g.map.gems.forEach(gem=>gem.got=false);g.savePoint=ForestRules.savePoint(g.map,g.players,g.score);g.waveTime=0;g.keys.clear();updateSelection();}
+function setupDuo(){g.score=(g.level-1)*4;g.map=arcadeForest()?ForestRules.temple(g.level):ForestRules.level(g.level);g.limit=g.map.id?(g.difficulty==='relaxed'?Infinity:g.map.seconds*(g.difficulty==='hard'?.8:1)):g.cfg.duo[(g.level-1)%3];g.remaining=g.limit;g.stageHits=0;g.players=[0,1].map(i=>({type:i,name:g.names[i],x:g.map.spawns?.[i].x??70+i*55,y:(g.map.spawns?.[i].y??499)-34,w:28,h:34,vx:0,vy:0,grounded:false,coyote:0,buffer:0,immunity:0,gems:0,checkpoint:70+i*55}));if(g.difficulty==='relaxed')g.map.hazards=[];g.active=0;g.gateTime=0;g.gateOpen=false;g.plateLatch=false;g.map.gems.forEach(gem=>gem.got=false);g.savePoint=ForestRules.savePoint(g.map,g.players,g.score);g.waveTime=0;g.keys.clear();updateSelection();}
 function respawn(p){if(g.phase!=='playing')return;g.stageHits++;g.hits++;if(g.stageHits>=g.cfg.lives){failStage('今關嘅嘗試次數用完喇。','保留你已經諗通嘅路線，重新試呢一關。');return}const saved=structuredClone(g.savePoint);g.map=saved.map;g.players=saved.players;g.score=saved.score;for(const actor of g.players){actor.vx=actor.vy=actor.buffer=0;actor.immunity=1}g.keys.clear();say('踩錯池，返安全位再試。精靈同伴會幫你記住。');burst(p.x,p.y,p.type?'#9cdce8':'#efaa69');}
-function duoStep(dt){g.waveTime+=dt;const m=g.map;ForestRules.stepBodies(m,g.players,dt);ForestRules.update(m,g.players);for(const platform of m.platforms){if(platform.lift){const up=platform.weighted?m.bodies.some(b=>b.locked):m.levers.find(l=>l.id===(platform.control||'needs'))?.on;const target=up?(platform.top??350):(platform.base??425);const dy=clamp(target-platform.y,-60*dt,60*dt);for(const p of g.players)if(p.grounded&&Math.abs(p.y+p.h-platform.y)<3&&p.x+p.w>platform.x&&p.x<platform.x+platform.w)p.y+=dy;platform.y+=dy}platform.oldX=platform.x;if(platform.moving)platform.x=305+Math.sin(g.waveTime*.65)*40;platform.dx=platform.x-platform.oldX}
+function duoStep(dt){g.waveTime=(g.map.clock??g.waveTime)+dt;const m=g.map;ForestRules.stepBodies(m,g.players,dt);ForestRules.update(m,g.players);ForestRules.stepPlatforms(m,g.players,dt);
 for(const gem of m.gems)if(gem.follow)gem.x=m.platforms.find(p=>p.moving).x+gem.follow;
 for(const p of g.players){const solo=g.mode==='solo',active=solo&&p.type===g.active,left=active?(g.keys.has('ArrowLeft')||g.keys.has('KeyA')):!solo&&g.keys.has(p.type?'ArrowLeft':'KeyA'),right=active?(g.keys.has('ArrowRight')||g.keys.has('KeyD')):!solo&&g.keys.has(p.type?'ArrowRight':'KeyD');p.vx+=(((right?1:0)-(left?1:0))*235-p.vx)*Math.min(1,dt*16);p.buffer=Math.max(0,p.buffer-dt);p.coyote=p.grounded?.12:Math.max(0,p.coyote-dt);p.immunity=Math.max(0,p.immunity-dt);if(p.buffer>0&&p.coyote>0){window.moneyJourneySound?.('click');p.vy=-480;p.buffer=0;p.coyote=0;p.grounded=false;burst(p.x+14,p.y+34,p.type?'#b0e4e8':'#e9b980',3)}
 const oldX=p.x,oldY=p.y;p.vy=Math.min(700,p.vy+1280*dt);p.x=clamp(p.x+p.vx*dt,12,920);ForestRules.pushPlayer(m,p,oldX,g.players,dt);ForestRules.doorCollision(p,m.doors,oldX);p.y+=p.vy*dt;p.grounded=false;p.support=null;
@@ -868,7 +1016,7 @@ for(const platform of m.platforms){if(platform.h<30&&p.drop>0&&Math.abs(platform
 for(const pool of m.pools){if(p.y+p.h>494&&p.x+p.w>pool.x+6&&p.x<pool.x+pool.w-6&&pool.type!==p.type&&p.immunity<=0){respawn(p);return}}
 for(const hazard of m.hazards){hazard.on=((g.waveTime+hazard.x*.01)%4.5)<2.1;if(hazard.on&&p.immunity<=0&&hit(p,hazard)){respawn(p);return}}if(p.y>600){respawn(p);return}for(const gem of m.gems){if(!gem.got&&gem.type===p.type&&Math.hypot(p.x+14-gem.x,p.y+17-gem.y)<30){window.moneyJourneySound?.('success');gem.got=true;p.gems++;g.score++;burst(gem.x,gem.y,p.type?'#98e2ed':'#efac67');say(p.name+'搵到一隻精靈。兩邊都齊先到門口。')}}}
 for(const b of m.bodies)if(b.locked&&!b.announced){b.announced=true;window.moneyJourneySound?.('success');burst(b.x+b.w/2,b.y+b.h,'#d5edaa',14);say('石球卡實凹槽喇！佢會繼續壓住機關，可以一齊前進。')}ForestRules.update(m,g.players);for(const p of g.players)ForestRules.doorCollision(p,m.doors,p.x);const ready=m.doors.filter(d=>d.roomReady).length;ForestRules.checkpoint(m,g.players);if(ready<m.doors.filter(d=>d.roomReady).length)g.savePoint=ForestRules.savePoint(m,g.players,g.score);g.gateOpen=m.doors.every(d=>d.open);
-if(m.gems.every(gem=>gem.got)&&g.players.every((p,i)=>Math.abs(p.x+14-(894+i*44))<23&&p.y>440)){g.cleared=g.level;g.phase='between';if(arcadeForest())try{localStorage.setItem("forest-temples-v2",String(Math.max(forestUnlocked(),Math.min(9,g.level+1))))}catch{}const messages=['行動先過閘，規劃接住同伴。付款之前，兩邊都要到場。','行得快，仲要睇到下一步落邊。想要、需要同預算，都值得一齊諗。','等一等、調整路線，兩個都到終點。慢一步，仍然可以有選擇。'];overlay(`第 ${g.level} 關・兩個都到咗。`,messages[(g.level-1)%3],g.level<forestCount()?'去下一座機關':'返到付款前嗰一刻',()=>{if(g.level<forestCount()){g.level++;setupDuo();g.phase='playing';removeOverlay();say(g.level===2?'三道壓力閘；要兩邊交接，先可以一齊前進。':'留意激光週期同信用卡毒池，先安排兩邊路線。')}else{g.phase='won';window.finishArcade()}})}}
+if(m.gems.every(gem=>gem.got)&&(m.goals||[]).every(id=>m.signals[id])&&g.players.every((p,i)=>m.exits?p.grounded&&Math.abs(p.x+14-m.exits[i].x)<23&&Math.abs(p.y+p.h-m.exits[i].y)<4:Math.abs(p.x+14-(894+i*44))<23&&p.y>440)){g.cleared=g.level;g.phase='between';if(arcadeForest())try{localStorage.setItem("forest-temples-v2",String(Math.max(forestUnlocked(),Math.min(9,g.level+1))))}catch{}const messages=['行動先過閘，規劃接住同伴。付款之前，兩邊都要到場。','行得快，仲要睇到下一步落邊。想要、需要同預算，都值得一齊諗。','等一等、調整路線，兩個都到終點。慢一步，仍然可以有選擇。'];overlay(`第 ${g.level} 關・兩個都到咗。`,messages[(g.level-1)%3],g.level<forestCount()?'去下一座機關':'返到付款前嗰一刻',()=>{if(g.level<forestCount()){g.level++;setupDuo();g.phase='playing';removeOverlay();say(g.map?.hint||(g.level===2?'三道壓力閘；要兩邊交接，先可以一齊前進。':'留意激光週期同信用卡毒池，先安排兩邊路線。'))}else{g.phase='won';window.finishArcade()}})}}
 function updateSelection(){if(!g)return;document.querySelectorAll('[data-plant]').forEach(b=>{const selected=b.dataset.plant===g.selected;b.classList.toggle('selected',selected);b.setAttribute('aria-pressed',String(selected))});for(let i=0;i<2;i++){const b=$(i?'duo-ice':'duo-fire');if(b){b.classList.toggle('selected',g.active===i);b.setAttribute('aria-pressed',String(g.active===i))}}}
 window.journeySwitch=function(index){if(!g||g.key!=='pause'||g.paused)return;g.active=Number.isInteger(index)?index:1-g.active;g.keys.clear();updateSelection();say(g.names[g.active]+(g.active?'・規劃':'・行動')+'，輪到你。');};
 window.journeyRetry=function(){if(!g)return;g.retries++;if(g.key==='instalments')setupGarden();else setupDuo();g.phase='playing';g.paused=false;$('journey-pause').textContent='暫停';removeOverlay();say('返到呢一關，再試另一個安排。');updateHUD();};
@@ -883,18 +1031,18 @@ document.querySelectorAll('[data-hold]').forEach(b=>{let code;on(b,'pointerdown'
 const interact=$('duo-interact');if(interact)on(interact,'click',()=>{if(g.phase==='playing'&&!g.paused&&ForestRules.lever(g.map,g.players[g.active]))window.moneyJourneySound?.('select')});
 const sound=$('journey-sound');const soundLabel=()=>{sound.textContent=window.moneyJourneyAudioMuted?.()?'聲音：關':'聲音：開';sound.setAttribute('aria-pressed',String(!window.moneyJourneyAudioMuted?.()))};soundLabel();sound.onclick=()=>{window.setGameAudio('muted',!window.moneyJourneyAudioMuted?.());soundLabel()};
 $('journey-full').onclick=async()=>{try{if(!document.fullscreenElement)await $('dialog').requestFullscreen();else await document.exitFullscreen()}catch{say('呢個瀏覽器未能開全螢幕，可以照常玩。')}};}
-window.arcadePause=function(){if(!g)return prior.pause();if(g.phase!=='playing')return;g.paused=!g.paused;g.keys.clear();stamp=0;acc=0;$('journey-pause').textContent=g.paused?'繼續':'暫停';if(!g.paused)document.body.classList.remove('forest-help');if(g.paused)overlay('抖一抖，故事會等你。','進度停喺呢度，唔會偷偷扣時間。','繼續',()=>window.arcadePause());else removeOverlay();updateHUD();};
+window.arcadePause=function(){if(!g)return prior.pause();if(g.phase!=='playing')return;g.paused=!g.paused;g.keys.clear();stamp=0;acc=0;$('journey-pause').textContent=g.paused?'繼續':'暫停';if(!g.paused)document.body.classList.remove('forest-help');if(g.paused){overlay('抖一抖，故事會等你。',g.map?.hint||'進度停喺呢度，唔會偷偷扣時間。','繼續',()=>window.arcadePause());if(g.map?.id){const reset=document.createElement('button');reset.className='btn secondary';reset.textContent='重置本關同物件';reset.onclick=()=>window.journeyRetry();journey-next.after(reset)}}else removeOverlay();updateHUD();};
 window.guideHelp=function(){if(!g)return prior.help();if(!g.paused&&g.phase==='playing')window.arcadePause();const d=document.querySelector('.journey-help');if(d){if(g.key==='pause')document.body.classList.add('forest-help');d.open=true;d.scrollIntoView({block:'nearest'})}};
 window.arcadeText=function(k){stop();return prior.text(k)};window.closeModal=function(...args){stop();return prior.close(...args)};
-window.finishArcade=function(){if(!g)return prior.finish();const run=g,key=run.key,v=run.v,stats={version:2,kind:key==='instalments'?'defense':'duo',score:run.score,hits:run.hits,seconds:Math.round(run.playSeconds),difficulty:run.difficulty,remaining:Math.ceil(run.remaining),levels:run.cleared,completed:run.cleared===(key==='pause'?forestCount():3),retries:run.retries,demo};stop();s.arcade=s.arcade||{};const first=!s.arcade[key];s.arcade[key]=stats;if(first)spend(5);save();modal('重演之後',`<div class="kicker">${v.title} ／ 接返阿俊嘅故事</div><h2>${stats.completed?'你哋搵到一個安排。':'帶住今次嘅發現，繼續查。'}</h2><div class="response">${v.bridge}</div><p>完成 ${stats.levels}／3 ${key==='instalments'?'波':'關'}・嘗試 ${stats.seconds} 秒${stats.retries?'・重試 '+stats.retries+' 次':''}。</p><p class="subtle">${first?'主線調查時間推進 5 分鐘。':'重玩唔會再增加主線調查時間。'} 遊戲資源同阿俊嘅真實戶口分開；可以直接繼續調查。</p><div class="actions"><button class="btn" onclick="window.arcadeContinue('${key}')">返到帳單，作一個決定</button><button class="btn secondary" onclick="window.startArcade('${key}')">再試一次</button></div>`);};
+window.finishArcade=function(){if(!g)return prior.finish();const run=g,key=run.key,v=run.v,stats={version:2,kind:key==='instalments'?'defense':'duo',score:run.score,hits:run.hits,seconds:Math.round(run.playSeconds),difficulty:run.difficulty,remaining:Number.isFinite(run.remaining)?Math.ceil(run.remaining):null,levels:run.cleared,completed:run.cleared===(key==='pause'?forestCount():3),retries:run.retries,demo};stop();s.arcade=s.arcade||{};const first=!s.arcade[key];s.arcade[key]=stats;if(first)spend(5);save();modal('重演之後',`<div class="kicker">${v.title} ／ 接返阿俊嘅故事</div><h2>${stats.completed?'你哋搵到一個安排。':'帶住今次嘅發現，繼續查。'}</h2><div class="response">${v.bridge}</div><p>完成 ${stats.levels}／3 ${key==='instalments'?'波':'關'}・嘗試 ${stats.seconds} 秒${stats.retries?'・重試 '+stats.retries+' 次':''}。</p><p class="subtle">${first?'主線調查時間推進 5 分鐘。':'重玩唔會再增加主線調查時間。'} 遊戲資源同阿俊嘅真實戶口分開；可以直接繼續調查。</p><div class="actions"><button class="btn" onclick="window.arcadeContinue('${key}')">返到帳單，作一個決定</button><button class="btn secondary" onclick="window.startArcade('${key}')">再試一次</button></div>`);};
 function formatClock(n){const seconds=Math.ceil(Math.max(0,n));return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0')}
 function failStage(title,body){g.phase='retry';g.keys.clear();overlay(title,body,'重試呢一關',window.journeyRetry);updateHUD()}
-function updateHUD(){if(!g)return;const d=g.key==='instalments';$('journey-state').textContent=(g.paused?'已暫停・':'')+(d?'第 '+g.level+'／3 波':'第 '+g.level+'／'+forestCount()+' 關')+'・'+g.cfg.label;$('journey-resources').textContent=d?`${g.energy} 計劃點・已守住 ${g.score}`:`${g.names[0]} ${g.players[0].gems}／2・${g.names[1]} ${g.players[1].gems}／2・${'♥'.repeat(Math.max(0,g.cfg.lives-g.stageHits))}`;const clock=$('journey-time');clock.textContent=formatClock(g.remaining);clock.className='countdown'+(g.remaining<=15?' urgent':'');clock.setAttribute('aria-label','餘下 '+Math.ceil(g.remaining)+' 秒');window.moneyJourneyMusic?.(g.key,g.paused||g.phase!=='playing',g.remaining<=15);}
+function updateHUD(){if(!g)return;const d=g.key==='instalments';$('journey-state').textContent=(g.paused?'已暫停・':'')+(d?'第 '+g.level+'／3 波':'第 '+g.level+'／'+forestCount()+' 關')+'・'+g.cfg.label;$('journey-resources').textContent=d?`${g.energy} 計劃點・已守住 ${g.score}`:`${g.names[0]} ${g.players[0].gems}／2・${g.names[1]} ${g.players[1].gems}／2・${'♥'.repeat(Math.max(0,g.cfg.lives-g.stageHits))}`;const clock=$('journey-time');clock.textContent=Number.isFinite(g.remaining)?formatClock(g.remaining):'練習 · 無倒數';clock.className='countdown'+(g.remaining<=15?' urgent':'');clock.setAttribute('aria-label',Number.isFinite(g.remaining)?'餘下 '+Math.ceil(g.remaining)+' 秒':'練習 · 無倒數');window.moneyJourneyMusic?.(g.key,g.paused||g.phase!=='playing',g.remaining<=15);}
 function loop(t){if(!g||!g.canvas.isConnected){stop();return}let delta=stamp?Math.min(.08,(t-stamp)/1000):0;stamp=t;if(!g.paused&&g.phase==='playing'){g.playSeconds+=delta;g.remaining=Math.max(0,g.remaining-delta);if(g.remaining<=0)failStage('倒數到喇。','今次未過關。留低你諗通嘅一步，重新安排再試。');acc+=delta*g.speed;let n=0;while(acc>=1/120&&n++<12&&g?.phase==='playing'){g.time+=1/120;if(g.key==='instalments')gardenStep(1/120);else duoStep(1/120);acc-=1/120;}if(g){g.messageLife=Math.max(0,g.messageLife-delta);g.particles.forEach(p=>{p.life-=delta;p.x+=p.vx*delta;p.y+=p.vy*delta;p.vy+=140*delta});g.particles=g.particles.filter(p=>p.life>0);}}if(!g)return;g.hudAt+=delta;if(g.hudAt>.25){g.hudAt=0;updateHUD()}draw();raf=requestAnimationFrame(loop);}
 function draw(){if(g&&window.drawMoneyJourney)window.drawMoneyJourney(g);if(g?.map?.light){const c=g.ctx,l=g.map.light;c.save();c.strokeStyle=l.lit?'#adffab':'#f2bd5c';c.lineWidth=3;for(const [x,y,x2,y2] of l.segments){c.beginPath();c.moveTo(x,y);c.lineTo(x2,y2);c.stroke()}for(const m of l.mirrors){c.fillStyle=m.type?'#83daff':'#ffa875';c.fillText(m.turned?'╱':'╲',m.x-5,m.y+5)}c.fillRect(l.receiver[0]-4,l.receiver[1]-4,8,8);c.restore()}}
 document.getElementById('dialog').addEventListener('close',()=>{if(!document.getElementById('dialog').open)stop()});window.addEventListener('pagehide',stop);
 /* Read-only live state for QA and accessibility inspection; does not advance the game. */
-window.moneyJourneySnapshot=()=>g?{key:g.key,phase:g.phase,paused:g.paused,difficulty:g.difficulty,remaining:g.remaining,limit:g.limit,lives:g.cfg.lives-g.stageHits,hazards:g.map?.hazards,level:g.level,cleared:g.cleared,time:g.time,energy:g.energy,active:g.active,plants:g.plants?.map(p=>({kind:p.kind,row:p.row,col:p.col,hp:p.hp})),enemies:g.enemies?.map(e=>({row:e.row,x:e.x,hp:e.hp,type:e.type,slow:e.slow})),players:g.players?.map(p=>({...p})),gems:g.map?.gems.map(p=>({...p})),platforms:g.map?.platforms.map(p=>({...p})),bodies:g.map?.bodies?.map(b=>({...b})),docks:g.map?.docks?.map(d=>({...d})),gateOpen:g.gateOpen,levers:g.map?.levers,doors:g.map?.doors?.map(d=>({...d})),score:g.score,hits:g.hits}:null;
+window.moneyJourneySnapshot=()=>g?{key:g.key,phase:g.phase,paused:g.paused,difficulty:g.difficulty,remaining:g.remaining,limit:g.limit,lives:g.cfg.lives-g.stageHits,hazards:g.map?.hazards,level:g.level,cleared:g.cleared,time:g.time,energy:g.energy,active:g.active,plants:g.plants?.map(p=>({kind:p.kind,row:p.row,col:p.col,hp:p.hp})),enemies:g.enemies?.map(e=>({row:e.row,x:e.x,hp:e.hp,type:e.type,slow:e.slow})),players:g.players?.map(p=>({...p})),lights:g.map?.lights,exits:g.map?.exits,signals:g.map?.signals,gems:g.map?.gems.map(p=>({...p})),platforms:g.map?.platforms.map(p=>({...p})),bodies:g.map?.bodies?.map(b=>({...b})),docks:g.map?.docks?.map(d=>({...d})),gateOpen:g.gateOpen,levers:g.map?.levers,doors:g.map?.doors?.map(d=>({...d})),score:g.score,hits:g.hits}:null;
 })();
 
 

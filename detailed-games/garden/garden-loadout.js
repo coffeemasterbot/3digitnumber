@@ -10,17 +10,17 @@ function configureGardenSeeds(stageControl,startButton) {
     return cards.map(card=>{
       const id=card.dataset.plant,world=unlock(id);
       return {id,name:card.querySelector('.name').textContent,cost:Number(card.dataset.cost),
-        art:card.querySelector('.emoji'),locked:!available(id),unlockText:id==='repeater'?'世界一第三關開放':'世界 '+world+' 開放'};
+        art:card.querySelector('.emoji'),locked:!available(id),unlockText:id==='repeater'?'第 2 關開放':'世界 '+world+' 開放'};
     });
   }
   function enemies(){
     const ids=new Set(),level=gardenLevel();
     for(let wave=1;wave<=5;wave++){
-      const state=GardenRules.wave(wave,level,(Number(stageControl.value)-1)%3);
-      for(let n=0;n<state.total;n++)ids.add(level>=4&&wave===5&&n===0?'giant':GardenEnemies.spawn(level,wave,n+1,(wave+n*2)%5));
+      const state=GardenRules.wave(wave,level);
+      for(let n=0;n<state.total;n++)ids.add(level===4&&wave===5&&n===0?'giant':GardenEnemies.spawn(level,wave,n+1,(wave+n*2)%5));
     }
     if(ids.has('dancer'))ids.add('backup');
-    if(Number(stageControl.value)===15)ids.add('boss');
+    if(GardenRules.STAGES[level-1].id==='roof')ids.add('boss');
     const names={normal:'信用卡超支',cone:'情緒消費',bucket:'分期疊加',giant:'債務巨人',boss:'機械博士'};
     return Array.from(ids,id=>{
       const art=document.createElement('span');art.textContent=zombieTypes[id]?.emoji||'';

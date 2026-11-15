@@ -1,6 +1,6 @@
 (() => {
  const targets={defence:[1,2,3].map(n=>'round-'+n),pause:Array.from({length:9},(_,i)=>i+1).map(n=>'temple-'+n),
-  instalments:Array.from({length:15},(_,i)=>Array.from({length:5},(_,j)=>'garden-'+(i+1)+'-'+(j+1))).flat(),
+  instalments:GardenRules.STAGES.flatMap(stage=>Array.from({length:GardenRules.WAVES},(_,j)=>'garden-'+stage.world+'-'+(j+1))),
   shipping:['drill','gravity','blink','mecha','dragon','glider'],coins:['jetpack','pogo','magnet','shoes']};
  window.arcadeDevTargets=targets;
  if(parent===window)return;

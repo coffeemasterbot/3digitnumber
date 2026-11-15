@@ -12,7 +12,7 @@ const GardenEnemies=(()=>{
    if(level===3&&row===2)return index%2?'diver':'float';
    const pools=[['normal','cone'],['normal','cone','bucket','pole','paper','football'],
      ['normal','pole','dancer','paper'],['normal','screen','zomboni','football','bucket'],['screen','dancer','football','zomboni','pole']];
-   const pool=pools[level-1];
+   const pool=level===5&&wave===5?['normal','cone']:pools[level-1];
    return pool[(wave+index)%pool.length];
  }
  function init(z){
@@ -61,7 +61,7 @@ const GardenEnemies=(()=>{
  }
  function reinforcements(dt){
    const live=gameState.zombies.filter(z=>z.element);
-   let slots=Math.max(0,12-live.length);
+   let slots=gameState.boss?Math.max(0,GardenRules.BOSS.minions-live.filter(z=>z.type!=='boss').length):Math.max(0,12-live.length);
    for(const z of live){
      if(!slots)break;
      const col=Math.max(0,Math.min(8,Math.floor(z.x/gameState.cellSize.width)));

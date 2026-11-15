@@ -17,3 +17,11 @@ body[data-game=jet]{background:#e8ce9e!important}body[data-game=jet] #root>div{b
 .runner-hud {background:linear-gradient(110deg,#253c48f2,#314952ed);border:1px solid #617882;border-left:5px solid #ffbc4f;color:#fff1d9;border-radius:6px}
 .runner-hud strong,.runner-hud b {color:#ffd277}
 body[data-game=jet] #root [class*="bg-black/90"] {background:linear-gradient(135deg,#192e43f5,#304554f5)!important;border-color:#91aeb3!important}
+.jet-revive{position:absolute;inset:0;z-index:60;background:#101c2bd9;display:grid;place-items:center;padding:10px}
+.jet-revive section{background:#fff1d6;color:#25394a;border:3px solid #d19c5d;border-radius:16px;width:min(420px,100%);max-height:100%;overflow:auto;padding:16px 24px;text-align:center;box-shadow:0 12px 36px #0008}
+.jet-revive h2,.jet-revive p{margin:4px 0 8px}
+.jet-revive button{min-height:44px;width:100%;margin:3px 0;border-radius:8px;border:1px solid #597073;font-weight:700}
+.jet-revive-primary{background:#e4a342;color:#1b302b}
+.jet-revive-primary:disabled{opacity:.55}
+.jet-revive button:focus-visible{outline:3px solid #126e9a;outline-offset:2px}
+@media(max-height:420px){.jet-revive section{padding:8px 18px}.jet-revive h2{font-size:20px}}
