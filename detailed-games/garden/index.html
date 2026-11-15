@@ -966,7 +966,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 health: 3.6,
                 maxHealth: 3.6,
                 produces: 'sun', 
-                sunAmount: 40,
+                sunAmount: SunflowerRules.yieldAmount,
                 interval: 15000,
                 shoots: false,
                 damage: 0.5,
@@ -1523,7 +1523,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             const cell = plant.element.parentElement;
             const rect = cell.getBoundingClientRect();
             const plantType = plantTypes[plant.type];
-            const sunValue = plantType.sunAmount || 40;  // Default to 40 (80% of 50)
+            const sunValue = plantType.sunAmount;
             
             const sun = document.createElement('div');
             sun.className = 'sun';

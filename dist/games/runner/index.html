@@ -1,1 +1,79 @@
-<!doctype html><html lang="zh-HK"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>散紙追蹤 3D</title><link rel="icon" href="../../assets/site-icon.svg"><link rel="stylesheet" href="style.css"></head><body data-game="runner"><div id="root"></div><script src="app.js"></script><script src="../game-shell.js"></script><link rel="stylesheet" href="../leaderboard.css"><script src="../leaderboard.js"></script></body></html>
+<!doctype html><html lang="zh-HK"><head><script>(() => {
+ const targets={defence:[1,2,3].map(n=>'round-'+n),pause:Array.from({length:9},(_,i)=>i+1).map(n=>'temple-'+n),
+  instalments:Array.from({length:15},(_,i)=>Array.from({length:5},(_,j)=>'garden-'+(i+1)+'-'+(j+1))).flat(),
+  shipping:['drill','gravity','blink','mecha','dragon','glider'],coins:['jetpack','pogo','magnet','shoes']};
+ window.arcadeDevTargets=targets;
+ if(parent===window)return;
+ const [version,game,target]=window.name.split('/');
+ if(version!=='arcade-test-v1'||!targets[game]?.includes(target))return;
+ const data=new Map();
+ Object.defineProperty(window,'localStorage',{value:{getItem:k=>data.get(String(k))??null,setItem:(k,v)=>data.set(String(k),String(v)),removeItem:k=>data.delete(String(k)),clear:()=>data.clear(),key:i=>Array.from(data.keys())[i]??null,get length(){return data.size}}});
+ const runId=crypto.randomUUID();window.arcadeTest={isTest:true,game,target,runId};
+ document.addEventListener('DOMContentLoaded',()=>{
+  const banner=document.createElement('aside');banner.style.cssText='position:fixed;z-index:9999;top:0;left:0;padding:2px 6px;background:#542e24;color:white;font:12px system-ui';
+  banner.textContent='測試局 · '+target+' · 不記成績 ';for(const [label,action] of [['重啟','restart'],['下一段','next'],['退出','end']]){
+   const b=document.createElement('button');b.textContent=label;b.onclick=()=>parent.postMessage({type:'arcade-test-v1',action,game,target,runId},location.origin==='null'?'*':location.origin);banner.append(b)
+  }(document.querySelector('dialog[open]')||document.body).append(banner)
+ });
+})();
+</script><script>// One owner per game document. URLs may also be self-contained data URIs.
+window.createGameAudio=function(sources,stopLegacyMusic){
+  const music=new Map(),effects=new Set(),heard=new Set();
+  const storageKey='money-journey-audio-v1',settings={music:.45,effects:.65};
+  const clamp=n=>Math.max(0,Math.min(1,n));
+  try{
+    const saved=JSON.parse(localStorage.getItem(storageKey));
+    if(saved&&typeof saved==='object'&&!Array.isArray(saved))
+      for(const k of Object.keys(settings))if(Number.isFinite(saved[k]))settings[k]=clamp(saved[k]);
+  }catch{}
+  let desired=null,current=null,frame=0,unlocked=false,paused=false,disposed=false,position=0;
+  function clear(){
+    cancelAnimationFrame(frame);
+    for(const a of [...music.keys(),...effects])a.pause();
+    music.clear();effects.clear();current=null;
+  }
+  function play(){
+    if(disposed||paused||!unlocked||!sources[desired]||current?.id===desired)return;
+    stopLegacyMusic?.();
+    const a=new Audio(sources[desired]);a.id=desired;a.loop=true;a.volume=0;
+    if(position>0)a.currentTime=position;
+    current=a;music.set(a,0);a.play().catch(()=>{music.delete(a);if(current===a)current=null});
+    cancelAnimationFrame(frame);const start=performance.now(),initial=new Map(music);
+    function fade(t){
+      const k=clamp((t-start)/350);
+      for(const track of music.keys()){
+        const gain=track===a?k:(1-k)*(initial.get(track)||0);
+        music.set(track,gain);track.volume=gain*settings.music;
+        if(k===1&&track!==a){track.pause();music.delete(track)}
+      }
+      if(k<1)frame=requestAnimationFrame(fade);
+    }
+    frame=requestAnimationFrame(fade);
+  }
+  function unlock(){unlocked=true;play()}
+  function hidden(){if(document.hidden)api.pause()}
+  const api={
+    track(id){if(disposed)return;if(id!==desired)position=0;desired=id;if(id==null)clear();else play()},
+    effect(id,eventId){
+      if(disposed||paused||!unlocked||!sources[id])return;
+      if(eventId!=null){const key=id+':'+eventId;if(heard.has(key))return;heard.add(key);if(heard.size>512)heard.delete(heard.values().next().value)}
+      if(effects.size>=4||!settings.effects)return;
+      const a=new Audio(sources[id]);a.volume=settings.effects;effects.add(a);
+      const done=()=>effects.delete(a);a.onended=done;a.onerror=done;a.play().catch(done);
+    },
+    volume(channel,value){
+      if(disposed||!Object.hasOwn(settings,channel)||!Number.isFinite(value))return;
+      settings[channel]=clamp(value);
+      if(channel==='music'){for(const [a,gain] of music)a.volume=gain*settings.music}
+      else for(const a of effects)a.volume=settings.effects;
+      try{localStorage.setItem(storageKey,JSON.stringify(settings))}catch{}
+    },
+    pause(){if(disposed||paused)return;paused=true;position=current?.currentTime||0;clear()},
+    resume(){if(disposed)return;paused=false;play()},
+    dispose(){disposed=true;clear();heard.clear();document.removeEventListener('pointerdown',unlock,true);document.removeEventListener('keydown',unlock,true);document.removeEventListener('visibilitychange',hidden);window.removeEventListener('pagehide',api.dispose)}
+  };
+  document.addEventListener('pointerdown',unlock,true);document.addEventListener('keydown',unlock,true);
+  document.addEventListener('visibilitychange',hidden);window.addEventListener('pagehide',api.dispose);
+  return api;
+};
+;window.gameAudio=createGameAudio({"garden-picker":"../../assets/game-audio/garden-picker.mp3","garden-1":"../../assets/game-audio/garden-1.mp3","garden-2":"../../assets/game-audio/garden-2.mp3","garden-3":"../../assets/game-audio/garden-3.mp3","garden-4":"../../assets/game-audio/garden-4.mp3","garden-5":"../../assets/game-audio/garden-5.mp3","garden-boss":"../../assets/game-audio/garden-boss.mp3","jet":"../../assets/game-audio/jet.mp3","runner":"../../assets/game-audio/runner.mp3","coin":"../../assets/game-audio/coin.mp3","forest":"../../assets/game-audio/forest.mp3","kill":"../../assets/game-audio/kill.mp3","reload":"../../assets/game-audio/reload.mp3"});</script><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>散紙追蹤 3D</title><link rel="icon" href="../../assets/site-icon.svg"><link rel="stylesheet" href="style.css"></head><body data-game="runner"><div id="root"></div><script src="app.js"></script><script src="../game-shell.js"></script><link rel="stylesheet" href="../leaderboard.css"><script src="../leaderboard.js"></script></body></html>

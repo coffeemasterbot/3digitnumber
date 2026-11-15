@@ -1,14 +1,15 @@
 (()=>{'use strict';for(const z of Object.values(zombieTypes)){z.health=Math.ceil(z.health*1.3);z.maxHealth=z.health}zombieTypes.giant={emoji:'🗿',health:220,maxHealth:220,speed:5,damage:3,points:1500};let storage;try{storage=window.localStorage}catch{}
-const campaign=GardenRules.campaign(storage);
+const campaign=GardenRules.campaign(storage);const dev=window.arcadeTest?.target.split('-').map(Number);if(dev)campaign.level=dev[1];
+window.gardenRepeaterAvailable=()=>campaign.repeater||!!dev&&campaign.level>=3;
 window.gardenLevel=()=>Math.ceil(campaign.level/3);
 let recommendSeeds;
 window.addEventListener('load',()=>{
  const start=document.getElementById('garden-start');if(!start)return;
  const select=document.createElement('select');select.setAttribute('aria-label','戰役選關');
- GardenRules.STAGES.forEach((title,i)=>{const option=new Option('世界 '+(Math.floor(i/3)+1)+' · '+(i%3+1)+' '+title,i+1);option.disabled=i+1>campaign.unlocked;select.add(option)});
+ GardenRules.STAGES.forEach((title,i)=>{const option=new Option('世界 '+(Math.floor(i/3)+1)+' · '+(i%3+1)+' '+title,i+1);option.disabled=!dev&&i+1>campaign.unlocked;select.add(option)});
  select.value=campaign.level;start.before(select);
  select.onchange=()=>{const id=Number(select.value);if(id>=1&&id<=campaign.unlocked){campaign.level=id;spawnZombieWave()}};
- recommendSeeds=configureGardenSeeds(select,start);
+ recommendSeeds=configureGardenSeeds(select,start);if(dev){select.disabled=true;start.addEventListener('click',()=>{gameState.wave=dev[2];spawnZombieWave();if(campaign.level===15&&gameState.wave===5)GardenBoss.start()},{once:true})}
 });
 const container=document.getElementById('gameContainer'),track=document.createElement('div');track.id='campaign-track';track.innerHTML='<span id="campaign-label"></span><div class="campaign-rail"><progress id="campaign-progress" max="1" value="0" aria-label="波數進度"></progress><i style="left:25%">⚑</i><i style="left:50%">⚑</i><i style="left:75%">⚑</i><i style="left:98%">◆</i></div><small id="campaign-next"></small>';container.append(track);
 const mowerSVG='<svg viewBox="0 0 64 54" aria-hidden="true"><path d="M42 29L35 7H19" fill="none" stroke="#e8d2a4" stroke-width="5"/><path d="M9 27h42l6 14H4z" fill="#bc5943" stroke="#713b31" stroke-width="3"/><rect x="19" y="16" width="22" height="18" rx="4" fill="#e8b74f" stroke="#805d34" stroke-width="3"/><circle cx="16" cy="44" r="8" fill="#304e42"/><circle cx="47" cy="44" r="8" fill="#304e42"/><circle cx="16" cy="44" r="3" fill="#e3cb8e"/><circle cx="47" cy="44" r="3" fill="#e3cb8e"/></svg>';

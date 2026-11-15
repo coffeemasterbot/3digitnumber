@@ -58,7 +58,10 @@ for(const file of ['model.js','game.js','style.css'])fs.copyFileSync(path.join(r
 fs.copyFileSync(path.join(root,'source','budget-defence','index.html'),path.join(dist,'games','budget-defence','range.html'));
 fs.copyFileSync(path.join(root,'source','fps','index.html'),path.join(dist,'games','budget-defence','index.html'));
 fs.copyFileSync(path.join(root,'source','fps','fps.css'),path.join(dist,'games','budget-defence','fps.css'));
-fs.copyFileSync(path.join(root,'source','fps','preview.svg'),path.join(dist,'assets','preview-defence.svg'));
+for(const game of require('./source/game-catalogue.cjs')){
+  const file='preview-'+game.art+'.png';
+  fs.copyFileSync(path.join(root,'source','game-previews',file),path.join(dist,'assets',file));
+}
 fs.copyFileSync(path.join(root,'source','site-icon.svg'),path.join(dist,'assets','site-icon.svg'));
 fs.copyFileSync(path.join(root,'garden-duo.css'),path.join(dist,'garden-duo.css'));
 if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missing talk poster asset');
@@ -69,5 +72,15 @@ fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'present
 
 if(!process.argv.includes('--preserve-arcade'))require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});
 
+const audioDir=path.join(root,'source/game-audio');
+const audioManifest=JSON.parse(fs.readFileSync(path.join(audioDir,'manifest.json'),'utf8'));
+fs.cpSync(path.join(root,'source/game-covers'),path.join(dist,'assets/game-covers'),{recursive:true});
+fs.mkdirSync(path.join(dist,'assets/game-audio'),{recursive:true});
+for(const f of Object.values(audioManifest))fs.copyFileSync(path.join(audioDir,f),path.join(dist,'assets/game-audio',f));
+const devScript=fs.readFileSync(path.join(root,'source/dev-session.js'),'utf8');
+for(const rel of ['index.html','story/index.html',...['budget-defence','runner','jet','garden'].map(game=>'games/'+game+'/index.html')]){
+ const target=path.join(dist,rel),page=fs.readFileSync(target,'utf8');
+ fs.writeFileSync(target,page.replace('<head>',()=>{let scripts='<script>'+devScript+'</script>';if(rel!=='index.html'){const base=rel.startsWith('story')?'../':'../../';const sources=Object.fromEntries(Object.entries(audioManifest).map(([k,v])=>[k,base+'assets/game-audio/'+v]));scripts+='<script>'+fs.readFileSync(path.join(audioDir,'player.js'),'utf8')+';window.gameAudio=createGameAudio('+JSON.stringify(sources)+');</script>'}return '<head>'+scripts}));
+}
 require('./build-offline.cjs');
 require('./build-server.cjs');

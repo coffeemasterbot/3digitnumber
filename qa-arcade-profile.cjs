@@ -6,9 +6,11 @@ try{
  await p.goto('http://127.0.0.1:'+server.address().port);
  const profile=p.locator('#arcade-profile');await profile.locator('summary').click();
  const file=profile.locator('input[type=file]');
- const backup={version:2,profile:{name:'測試玩家',recent:'coins'},records:{coins:{best:150,plays:2}},progress:{gardenStage:7,runnerBest:150,jetBest:89}};
+ const backup={version:2,profile:{name:'測試玩家',recent:'coins'},records:{coins:{best:150,plays:2}},progress:{gardenStage:2,seedRules:1,legacyRepeater:false,runnerBest:150,jetBest:89}};
  await file.setInputFiles({name:'backup.json',mimeType:'application/json',buffer:Buffer.from(JSON.stringify(backup))});
  await profile.locator('[data-import]').click();
+ const campaign=await p.evaluate(()=>localStorage.getItem('garden-campaign-v2'));
+ assert.equal(require('./source/garden-rules.js').campaign({getItem:k=>k==='garden-campaign-v2'?campaign:null}).repeater,false);
  assert.match(await profile.locator('ul').innerText(),/150 分 · 2 局/);
  const [download]=await Promise.all([p.waitForEvent('download'),profile.locator('[data-export]').click()]);
  assert.deepEqual(JSON.parse(fs.readFileSync(await download.path())),backup);

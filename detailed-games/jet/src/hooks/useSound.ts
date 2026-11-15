@@ -167,7 +167,7 @@ export function useSound(enabled: boolean) {
   }, [getCtx]);
 
   const stopBGM = useCallback(() => {
-    bgmPlayingRef.current = false;generationRef.current++;if(bgmTimerRef.current!==null){clearTimeout(bgmTimerRef.current);bgmTimerRef.current=null;}
+    (window as any).gameAudio?.pause();bgmPlayingRef.current = false;generationRef.current++;if(bgmTimerRef.current!==null){clearTimeout(bgmTimerRef.current);bgmTimerRef.current=null;}
     bgmNodesRef.current.forEach(({ osc, gain }) => {
       try { osc.stop(); } catch {}
     });
@@ -188,7 +188,7 @@ export function useSound(enabled: boolean) {
       case 'hit':     playHit();   break;
       case 'death':   playDeath(); break;
       case 'start':   playStart(); break;
-      case 'bgm':     startBGM();  break;
+      case 'bgm':     if((window as any).gameAudio){(window as any).gameAudio.track('jet');(window as any).gameAudio.resume()}else startBGM();  break;
     }
   }, [enabled, playThrust, playCoin, playPowerUp, playHit, playDeath, playStart, startBGM]);
 

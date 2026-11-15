@@ -1,0 +1,16 @@
+.garden-picker{background:#fff1ca;color:#403c28;padding:8px;border:2px solid #9c8159;border-radius:12px;text-align:left;min-width:0}
+.garden-picker h2,.garden-picker h3{margin:0 0 4px;font-size:15px}
+.picker-tray,.picker-library,.picker-enemies{display:grid;gap:4px}
+.picker-tray{grid-template-columns:repeat(8,minmax(0,1fr));padding:5px;background:#715a40;border-radius:7px}
+.picker-tray>*,.picker-library button,.picker-enemies>span{min-width:0;display:grid;justify-items:center;align-content:center;background:#fff8df;color:#303d2b;border:1px solid #b29969;border-radius:5px;padding:3px;font:600 11px/1.2 system-ui}
+.garden-picker svg,.garden-picker img{width:32px;height:32px;object-fit:contain}
+.picker-columns{display:grid;grid-template-columns:2fr 1fr;gap:12px;margin:8px 0}
+.picker-library{grid-template-columns:repeat(auto-fit,minmax(55px,1fr))}
+.picker-enemies{grid-template-columns:repeat(auto-fit,minmax(51px,1fr))}
+.picker-library button[aria-pressed=true]{border:2px solid #467839;background:#e0efb9}
+.picker-library button:disabled{opacity:.65}
+.garden-picker footer{display:flex;align-items:center;gap:8px}.garden-picker output{margin-right:auto}
+.garden-picker button:focus-visible{outline:3px solid #156694;outline-offset:1px}
+@media(max-height:420px){.picker-columns{max-height:125px;overflow-y:auto}.garden-picker svg{height:23px}.garden-picker h2{font-size:14px}}
+.picker-library button[aria-disabled=true]{background:#e4dfd0;color:#4d4d43;cursor:default}
+.picker-library small{font-size:10px;overflow-wrap:anywhere}

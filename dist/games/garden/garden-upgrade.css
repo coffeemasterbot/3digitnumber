@@ -39,3 +39,42 @@
 .boss-attack{position:fixed;z-index:8;pointer-events:none;transform:translate(-50%,-50%);display:grid;place-items:center;width:38px;height:38px;font-weight:bold;background:#f9dc9a;border:3px solid #ad3923;color:#863120;border-radius:55% 45% 38% 62%;box-shadow:0 0 12px #eb8545}.boss-attack.ice{border-radius:6px;background:#d5f4ff;color:#226280;border-color:#4d9fb6}.boss-attack.stomp{border-radius:4px;background:#eac451;border-color:#685233;color:#423b23}
 #garden-intro{overflow:auto;align-items:safe center;padding:8px}#garden-intro section{max-width:min(660px,95vw);padding:12px 20px;line-height:1.35}
 .seed-loadout{padding:6px;border:1px solid #829565;border-radius:8px;margin:6px 0}.seed-loadout div{display:flex;flex-wrap:wrap;gap:3px;justify-content:center}.seed-loadout button{border:1px solid #859778;background:#ecebd4;color:#254e34;border-radius:4px;padding:4px 7px}.seed-loadout button[aria-pressed=true]{background:#315c42;color:white}.seed-loadout button:disabled{opacity:.5}.seed-loadout output{display:block}.plantCard[hidden]{display:none!important}
+
+/* Field guide pages and seed packets. */
+#garden-guide article {background:radial-gradient(ellipse at top,#fff4c9,#ead0a1);color:#51391e;border:2px solid #956e40;box-shadow:inset 0 0 18px #a17d4736}
+#garden-guide .guide-art {background:radial-gradient(ellipse at 50% 82%,#718946 0 18%,transparent 19%),linear-gradient(#aed6ab,#d4e6a0 70%,#92ae57 71%);border:3px solid #826842;border-radius:7px}
+#garden-guide nav button[aria-pressed=true] {outline:3px solid #a85e25;outline-offset:-3px}
+#gameBoard .cell:not(.water-lane):not([data-base=true]):not([data-iced=true]) {background-image:radial-gradient(ellipse at 22% 72%,#315f281c 0 2%,transparent 3%),radial-gradient(ellipse at 74% 24%,#d9ed922e 0 2%,transparent 3%);background-size:27px 18px,37px 26px}
+
+/* Clipped bands of turf keep the rows readable behind the silhouettes. */
+#gameBoard {border-color:#82694a;background-color:#499339}
+#gameBoard .cell:not(.water-lane):not([data-base=true]):not([data-iced=true]) {
+  background-color:#72b942;
+  background-image:radial-gradient(ellipse at 22% 72%,#316f2b55 0 2%,transparent 4%),radial-gradient(ellipse at 74% 24%,#bfe77466 0 3%,transparent 5%),linear-gradient(105deg,#ffffff0b,#306b1c1c);
+  border-color:#659f393a;
+}
+#gameBoard .cell:nth-child(even):not(.water-lane):not([data-base=true]):not([data-iced=true]) {background-color:#68ac3f}
+#gameBoard .cell.water-lane {background:repeating-radial-gradient(ellipse at 25% -80%,#65afbd 25%,#aadbd4 27%,#58a6b3 30%,#448b9f 42%);background-size:58px 29px}
+#gameBoard .cell[data-base=true] {background:conic-gradient(from 35deg at 49% 56%,transparent 0 22deg,#0000 22deg),radial-gradient(ellipse at 50% 48%,#afce71 0 23%,#74a34e 25% 48%,#537b3c 50% 54%,#397b89 57%,#80c1c6 67%);box-shadow:inset 0 -3px 6px #456b693b}
+#gameBoard .cell[data-iced=true] {background:linear-gradient(136deg,transparent 36%,#fff 37%,transparent 39%),linear-gradient(67deg,transparent 58%,#a6e0f1 59%,transparent 62%),linear-gradient(155deg,#d5f4f7,#8ac5dc 50%,#ebffff);background-size:47px 39px,31px 55px,100% 100%}
+#gameBoard .plant>svg,.zombie>svg {filter:drop-shadow(0 2px 0 #38522c) drop-shadow(1px 4px 2px #2c4c3159)}
+.zombie.eating>svg {transform-origin:50% 82%;animation:enemy-chew .44s ease-in-out infinite alternate}
+@keyframes enemy-chew {to{transform:rotate(-5deg) translateX(-2px)}}
+@media(prefers-reduced-motion:reduce){.zombie.eating>svg{animation:none}}
+.zombie .habit-body svg {display:block;width:1.05em;height:1.13em;overflow:visible}
+.zombie.eating .habit-body svg {transform-origin:45% 78%;animation:enemy-chew .4s ease-in-out infinite alternate}
+.zombie.damage-effect .habit-body svg {filter:brightness(1.45)}
+@media(prefers-reduced-motion:reduce){.zombie.eating .habit-body svg{animation:none}}
+@media (orientation:landscape) and (max-height:420px){
+ #ui {height:78px!important;padding:3px 7px;box-sizing:border-box}
+ #plantSelection .plantCard:not([hidden]) {display:grid;grid-template-rows:31px 13px 13px;justify-items:center;align-items:center;align-content:center;height:65px;min-width:50px;padding:0;gap:0;box-sizing:border-box}
+ #plantSelection .plantCard .emoji {grid-row:1;height:30px!important;margin:0}
+ #plantSelection .plantCard .emoji svg {display:block;height:30px;width:32px}
+ #plantSelection .plantCard .name {grid-row:2}
+ #plantSelection .plantCard .cost {grid-row:3;color:#735210}
+ #plantSelection .plantCard :is(.name,.cost){position:static;font-size:10px!important;line-height:12px;padding:0;margin:0;white-space:nowrap}
+ #wave {top:92px!important;left:16px!important;right:auto!important;padding:1px 8px!important;font-size:11px!important;line-height:14px;flex-direction:row;gap:3px}
+ #gameBoard {top:111px!important}
+}
+.zombie.mechanical-body .habit-body {background:none;border:0}
+.zombie .habit-body:has(svg){transform:none}

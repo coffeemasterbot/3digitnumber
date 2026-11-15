@@ -20,11 +20,7 @@ home=replaceRequired(home,
   '公開遊戲連結，不需要登入。排行榜會顯示玩家自選暱稱及每局成績。',
   '呢個 GitHub Pages 版本毋須登入；遊戲最佳分數只保存在本機，不設共用排行榜。',
   'Pages score notice');
-home=replaceRequired(home,
-  'value="https://lost-found-money-journey.cottonpatch1.chatgpt.site/#play"',
-  'value=""',
-  'share link');
-home=home.replace('</body>', '<script>const share=document.getElementById("share-url");if(share)share.value=location.href.split("#")[0]+"#play";</script></body>');
+
 fs.writeFileSync(path.join(output,'index.html'),home);
 
 const slideFile=path.join(output,'presentation.js');

@@ -114,7 +114,7 @@ export function Game() {
     }else extras[p.kind]=extras.time+POWER_DURATION[p.kind];return false}return p.z+distanceRef.current<10});
     if (collectedCoins.length > 0) {
       collectedCoins.forEach(coin => {
-        if(removeCoin(coin.id)){addCoin();window.dispatchEvent(new Event('runner-coin'))}
+        if(removeCoin(coin.id)){addCoin();window.dispatchEvent(new CustomEvent('runner-coin',{detail:crypto.randomUUID()}))}
       });
     }
   });

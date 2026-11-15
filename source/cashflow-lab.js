@@ -2,7 +2,7 @@
  const core=window.JourneyCore, key='arcade-cashflow-lab-v1', el=id=>document.getElementById(id);
  const defaults=()=>({A:core.example(),B:{...core.example(),payday:5}});
  const fields={openingCents:'手上現金',pendingIncomeCents:'預計收入',payday:'到帳日（1–7）',foodCents:'每日餐費',travelCents:'每日交通',voucherCents:'頭兩日每張飯券面值',phoneCents:'必要電話費',phoneDay:'電話費到期日',socialCostCents:'可調聚餐支出',socialDay:'聚餐付款日'};
- const quick=['openingCents','payday','foodCents','travelCents','phoneCents','socialCostCents'];
+ const quick=['openingCents','pendingIncomeCents','payday'];
  const money=cents=>new Intl.NumberFormat('zh-HK',{style:'currency',currency:'HKD',currencyDisplay:'narrowSymbol'}).format(cents/100);
  let scenarios=defaults(), active='A', pending=null;
  const status=text=>{el('lab-status').textContent=text};
@@ -35,6 +35,11 @@
   }
   const a=core.calculateCashflow(scenarios.A),b=core.calculateCashflow(scenarios.B);
   const describe=r=>r.firstDeficitDay?'第 '+r.firstDeficitDay+' 日首次不足，當日差 '+money(-r.ledger[r.firstDeficitDay-1].balanceCents)+'。最大缺口 '+money(r.gapCents):'七日每日結餘均足夠';
+  const peak=Math.max(1,...a.ledger.map(day=>Math.abs(day.balanceCents)));
+  el('balance-days').innerHTML=a.ledger.map(day=>{
+   const width=Math.abs(day.balanceCents)/peak*100;
+   return '<div class="balance-day"><span>第 '+day.day+' 日'+(day.incomeCents?' · 到帳':'')+'</span><span class="balance-track"><i class="'+(day.balanceCents<0?'deficit':'')+'" style="width:'+width+'%"></i></span><strong>'+money(day.balanceCents)+'</strong></div>';
+  }).join('');
   el('quick-result').textContent='A · '+describe(a)+'。期末 '+money(a.closingCents);
   el('lab-summary').textContent='B · '+describe(b)+'。期末 '+money(b.closingCents);
   const current=(active==='A'?a:b).ledger;

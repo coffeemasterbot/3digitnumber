@@ -112,13 +112,13 @@ export default function HUD({
             <span className="font-mono text-xs font-bold uppercase leading-none" style={{ color: pwCfg.color }}>
               {pwCfg.label}
             </span>
-            {/* Timer bar */}
+            {!['mecha','glider','drill','gravity','blink','dragon'].includes(activePowerUp) && (
             <div className="w-24 h-1.5 rounded-full bg-white/10 overflow-hidden">
               <motion.div
                 className="h-full rounded-full"
                 style={{ backgroundColor: pwCfg.color, width: `${powerUpTimeLeft * 100}%`, boxShadow: `0 0 6px ${pwCfg.color}` }}
               />
-            </div>
+            </div>)}
           </div>
         </motion.div>
       )}

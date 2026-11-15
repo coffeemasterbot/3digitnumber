@@ -1,7 +1,7 @@
 import {airRoute} from '../../../../source/runner-air.mjs';
 import{canSpawnObstacle}from'../../../../source/runner-rules.mjs';
 import { useRef, useCallback } from 'react';
-import { LANES, CHUNK_LENGTH } from '../utils/constants';
+import { LANES, MAX_SPEED, CHUNK_LENGTH } from '../utils/constants';
 import type { ObstacleType, ObstacleData } from './Obstacle';
 import type { CoinData } from './Coin';
 
@@ -48,7 +48,7 @@ export function useSpawner() {
   },[]);
   const spawn = useCallback((currentZ: number) => {
     const state = stateRef.current;
-    const spawnAheadDistance = CHUNK_LENGTH * 3;
+    const spawnAheadDistance = Math.max(CHUNK_LENGTH*3,MAX_SPEED*6);
     const despawnBehindDistance = 10;
 
     // Spawn new items ahead

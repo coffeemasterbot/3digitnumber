@@ -34,17 +34,17 @@ function step(state,dt,alive){
 function progress(s,victory=false){return victory?1:Math.min(.999,(s.number-1+Math.min(1,s.elapsed/DURATION))/WAVES)}
 function campaign(storage){
   const key='garden-campaign-v2';
-  let unlocked=1;
+  let unlocked=1,legacyRepeater=false;
   try{
     const raw=storage.getItem(key);
     const old=storage.getItem('pvz_gameState');
     if(old&&!storage.getItem('pvz_gameState-pre-campaign'))storage.setItem('pvz_gameState-pre-campaign',old);
     const data=JSON.parse(raw||storage.getItem('garden-campaign-v1')||'null');
-    if(data&&Number.isInteger(data.unlocked)&&data.unlocked>=1){if(data.version===2&&data.unlocked<=15)unlocked=data.unlocked;else if(data.version===1&&data.unlocked<=5)unlocked=3*data.unlocked-2}
+    if(data&&Number.isInteger(data.unlocked)&&data.unlocked>=1){if(data.version===2&&data.unlocked<=15){unlocked=data.unlocked;legacyRepeater=data.seedRules===undefined||data.legacyRepeater===true}else if(data.version===1&&data.unlocked<=5){unlocked=3*data.unlocked-2;legacyRepeater=true}}
   }catch{}
-  return {level:unlocked,get unlocked(){return unlocked},complete(){
+  return {level:unlocked,get repeater(){return legacyRepeater||unlocked>=3},get unlocked(){return unlocked},complete(){
     unlocked=Math.max(unlocked,Math.min(STAGES.length,this.level+1));
-    try{storage.setItem(key,JSON.stringify({version:2,unlocked}))}catch{}
+    try{storage.setItem(key,JSON.stringify({version:2,unlocked,seedRules:1,legacyRepeater}))}catch{}
   }};
 }
 function mowers(){return Array.from({length:5},(_,row)=>({row,x:-34,state:'ready'}))}function stepMowers(list,enemies,dt,width){const kills=[];for(const m of list){if(m.state==='ready'&&enemies.some(e=>e.row===m.row&&e.alive&&e.x<=8))m.state='active';if(m.state==='active'){m.x+=420*dt;for(const e of enemies)if(e.alive&&e.row===m.row&&e.x<=m.x+45){e.alive=false;kills.push(e.id)}if(m.x>width+60)m.state='spent'}}return kills}return {DURATION,WAVES,LEVELS,STAGES,campaign,wave,step,progress,mowers,stepMowers};

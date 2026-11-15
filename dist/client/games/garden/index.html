@@ -3,7 +3,85 @@
 Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
 -->
 <html lang="zh-HK">
-<head>
+<head><script>(() => {
+ const targets={defence:[1,2,3].map(n=>'round-'+n),pause:Array.from({length:9},(_,i)=>i+1).map(n=>'temple-'+n),
+  instalments:Array.from({length:15},(_,i)=>Array.from({length:5},(_,j)=>'garden-'+(i+1)+'-'+(j+1))).flat(),
+  shipping:['drill','gravity','blink','mecha','dragon','glider'],coins:['jetpack','pogo','magnet','shoes']};
+ window.arcadeDevTargets=targets;
+ if(parent===window)return;
+ const [version,game,target]=window.name.split('/');
+ if(version!=='arcade-test-v1'||!targets[game]?.includes(target))return;
+ const data=new Map();
+ Object.defineProperty(window,'localStorage',{value:{getItem:k=>data.get(String(k))??null,setItem:(k,v)=>data.set(String(k),String(v)),removeItem:k=>data.delete(String(k)),clear:()=>data.clear(),key:i=>Array.from(data.keys())[i]??null,get length(){return data.size}}});
+ const runId=crypto.randomUUID();window.arcadeTest={isTest:true,game,target,runId};
+ document.addEventListener('DOMContentLoaded',()=>{
+  const banner=document.createElement('aside');banner.style.cssText='position:fixed;z-index:9999;top:0;left:0;padding:2px 6px;background:#542e24;color:white;font:12px system-ui';
+  banner.textContent='測試局 · '+target+' · 不記成績 ';for(const [label,action] of [['重啟','restart'],['下一段','next'],['退出','end']]){
+   const b=document.createElement('button');b.textContent=label;b.onclick=()=>parent.postMessage({type:'arcade-test-v1',action,game,target,runId},location.origin==='null'?'*':location.origin);banner.append(b)
+  }(document.querySelector('dialog[open]')||document.body).append(banner)
+ });
+})();
+</script><script>// One owner per game document. URLs may also be self-contained data URIs.
+window.createGameAudio=function(sources,stopLegacyMusic){
+  const music=new Map(),effects=new Set(),heard=new Set();
+  const storageKey='money-journey-audio-v1',settings={music:.45,effects:.65};
+  const clamp=n=>Math.max(0,Math.min(1,n));
+  try{
+    const saved=JSON.parse(localStorage.getItem(storageKey));
+    if(saved&&typeof saved==='object'&&!Array.isArray(saved))
+      for(const k of Object.keys(settings))if(Number.isFinite(saved[k]))settings[k]=clamp(saved[k]);
+  }catch{}
+  let desired=null,current=null,frame=0,unlocked=false,paused=false,disposed=false,position=0;
+  function clear(){
+    cancelAnimationFrame(frame);
+    for(const a of [...music.keys(),...effects])a.pause();
+    music.clear();effects.clear();current=null;
+  }
+  function play(){
+    if(disposed||paused||!unlocked||!sources[desired]||current?.id===desired)return;
+    stopLegacyMusic?.();
+    const a=new Audio(sources[desired]);a.id=desired;a.loop=true;a.volume=0;
+    if(position>0)a.currentTime=position;
+    current=a;music.set(a,0);a.play().catch(()=>{music.delete(a);if(current===a)current=null});
+    cancelAnimationFrame(frame);const start=performance.now(),initial=new Map(music);
+    function fade(t){
+      const k=clamp((t-start)/350);
+      for(const track of music.keys()){
+        const gain=track===a?k:(1-k)*(initial.get(track)||0);
+        music.set(track,gain);track.volume=gain*settings.music;
+        if(k===1&&track!==a){track.pause();music.delete(track)}
+      }
+      if(k<1)frame=requestAnimationFrame(fade);
+    }
+    frame=requestAnimationFrame(fade);
+  }
+  function unlock(){unlocked=true;play()}
+  function hidden(){if(document.hidden)api.pause()}
+  const api={
+    track(id){if(disposed)return;if(id!==desired)position=0;desired=id;if(id==null)clear();else play()},
+    effect(id,eventId){
+      if(disposed||paused||!unlocked||!sources[id])return;
+      if(eventId!=null){const key=id+':'+eventId;if(heard.has(key))return;heard.add(key);if(heard.size>512)heard.delete(heard.values().next().value)}
+      if(effects.size>=4||!settings.effects)return;
+      const a=new Audio(sources[id]);a.volume=settings.effects;effects.add(a);
+      const done=()=>effects.delete(a);a.onended=done;a.onerror=done;a.play().catch(done);
+    },
+    volume(channel,value){
+      if(disposed||!Object.hasOwn(settings,channel)||!Number.isFinite(value))return;
+      settings[channel]=clamp(value);
+      if(channel==='music'){for(const [a,gain] of music)a.volume=gain*settings.music}
+      else for(const a of effects)a.volume=settings.effects;
+      try{localStorage.setItem(storageKey,JSON.stringify(settings))}catch{}
+    },
+    pause(){if(disposed||paused)return;paused=true;position=current?.currentTime||0;clear()},
+    resume(){if(disposed)return;paused=false;play()},
+    dispose(){disposed=true;clear();heard.clear();document.removeEventListener('pointerdown',unlock,true);document.removeEventListener('keydown',unlock,true);document.removeEventListener('visibilitychange',hidden);window.removeEventListener('pagehide',api.dispose)}
+  };
+  document.addEventListener('pointerdown',unlock,true);document.addEventListener('keydown',unlock,true);
+  document.addEventListener('visibilitychange',hidden);window.addEventListener('pagehide',api.dispose);
+  return api;
+};
+;window.gameAudio=createGameAudio({"garden-picker":"../../assets/game-audio/garden-picker.mp3","garden-1":"../../assets/game-audio/garden-1.mp3","garden-2":"../../assets/game-audio/garden-2.mp3","garden-3":"../../assets/game-audio/garden-3.mp3","garden-4":"../../assets/game-audio/garden-4.mp3","garden-5":"../../assets/game-audio/garden-5.mp3","garden-boss":"../../assets/game-audio/garden-boss.mp3","jet":"../../assets/game-audio/jet.mp3","runner":"../../assets/game-audio/runner.mp3","coin":"../../assets/game-audio/coin.mp3","forest":"../../assets/game-audio/forest.mp3","kill":"../../assets/game-audio/kill.mp3","reload":"../../assets/game-audio/reload.mp3"});</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <meta name="description" content="Plants vs Zombies">
@@ -802,7 +880,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             100% { opacity: 0; }
         }
     </style>
-<style>body{background:#12291f;font-family:"Microsoft JhengHei",system-ui,sans-serif}#debugInfo{display:none!important}#gameContainer{max-height:none;border-radius:0}#garden-intro{position:fixed;inset:0;background:#102a22c9;backdrop-filter:blur(5px);display:grid;place-items:center;z-index:500}#garden-intro section{background:#fff6de;color:#34503b;border:2px solid #c0b68a;border-radius:22px;padding:34px;max-width:480px;text-align:center;line-height:2}#garden-intro h1{font-size:32px;margin:12px 0}#garden-intro small{letter-spacing:2px}#garden-intro p{font-size:14px;margin:14px 0}#garden-start{background:#557b4c;color:#fff5d8;border:0;border-radius:10px;padding:13px 50px;font-weight:bold;font-size:17px}.shell-controls{position:fixed;bottom:8px;right:10px;display:flex;gap:7px;z-index:510}.shell-controls button{background:#203e2dea;color:#fff0cf;border:1px solid #b5bb93;border-radius:7px;padding:7px 12px;font-size:11px}#landscapeMessage{display:none!important}@media(orientation:portrait){#gameContainer{min-width:0;max-width:100%}#gameBoard{left:12px;right:12px;top:170px;bottom:70px}#ui{padding:4px}#plantSelection{display:flex;overflow-x:auto;width:100%;max-width:100%}.plantCard{min-width:48px;width:48px}.plantCard .name{font-size:8px}.plantCard .emoji{font-size:22px}#leftPanel{font-size:14px}.plant,.zombie{font-size:24px}}</style><style>#gameBoard{background:#4f8437;border:7px solid #776443;box-shadow:inset 0 0 20px #234e2c55}.cell{background:#8fba6266;border-color:#609645}.cell:nth-child(even){background:#b0ca7766}.plant{font-size:clamp(30px,4.5vw,55px)!important}.zombie{font-size:clamp(32px,4.5vw,57px)!important}.plantCard:focus-visible{outline:3px solid #f4b440;outline-offset:2px}</style><link rel="icon" href="../../assets/site-icon.svg"><link rel="stylesheet" href="garden-upgrade.css"></head>
+<style>body{background:#12291f;font-family:"Microsoft JhengHei",system-ui,sans-serif}#debugInfo{display:none!important}#gameContainer{max-height:none;border-radius:0}#garden-intro{position:fixed;inset:0;background:#102a22c9;backdrop-filter:blur(5px);display:grid;place-items:center;z-index:500}#garden-intro section{background:#fff6de;color:#34503b;border:2px solid #c0b68a;border-radius:22px;padding:34px;max-width:480px;text-align:center;line-height:2}#garden-intro h1{font-size:32px;margin:12px 0}#garden-intro small{letter-spacing:2px}#garden-intro p{font-size:14px;margin:14px 0}#garden-start{background:#557b4c;color:#fff5d8;border:0;border-radius:10px;padding:13px 50px;font-weight:bold;font-size:17px}.shell-controls{position:fixed;bottom:8px;right:10px;display:flex;gap:7px;z-index:510}.shell-controls button{background:#203e2dea;color:#fff0cf;border:1px solid #b5bb93;border-radius:7px;padding:7px 12px;font-size:11px}#landscapeMessage{display:none!important}@media(orientation:portrait){#gameContainer{min-width:0;max-width:100%}#gameBoard{left:12px;right:12px;top:170px;bottom:70px}#ui{padding:4px}#plantSelection{display:flex;overflow-x:auto;width:100%;max-width:100%}.plantCard{min-width:48px;width:48px}.plantCard .name{font-size:8px}.plantCard .emoji{font-size:22px}#leftPanel{font-size:14px}.plant,.zombie{font-size:24px}}</style><style>#gameBoard{background:#4f8437;border:7px solid #776443;box-shadow:inset 0 0 20px #234e2c55}.cell{background:#8fba6266;border-color:#609645}.cell:nth-child(even){background:#b0ca7766}.plant{font-size:clamp(30px,4.5vw,55px)!important}.zombie{font-size:clamp(32px,4.5vw,57px)!important}.plantCard:focus-visible{outline:3px solid #f4b440;outline-offset:2px}</style><link rel="icon" href="../../assets/site-icon.svg"><link rel="stylesheet" href="garden-upgrade.css"><link rel="stylesheet" href="seed-picker-view.css"></head>
 <body data-game="garden">
     <div id="landscapeMessage">
         <h2>📱 建議橫向遊玩</h2>
@@ -966,7 +1044,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 health: 3.6,
                 maxHealth: 3.6,
                 produces: 'sun', 
-                sunAmount: 40,
+                sunAmount: SunflowerRules.yieldAmount,
                 interval: 15000,
                 shoots: false,
                 damage: 0.5,
@@ -1523,7 +1601,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             const cell = plant.element.parentElement;
             const rect = cell.getBoundingClientRect();
             const plantType = plantTypes[plant.type];
-            const sunValue = plantType.sunAmount || 40;  // Default to 40 (80% of 50)
+            const sunValue = plantType.sunAmount;
             
             const sun = document.createElement('div');
             sun.className = 'sun';
@@ -2260,5 +2338,5 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             }
         });
     </script>
-<script src="../game-shell.js"></script><script>document.addEventListener("keydown",e=>{if(e.target.matches(".plantCard")&&["Enter"," "].includes(e.key)){e.preventDefault();e.target.click()}else if(/^[1-9]$/.test(e.key))document.querySelectorAll(".plantCard:not([hidden])")[Number(e.key)-1]?.click()})</script><script src="garden-rules.js"></script><script src="garden-enemies.js"></script><script src="garden-abilities.js"></script><script src="garden-mechanics.js"></script><script src="garden-boss.js"></script><script src="garden-loadout.js"></script><script src="garden-battle.js"></script><script src="garden-upgrade.js"></script><dialog id="garden-guide" aria-labelledby="guide-title"><header><h2 id="guide-title">植物圖鑑</h2><button class="guide-close">返回花園</button></header><div class="guide-layout"><nav aria-label="植物"></nav><article aria-live="polite"><div class="guide-art"></div><h3></h3><p></p><output></output><small></small></article></div></dialog><script src="garden-guide.js"></script></body>
+<script src="../game-shell.js"></script><script>document.addEventListener("keydown",e=>{if(e.target.matches(".plantCard")&&["Enter"," "].includes(e.key)){e.preventDefault();e.target.click()}else if(/^[1-9]$/.test(e.key))document.querySelectorAll(".plantCard:not([hidden])")[Number(e.key)-1]?.click()})</script><script src="garden-rules.js"></script><script src="garden-enemies.js"></script><script src="garden-abilities.js"></script><script src="garden-mechanics.js"></script><script src="garden-boss.js"></script><script src="seed-picker-view.js"></script><script src="garden-loadout.js"></script><script src="garden-battle.js"></script><script src="garden-upgrade.js"></script><dialog id="garden-guide" aria-labelledby="guide-title"><header><h2 id="guide-title">植物圖鑑</h2><button class="guide-close">返回花園</button></header><div class="guide-layout"><nav aria-label="植物"></nav><article aria-live="polite"><div class="guide-art"></div><h3></h3><p></p><output></output><small></small></article></div></dialog><script src="garden-guide.js"></script></body>
 </html>

@@ -11,7 +11,7 @@ try{
  await p.waitForFunction(v=>detailedGameSnapshot().player.power===v&&detailedGameSnapshot().seconds>0,vehicle);
  await p.keyboard.down('Space');await p.waitForTimeout(180);await p.keyboard.up('Space');
  const snapshot=await p.evaluate(()=>detailedGameSnapshot());
- assert.ok(snapshot.player.timer>0&&snapshot.player.timer<1200);
+ assert.equal(snapshot.player.timer,0);assert.equal(snapshot.player.power,vehicle);assert.equal(await p.getByRole("group",{name:"難度"}).count(),0);
  console.log(vehicle,snapshot.mode,snapshot.seconds);
  }
 }finally{await b?.close();server.closeAllConnections();server.close()}})().catch(e=>{console.error(e);process.exitCode=1});

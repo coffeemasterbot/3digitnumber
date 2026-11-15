@@ -32,3 +32,17 @@ test('all nine temples let the second player release the first, with independent
   step();assert.ok(map.doors[1].open,'exit in stage '+stage);
  }
 });
+
+test('co-op launcher purchase, three shots, reload lock and friendly blast exclusion',()=>{
+ const room=new Room('TEST'),a=room.attach(()=>{},{},0),b=room.attach(()=>{},{},0);
+ const send=(p,type,data={})=>room.input(p,{v:1,seq:p.seq+1,type,...data},0);
+ send(a,'ready');send(b,'ready');send(a,'buy',{item:'bazooka'});send(a,'buy',{item:'bazooka'});send(a,'equip',{weapon:'bazooka'});
+ assert.equal(a.credits,0);assert.equal(a.rockets,3);
+ Object.assign(a,{x:0,z:12});Object.assign(b,{x:.5,z:9});
+ Object.assign(room.bots[0],{x:0,z:9});Object.assign(room.bots[1],{x:1,z:9});
+ send(a,'input',{f:0,r:0,yaw:0,pitch:0,fire:true});room.step(.05,50);
+ assert.equal(room.bots[0].hp,0);assert.ok(room.bots[1].hp<72);assert.equal(b.hp,100);assert.ok(a.hp<100);
+ assert.equal(a.ammo,0);assert.equal(a.rockets,2);send(a,'reload');assert.equal(a.reload,2.5);
+ for(let shot=0;shot<2;shot++){for(let t=0;t<52;t++)room.step(.05,100);send(a,'reload')}
+ assert.equal(a.rockets,0);assert.equal(a.ammo,0);assert.equal(a.reload,0);
+});

@@ -13,17 +13,7 @@ test('presentation links to the team Instagram in a new tab', () => {
   assert.match(section, /href="https:\/\/www\.instagram\.com\/poor_guysssss\/" target="_blank" rel="noopener noreferrer"/);
 });
 
-test('presentation keeps the unverified date as a date and includes the official consultation period in both languages', () => {
-  assert.match(slides, /09\/11：理財教育計劃諮詢；16\/11/);
-  assert.match(slides, /16\/11 暫只保留日期，活動未有可信來源核實/);
-  assert.match(slides, /09\/11: programme consultation · 16\/11/);
-  assert.match(slides, /16\/11 is kept as a date only until its activity is verified/);
-  assert.doesNotMatch(slides, /16\/11 校園講座|16 November\.?'?\s*,['"]Guest speaker/);
-  assert.match(landing, /官方計劃日程列明，11 月 9 至 13 日為理財教育計劃諮詢環節/);
-  assert.match(landing, /未找到可信來源確認活動內容，暫只保留日期/);
-  assert.doesNotMatch(landing, /郭旭昇先生主講|18:00–19:00|Academic Building 1104|Academic Building 6580/);
-  assert.match(built, /未找到可信來源確認活動內容，暫只保留日期/);
-  assert.match(builtSlides, /16\/11 暫只保留日期，活動未有可信來源核實/);
-  assert.match(offline, /href="https:\/\/www\.instagram\.com\/poor_guysssss\/" target="_blank" rel="noopener noreferrer"/);
-  assert.match(offline, /16\/11 is kept as a date only until its activity is verified/);
+test('completed talks appear in both languages and built editions', () => {
+  for (const page of [landing,built,offline]) assert.match(page,/十一月講座回顧/);
+  for (const page of [slides,builtSlides,offline]) assert.match(page,/rooms 1104 and 1103/);
 });

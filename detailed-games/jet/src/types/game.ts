@@ -2,7 +2,7 @@
 //  Core game types for Jetpack Joyride
 // ─────────────────────────────────────────────
 
-export type GameState = 'start' | 'playing' | 'paused' | 'gameover';
+export type GameState = 'start' | 'playing' | 'paused' | 'dying' | 'revive' | 'gameover';
 export type PowerUpType = 'shield' | 'magnet' | 'boost' | 'mecha' | 'glider' | 'drill' | 'gravity' | 'blink' | 'dragon' | 'none';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type MissileType = 'horizontal' | 'diagonal-up' | 'diagonal-down' | 'homing';
@@ -26,6 +26,7 @@ export interface Player extends Rect {
   powerUpTimer: number;
   magnetFrames?: number;
   shieldFrames?: number;
+  dashFrames?: number;
   invertedGravity?: boolean;
   teleportPreview?: {targets:{id:string,y:number,safe:boolean}[],nextId:string|null};
   vehicleVisualState?: {gravity:'up'|'down', airborne:boolean, active:PowerUpType, velocityY:number};
@@ -40,6 +41,7 @@ export interface Player extends Rect {
 }
 
 export interface Missile extends Rect {
+  warningFrames?:number; hazard?:'missile'|'zapper';
   velocityX: number;
   velocityY: number;
   angle: number;

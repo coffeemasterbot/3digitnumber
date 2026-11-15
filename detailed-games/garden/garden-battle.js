@@ -1,5 +1,6 @@
 (()=>{'use strict';for(const z of Object.values(zombieTypes)){z.health=Math.ceil(z.health*1.3);z.maxHealth=z.health}zombieTypes.giant={emoji:'🗿',health:220,maxHealth:220,speed:5,damage:3,points:1500};let storage;try{storage=window.localStorage}catch{}
 const campaign=GardenRules.campaign(storage);const dev=window.arcadeTest?.target.split('-').map(Number);if(dev)campaign.level=dev[1];
+window.gardenRepeaterAvailable=()=>campaign.repeater||!!dev&&campaign.level>=3;
 window.gardenLevel=()=>Math.ceil(campaign.level/3);
 let recommendSeeds;
 window.addEventListener('load',()=>{

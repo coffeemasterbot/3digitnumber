@@ -94,6 +94,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
   const missileTimerRef = useRef(MISSILE_SPAWN_BASE);
   const coinTimerRef    = useRef(20);
   const powerUpTimerRef = useRef(90);
+  const spent=useRef(0);
   const vehicleCycle=useRef(0);const blastRef=useRef(0);
 
   // ── High score (localStorage) ─────────────────
@@ -160,14 +161,14 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     frameRef.current     = 0;
     missileTimerRef.current = MISSILE_SPAWN_BASE;
     coinTimerRef.current    = 20;
-    powerUpTimerRef.current = 90;vehicleCycle.current=0;blastRef.current=0;
+    spent.current=0;powerUpTimerRef.current = 180;vehicleCycle.current=0;blastRef.current=0;
     tappedRef.current=false;thrustingRef.current=false;
   }, [difficulty]);
 
   // ── Start / restart game ──────────────────────
   const startGame = useCallback(() => {
     resetGame();
-    if(mode==="trial"&&vehicles.includes(vehicle as PowerUpType)){playerRef.current.powerUp=vehicle as PowerUpType;playerRef.current.powerUpTimer=1200;powerUpTimerRef.current=1500}
+    if(mode==="trial"&&vehicles.includes(vehicle as PowerUpType)){playerRef.current.powerUp=vehicle as PowerUpType;playerRef.current.powerUpTimer=0}
     gameStateRef.current = 'playing';
     play('start');
     play('bgm');
@@ -217,10 +218,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       play('death');
       stopBGM();
       gameStateRef.current = 'dying' as any;deathFrames.current=0;
-      const hs = Math.max(highScoreRef.current, Math.floor(scoreRef.current));
-      highScoreRef.current = hs;
-      localStorage.setItem(mode==='practice'?'jj_highscore':'jet-best-'+mode, String(hs));
-      setHighScore(hs);
+
       syncUI(); // ← must call here; the game loop exits early on 'gameover' so syncUI
                 //   would never run otherwise
     } else {
@@ -237,6 +235,18 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
 
   // ── Sync React UI from refs ───────────────────
   // Uses refs throughout so it's safe to call from any callback without stale-closure issues
+  function settle(){
+    if(!['dying','revive'].includes(gameStateRef.current))return;
+    gameStateRef.current='gameover';
+    const hs=Math.max(highScoreRef.current,Math.floor(scoreRef.current));highScoreRef.current=hs;setHighScore(hs);
+    try{localStorage.setItem(mode==='practice'?'jj_highscore':'jet-best-'+mode,String(hs))}catch{}
+    syncUI();
+  }
+  function revive(){
+    if(gameStateRef.current!=='revive'||spent.current||coinsCountRef.current<100)return;
+    spent.current=100;livesRef.current=1;const p=playerRef.current;p.invincible=true;p.invincibleTimer=120;p.velocity=0;p.y=(GROUND_Y+CEILING_Y-p.height)/2;
+    gameStateRef.current='playing';lastClock.current=performance.now();fixedAcc.current=0;play('bgm');syncUI();
+  }
   function syncUI() {
     const p = playerRef.current;
     setUIState({
@@ -265,7 +275,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
 
   const deathFrames=useRef(0),lastClock=useRef(0),fixedAcc=useRef(0);
   (window as any).orientationPause=togglePause;
-  (window as any).detailedGameSnapshot=()=>({mode,state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,distance:distanceRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,magnet:playerRef.current.magnetFrames,shield:playerRef.current.shieldFrames,teleportPreview:playerRef.current.teleportPreview,vehicleVisualState:playerRef.current.vehicleVisualState,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
+  (window as any).detailedGameSnapshot=()=>({mode,dashFrames:playerRef.current.dashFrames||0,collected:coinsCountRef.current,spent:spent.current,available:coinsCountRef.current-spent.current,state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,distance:distanceRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,magnet:playerRef.current.magnetFrames,shield:playerRef.current.shieldFrames,teleportPreview:playerRef.current.teleportPreview,vehicleVisualState:playerRef.current.vehicleVisualState,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
   function endVehicle(p:Player,reason:string){p.expiredType=p.powerUp;p.expiredTimer=100;p.expiredReason=reason;for(let i=0;i<(matchMedia('(prefers-reduced-motion:reduce)').matches?0:16);i++){const a=i*Math.PI/8;p.particles.push({x:p.x+p.width/2,y:p.y+p.height/2,vx:Math.cos(a)*3,vy:Math.sin(a)*3,life:40,maxLife:40,size:4,color:'#e9bc66'})}play('powerup')}
   // ── Main game loop ────────────────────────────
   const gameLoop = useCallback(() => {
@@ -277,13 +287,13 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     rafRef.current = requestAnimationFrame(gameLoop);
 
     const clockNow=performance.now(),delta=lastClock.current?Math.min(.1,(clockNow-lastClock.current)/1000):0;lastClock.current=clockNow;const gs = gameStateRef.current;
-if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.current;p.y=Math.min(GROUND_Y-p.height,p.y+deathFrames.current*.28);p.particles=p.particles.map(pt=>({...pt,x:pt.x+pt.vx,y:pt.y+pt.vy,life:pt.life-1})).filter(pt=>pt.life>0);renderFrame(ctx);if(deathFrames.current>65){gameStateRef.current='gameover';syncUI()}return;}
+if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.current;p.y=Math.min(GROUND_Y-p.height,p.y+deathFrames.current*.28);p.particles=p.particles.map(pt=>({...pt,x:pt.x+pt.vx,y:pt.y+pt.vy,life:pt.life-1})).filter(pt=>pt.life>0);renderFrame(ctx);if(deathFrames.current>65){if(!spent.current&&coinsCountRef.current>=100){gameStateRef.current='revive';syncUI()}else settle()}return;}
     if (gs === 'start' || gs === 'gameover') {
       // Still draw background on start/gameover for visual richness
       drawBackground(ctx, scrollRef.current, starsRef.current, buildingsRef.current, buildingsFarRef.current);
       return;
     }
-    if (gs === 'paused') {
+    if (gs === 'paused'||gs==='revive') {
       // Don't advance, just re-render current state
       renderFrame(ctx);
       return;
@@ -292,10 +302,10 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
     fixedAcc.current+=delta;let steps=0;while(fixedAcc.current>=1/60&&steps++<6&&gameStateRef.current==='playing'){fixedAcc.current-=1/60;
     frameRef.current++;
     const frame = frameRef.current;
-    const speed = speedRef.current;
+    const speed = speedRef.current*((playerRef.current.dashFrames||0)>0?1.65:1);
 
     // Ramp up speed
-    speedRef.current = Math.min(MAX_SPEED, speed + SPEED_RAMP);
+    speedRef.current = Math.min(MAX_SPEED, speedRef.current + SPEED_RAMP);
     scrollRef.current += speed;
     distanceRef.current += speed;
     scoreRef.current += DISTANCE_SCORE_RATE * speed;
@@ -367,10 +377,10 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
     p.shieldFrames=Math.max(0,(p.shieldFrames||0)-1);
     p.expiredTimer=Math.max(0,(p.expiredTimer||0)-1);
     // Power-up timer
-    if (p.powerUp !== 'none') {
+    if (p.powerUp !== 'none'&&!vehicles.includes(p.powerUp)) {
       p.powerUpTimer--;
       if (p.powerUpTimer <= 0) {
-        if(vehicles.includes(p.powerUp))endVehicle(p,'時間已到');
+        
         p.powerUp = 'none';
         p.powerUpTimer = 0;
       }
@@ -386,7 +396,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
     if (missileTimerRef.current <= 0) {
       const difficultyFactor = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 0.7 : 0.5;
       const scoreBonus = Math.max(0, 1 - scoreRef.current / 3000);
-      const barrier=spawnMissile(speed,scoreRef.current);barrier.width=145;barrier.height=45;missilesRef.current.push(barrier);
+      const barrier=spawnMissile(speed,scoreRef.current);barrier.warningFrames=72;barrier.hazard=frame%2?'missile':'zapper';if(barrier.hazard==='zapper'){barrier.width=28;barrier.height=95}missilesRef.current.push(barrier);
       missileTimerRef.current = Math.max(40, MISSILE_SPAWN_BASE * difficultyFactor * (0.5 + scoreBonus));
     }
 
@@ -398,7 +408,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
 
     powerUpTimerRef.current--;
     if (powerUpTimerRef.current <= 0) {
-      const pickup=spawnPowerUp();pickup.type=([...vehicles,'shield','magnet','boost'] as PowerUpType[])[Math.floor(Math.random()*9)];pickup.x=450;pickup.y=Math.max(CEILING_Y+15,Math.min(GROUND_Y-50,p.y));powerUpsRef.current.push(pickup);
+      const pickup=spawnPowerUp();pickup.type=([...vehicles,'shield','magnet','boost'] as PowerUpType[])[Math.floor(Math.random()*9)];pickup.x=CANVAS_WIDTH-POWERUP_SIZE;pickup.y=Math.max(CEILING_Y+15,Math.min(GROUND_Y-50,p.y));powerUpsRef.current.push(pickup);
       powerUpTimerRef.current = POWERUP_SPAWN_INTERVAL;
     }
 
@@ -406,6 +416,8 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
     missilesRef.current = missilesRef.current
       .map(m => {
         if (!m.active) return m;
+        if(m.warningFrames&&m.warningFrames>0)return {...m,x:CANVAS_WIDTH-m.width,warningFrames:m.warningFrames-1};
+        if(m.hazard==='zapper')return {...m,x:m.x-speed};
         let vx = m.velocityX;
         let vy = m.velocityY;
         // Homing: steer toward player
@@ -457,20 +469,20 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       .filter(pu => pu.x + POWERUP_SIZE > -20);
 
     // ── Collision: player ↔ missiles ────────────
-    if (!p.invincible) {
+    if (!p.invincible&&!(p.dashFrames||0)) {
       for (const m of missilesRef.current) {
         if (!m.active) continue;
         if (rectIntersects(p, m)) {
           if ((p.shieldFrames||0)>0||vehicles.includes(p.powerUp)) {
             // Shield absorbs hit
-            if((p.shieldFrames||0)>0){p.shieldFrames=0;m.active=false;p.invincible=true;p.invincibleTimer=60;continue}
+            if(!vehicles.includes(p.powerUp)){p.shieldFrames=0;m.active=false;p.invincible=true;p.invincibleTimer=60;break}
             endVehicle(p,'擋擊後解除');
             p.powerUp = 'none';
             p.powerUpTimer = 0;
             p.invincible = true;
-            p.invincibleTimer = 60;
+            p.invincibleTimer = 48;
             m.active = false;
-            play('hit');
+            play('hit');break;
           } else {
             m.active = false;
             die();
@@ -492,25 +504,28 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
       }
     }
 
+    if(p.dashFrames)p.dashFrames--;
     // ── Collision: player ↔ power-ups ────────
     for (const pu of powerUpsRef.current) {
       if (!pu.active) continue;
       if (rectIntersects(p, pu, 0.1, 0.1)) {
         pu.active = false;
+        if(pu.type==='boost'){p.dashFrames=45;play('powerup');continue}
         if(pu.type==='magnet'||pu.type==='shield'){if(pu.type==='magnet')p.magnetFrames=MAGNET_DURATION;else p.shieldFrames=SHIELD_DURATION;play('powerup');continue}
         p.powerUp = pu.type;p.invertedGravity=false;
         p.powerUpTimer =
-          vehicles.includes(pu.type)?1200:pu.type === 'shield' ? SHIELD_DURATION :
+          vehicles.includes(pu.type)?0:pu.type === 'shield' ? SHIELD_DURATION :
           pu.type === 'magnet' ? MAGNET_DURATION :
           BOOST_DURATION;
         play('powerup');
       }
     }
 
+    
     // Sync UI every 10 frames
     if (frame % 10 === 0) syncUI();
 
-    if(mode==='practice'&&frameRef.current>=5400){gameStateRef.current='gameover';highScoreRef.current=Math.max(highScoreRef.current,Math.floor(scoreRef.current));localStorage.setItem(mode==='practice'?'jj_highscore':'jet-best-'+mode,String(highScoreRef.current));stopBGM();syncUI()}
+    if(mode==='practice'&&frameRef.current>=5400&&gameStateRef.current==='playing'){gameStateRef.current='gameover';highScoreRef.current=Math.max(highScoreRef.current,Math.floor(scoreRef.current));localStorage.setItem(mode==='practice'?'jj_highscore':'jet-best-'+mode,String(highScoreRef.current));stopBGM();syncUI()}
     }
     // ── Draw ────────────────────────────────────
     renderFrame(ctx);
@@ -604,7 +619,7 @@ if((gs as string)==='dying'){deathFrames.current+=delta*60;const p=playerRef.cur
   return {
     canvasRef,
     uiState,
-    startGame,
+    startGame,revive,settle,
     togglePause,
     setThrusting,
   };

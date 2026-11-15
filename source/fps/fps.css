@@ -34,3 +34,8 @@ body[data-phase=playing] #weapon-bar{left:50%;bottom:44px;transform:translateX(-
 #notice{bottom:84px}#defuse{bottom:112px}#interaction-hint{top:calc(var(--hud-bottom) + 46px);bottom:auto}
 @media(pointer:coarse){#touch{bottom:88px}.touch-actions{grid-template-columns:repeat(3,minmax(40px,56px))}#notice{top:calc(var(--hud-bottom) + 90px);bottom:auto}#defuse{top:calc(var(--hud-bottom) + 42px);bottom:auto}#touch #look{display:none}}
 @media(max-height:520px) and (pointer:coarse){.touch-actions{grid-template-columns:repeat(4,52px)}}
+
+#hud {background:linear-gradient(105deg,#14292beb,#1b3435f5);border-radius:4px;border-left:4px solid #e1ab58;box-shadow:0 3px 12px #05171355}
+#hud #timer,#hud #ammo,#hud #money {font-variant-numeric:tabular-nums}
+#hud button {border-radius:4px}
+#world {background:radial-gradient(ellipse at 55% 42%,#859b93,#263e41)}

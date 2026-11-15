@@ -15,13 +15,13 @@ export default function Game() {
   // ── User preferences ──────────────────────────
   const [mode,setMode]=useState((window as any).arcadeTest?'trial':'endless');
   const [vehicle,setVehicle]=useState((window as any).arcadeTest?.target||'mecha');
-  const [difficulty, setDifficulty] = useState<Difficulty>('medium');
+  const difficulty:Difficulty='medium';
   const [soundEnabled, setSoundEnabled] = useState(()=>{try{return localStorage.getItem('jet-sound-enabled')==='true'}catch{return false}});
 
   const {
     canvasRef,
     uiState,
-    startGame,
+    startGame,revive,settle,
     togglePause,
     setThrusting,
   } = useGameEngine(difficulty, soundEnabled,mode,vehicle);
@@ -52,6 +52,11 @@ export default function Game() {
     setSoundEnabled(prev => {const next=!prev;try{localStorage.setItem('jet-sound-enabled',String(next))}catch{}return next});
   }, []);
 
+  useEffect(()=>{
+    const audio=(window as any).gameAudio;if(!audio)return;
+    if(!soundEnabled||uiState.gameState!=='playing'||document.hidden)audio.pause();
+    else {audio.track('jet');audio.resume()}
+  },[soundEnabled,uiState.gameState]);
   // ── Canvas responsiveness ─────────────────────
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
@@ -116,8 +121,7 @@ export default function Game() {
           {uiState.gameState === 'start' && (
             <StartScreen
               key="start" mode={mode} vehicle={vehicle} setMode={setMode} setVehicle={setVehicle}
-              difficulty={difficulty}
-              onDifficultyChange={setDifficulty}
+
               onStart={startGame}
               highScore={uiState.highScore}
               soundEnabled={soundEnabled}
@@ -125,6 +129,7 @@ export default function Game() {
             />
           )}
 
+          {uiState.gameState==='revive'&&<div className="jet-guide"><section><h2>再飛一次？</h2><p>本局收集 {uiState.coins} 枚金幣。復活會用 100 枚，恢復一條生命。</p><button onClick={revive}>用 100 金幣復活</button><button onClick={settle}>結束本局</button></section></div>}
           {uiState.gameState === 'gameover' && (
             <GameOverScreen
               key="gameover"

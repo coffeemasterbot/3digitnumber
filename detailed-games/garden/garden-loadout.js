@@ -5,11 +5,12 @@ function configureGardenSeeds(stageControl,startButton) {
   stageControl.after(host);
   startButton.hidden=true;
   const unlock=id=>GardenAbilities.cards[id]?.[2]||1;
+  const available=id=>unlock(id)<=gardenLevel()&&(id!=='repeater'||gardenRepeaterAvailable());
   function plants(){
     return cards.map(card=>{
       const id=card.dataset.plant,world=unlock(id);
       return {id,name:card.querySelector('.name').textContent,cost:Number(card.dataset.cost),
-        art:card.querySelector('.emoji'),locked:world>gardenLevel(),unlockText:'世界 '+world+' 開放'};
+        art:card.querySelector('.emoji'),locked:!available(id),unlockText:id==='repeater'?'世界一第三關開放':'世界 '+world+' 開放'};
     });
   }
   function enemies(){
@@ -35,11 +36,11 @@ function configureGardenSeeds(stageControl,startButton) {
   function recommend(){
     selected.clear();
     const special=gardenLevel()===3?'lily':gardenLevel()>=4?'pepper':'snowpea';
-    for(const id of ['sunflower','peashooter','wallnut','mine','squash','repeater',special,'cherrybomb'])if(unlock(id)<=gardenLevel())selected.add(id);
+    for(const id of ['sunflower','peashooter','wallnut','mine','squash',gardenRepeaterAvailable()?'repeater':'firepea',special,'cherrybomb'])if(available(id))selected.add(id);
     draw();
   }
   const renderPicker=createGardenSeedPicker(host,{
-    toggle(id){if(!cards.some(c=>c.dataset.plant===id)||unlock(id)>gardenLevel())return;
+    toggle(id){if(!cards.some(c=>c.dataset.plant===id)||!available(id))return;
       if(selected.has(id))selected.delete(id);else if(selected.size<8)selected.add(id);draw()},
     recommend,start(){if(selected.size&&!startButton.disabled)startButton.click()}
   });
