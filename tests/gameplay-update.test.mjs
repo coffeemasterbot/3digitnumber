@@ -16,3 +16,19 @@ test('temple mirror circuit reflects both turns and checkpoint copies mutable st
  const point=Forest.savePoint(m,[{x:42,y:155}],4);m.bodies[0].x=600;m.gems[0].got=true;
  assert.notEqual(point.map.bodies[0].x,600);assert.ok(!point.map.gems[0].got);
 });
+
+test('all nine temples let the second player release the first, with independent weight and light locks',()=>{
+ for(let stage=1;stage<=9;stage++){
+  const map=Forest.temple(stage),[bridge,returnLever]=map.levers;
+  const fire={type:0,x:0,y:460},ice={type:1,x:80,y:460};
+  const step=()=>Forest.update(map,[fire,ice]);
+  step();assert.equal(map.doors[0].open,false);
+  fire.x=bridge.x-14;fire.y=bridge.y-17;step();assert.equal(map.doors[0].open,true);
+  ice.x=returnLever.x-14;ice.y=returnLever.y-17;
+  assert.ok(Forest.lever(map,ice),'return switch in stage '+stage);
+  fire.x=0;step();assert.ok(map.doors[0].open,'return route in stage '+stage);
+  if(map.doors[1].weight){assert.equal(map.doors[1].open,false);map.bodies[1].locked=true}
+  if(map.light){assert.equal(map.doors[1].open,false);map.light.mirrors.forEach(m=>m.turned=true)}
+  step();assert.ok(map.doors[1].open,'exit in stage '+stage);
+ }
+});
