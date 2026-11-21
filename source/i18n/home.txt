@@ -1,0 +1,204 @@
+戶口三位數|Lost & Found
+戶口三位數首頁|Lost & Found home
+戶口三位數｜website v2|Lost & Found · Money Journey
+戶口三位數｜離線遊戲版|Lost & Found · Offline edition
+跳至主要內容|Skip to main content
+主要導航|Main navigation
+主線故事|Story
+遊戲室|Arcade
+資源試算|Cash flow lab
+講座|Talks
+簡報|Presentation
+我的旅程|My journey
+我的旅程 ↗|My journey ↗
+失物|Lost &
+認領處|Found
+失物認領處|Lost & Found
+人生失物認領處 · 舊版|Lost & Found · Classic story
+每逢六號，城入面就有一個人失蹤。今次警局收到阿俊寄嚟嘅失物箱。打開佢，搵出支出、還款同失蹤之間嘅線索。|Someone goes missing on the sixth of every month. The police have just received a box from Ah Jun. Open it and trace the links between his spending, repayments and disappearance.
+開始調查|Start the investigation
+繼續調查|Continue the investigation
+重看結案|Revisit the conclusion
+直接玩遊戲|Play the games
+阿俊寄到警局嘅失物箱同證物|Ah Jun's box and the evidence sent to the police
+警局失物認領處|Police lost property office
+這些是我不要的，如果我不在了，請幫我扔掉。|I don't want these anymore. If I'm gone, please throw them away for me.
+理財遊戲室|Money Arcade
+直接開局，或者由之前嘅紀錄繼續玩。|Start a game or pick up where you left off.
+快速開始遊戲|Quick play
+玩後諗一諗|Reflect after playing
+用自己嘅收支試一試 →|Try with your own figures →
+進入遊戲|Play
+開發者測試模式|Developer test mode
+測試局不記正常成績、通關或故事進度。|Test runs do not count towards scores, campaign progress or the story.
+遊戲|Game
+起點|Starting point
+開始測試局|Start test run
+玩家檔案與成績備份 · V2|Player profile and backups · V2
+玩家暱稱|Nickname
+匯出成績|Export records
+匯入成績|Import records
+確認匯入|Confirm import
+已匯入成績。|Records imported.
+未能保存，請保留備份檔。|Could not save. Keep your backup file.
+瀏覽器未能保存。請匯出備份。|This browser could not save. Export a backup.
+未有紀錄|No records yet
+已開放生存及挑戰|Survival and challenges unlocked
+街區任務|street missions
+飛行任務|flight missions
+單人任務|solo missions
+唔需要一開始就好叻。可以揀輕鬆模式，再慢慢加難度。|Start with an easier mode and increase the challenge when you're ready.
+手機／電腦都玩得|Playable on mobile and desktop
+最難嗰日，|The hardest day
+可能係第四日。|might be day four.
+記帳寫咗三日就停？今次，唔使追求完美。|Did you stop tracking expenses after three days? This time, keep it manageable.
+完成故事，揀一個細到做得到嘅行動，試足七日。|Finish the story, pick one small action and try it for seven days.
+我的七日行動|My seven-day action
+一個細到做得到嘅開始|One small step
+每晚刷牙之後，|Each evening after brushing my teeth,
+記低一筆支出。|I'll record one expense.
+第 4 日，繼續就係進步。|Day 4: keeping going is progress.
+呢個係示例|Example
+十一月講座回顧|November seminar recap
+已舉行|Completed
+個人理財講座|Personal Financial Seminar
+Academic Building · 1104 室|Academic Building · Room 1104
+Academic Building · 1103 室|Academic Building · Room 1103
+將練習，帶返日常。|Put it into practice
+整理收支，或者搵人傾一傾。求助唔使等到自己撐唔住。|Organise your finances or talk to someone. You can ask for help before things feel unmanageable.
+安排收支|Plan your income and spending
+由七日試算延伸到個人收支預算。|Go from a seven-day forecast to a personal budget.
+投委會：個人收支計算機 ↗|IFEC: Personal budget calculator ↗
+睇清借貸成本|Understand the cost of borrowing
+用官方工具比較還款安排及借貸成本。|Use the official tool to compare repayments and borrowing costs.
+投委會：貸款及債務計算機 ↗|IFEC: Loan and debt calculator ↗
+需要債務支援？|Need help with debt?
+投委會目錄列出明愛及東華三院嘅債務輔導服務與聯絡資料。|The IFEC directory lists debt counselling and contact details for Caritas and Tung Wah Group of Hospitals.
+查看債務輔導服務 ↗|Find debt counselling services ↗
+外部工具及支援連結需要網絡，按各機構嘅條款及私隱政策運作。資料核對：2026年11月17日。|External tools require internet access and follow their own terms and privacy policies. Checked on 17 November 2026.
+簡報語言|Presentation language
+互動簡報，方向鍵切換|Interactive presentation. Use the arrow keys to move between slides.
+邀請朋友，一齊試玩。|Invite friends to play
+公開遊戲連結，不需要登入。此分享版本不設線上排行榜。|Share the public play link. This edition requires no sign-in and has no online leaderboard.
+公開試玩網址|Public playtest link
+複製試玩連結|Copy playtest link
+下載連結 .txt ↓|Download link (.txt) ↓
+下載一次，隨時開局。|Download once and play anytime
+主線故事、簡報及五款遊戲已包在單一 HTML 檔案。離線版已停用線上排行榜，進度只保留在本機。|The story, presentation and five games are included in one HTML file. Leaderboards are disabled offline. Progress stays on this device.
+適用桌面 Chrome／Edge／Firefox。下載後以瀏覽器開啟，毋須安裝或登入。請先儲存檔案，再用瀏覽器開啟；Codex／ChatGPT／WhatsApp 檔案預覽未必能執行遊戲。桌面可在瀏覽器按 Ctrl+O 選取檔案。|Save the file and open it in desktop Chrome, Edge or Firefox. No installation or sign-in is needed. Use Ctrl+O to choose the file. In-app file previews may not run the games.
+下載完整離線遊戲 .html|Download offline edition (.html)
+使用說明 .txt ↓|Instructions (.txt) ↓
+全部遊戲，已在這個檔案。|All games are included in this file
+毋須登入或連線。故事、簡報及五款遊戲可離線使用；排行榜已停用。分數及進度只保留於本機。請保留檔案名稱及使用同一瀏覽器；清除瀏覽器資料或移動檔案可能影響存檔。外部連結需要網絡。|Play the story, presentation and all five games without internet access or sign-in. Scores and progress stay local. Keep the file name and use the same browser. Clearing browser data or moving the file can affect saves. External links require internet access.
+這是離線版本，不會上傳成績。你亦可在有網絡時分享公開網站連結。|This offline edition keeps scores on your device. You can share the public link when online.
+由同學需要出發。|Built around students' needs
+飯錢、聚餐、實習收入同未來目標，冇一個答案啱晒所有人。我哋先透過問卷同街訪聽你講，再用講座、故事同遊戲，一齊搵到適合自己嘅理財習慣。|Food, social plans, internship income and future goals look different for everyone. We listened through surveys and interviews, then made talks, stories and games to help you find habits that fit.
+返回網站|Back to website
+← 返回網站|← Back to website
+重新載入|Reload
+載入中…|Loading…
+個人理財大使計劃 2026–2027|Personal Finance Ambassador Programme 2026–2027
+由「戶口三位數」學生團隊策劃|Created by the Lost & Found student team
+了解官方計劃 ↗|Learn about the programme ↗
+合辦機構|Co-organisers
+資助機構|Funded by
+聖雅各福群會|St. James’ Settlement
+投資者及理財教育委員會 投委會 IFEC|Investor and Financial Education Council (IFEC)
+香港交易所慈善基金 HKEX Foundation|HKEX Foundation
+理財遊戲|Money games
+活動資訊|Events
+工具與支援|Tools and support
+開源鳴謝|Open-source credits
+私隱說明|Privacy notice
+你嘅記錄，喺你手上。|Your records stay in your hands
+內容供一般理財教育用途，並非個人化投資建議。故事人物及金額屬虛構；遊戲分數不代表個人理財能力。|This project is for general financial education. The characters and amounts are fictional. Game scores do not measure personal financial ability.
+現金流實驗室|Cash Flow Lab
+兩個方案可以有一樣嘅期末結餘，但中途有機會唔夠錢。試下改到帳日，比較七日內最緊嘅一日。|Two plans can end with the same balance and still run short along the way. Change the payment date and compare the tightest day in each plan.
+調整方案 A 嘅收入（港元）|Adjust income for Plan A (HKD)
+兩個方案差喺邊？|How do the plans compare?
+第七日結餘|Day 7 balance
+方案 B 首次唔夠錢|First shortfall in Plan B
+方案 B 最大缺口|Largest shortfall in Plan B
+每日結餘比較（HK$）|Daily balance comparison (HK$)
+查看每日收支明細|View daily cash flow
+每日先計預計收入，再計支出。同一日嘅實際扣款時間可能有差異。|Each day shows expected income first, then expenses. Actual payments may clear at different times during the day.
+每日收支明細，可橫向捲動|Daily cash flow, horizontally scrollable
+調整兩個方案同管理紀錄|Edit plans and manage records
+選擇要編輯嘅方案|Choose a plan to edit
+方案 A|Plan A
+方案 B|Plan B
+收入設定|Income settings
+開支及飯券設定|Expenses and meal vouchers
+複製 A 到 B|Copy A to B
+收入延遲兩日|Delay income by two days
+複製主線已知安排|Use confirmed figures from the story
+保存 A／B|Save A and B
+還原範例|Restore examples
+刪除本機方案|Delete local plans
+匯出兩個方案|Export both plans
+預覽匯入方案|Preview imported plans
+套用匯入|Apply import
+取消匯入|Cancel import
+帶去行動卡嘅建議（可以改）|Suggestion for your action card (editable)
+開啟我的七日行動卡 →|Open my seven-day action card →
+手上現金|Cash on hand
+預計收入|Expected income
+到帳日（1–7）|Payment day (1–7)
+關閉|Close
+團隊 Instagram：poor_guysssss|Team Instagram: poor_guysssss
+OUR PROJECT · 中 / EN|OUR PROJECT
+DOWNLOAD & PLAY · 離線遊戲版|DOWNLOAD & PLAY · OFFLINE EDITION
+OFFLINE EDITION · 離線遊戲包|OFFLINE EDITION
+© 2026 戶口三位數|© 2026 Lost & Found
+每日餐費|Daily meals
+每日交通|Daily transport
+頭兩日每張飯券面值|Value of each meal voucher for the first two days
+必要電話費|Essential phone bill
+電話費到期日|Phone bill due day
+可調聚餐支出|Flexible group meal cost
+聚餐付款日|Group meal payment day
+冇預計收入|No expected income
+七日結餘均非負數|The balance stays at or above zero for all seven days
+日|Day
+收入|Income
+餐費|Meals
+交通|Transport
+飯券抵扣|Meal voucher credit
+電話|Phone
+聚餐|Group meal
+A 結餘|A balance
+B 結餘|B balance
+未能讀取本機方案，已載入範例。|Could not read local plans. Examples loaded.
+請輸入範圍內嘅金額（最多兩位小數）或第 1 至 7 日。|Enter an amount in range (up to two decimal places) or a day from 1 to 7.
+輸入未完成，結果沿用上一個有效安排。|The entry is incomplete. Results use the previous valid plan.
+方案已修改，按「保存 A／B」保留。|Plan edited. Select “Save A and B” to keep it.
+已複製到 B。|Copied to Plan B.
+延遲兩日會超出七日範圍。|A two-day delay would go past day seven.
+已帶入手機顯示餘額 $1.50。其他收支可用自訂假設試算。|Imported the $1.50 balance shown on the phone. Enter your own estimates for other income and expenses.
+目前未查到手上現金，可先用自訂範例。|Cash on hand is still unknown. You can start with the examples.
+已複製故事預算。|Story budget copied.
+只複製已知現金，其他收支可以自行假設。|Only known cash has been copied. Enter your own estimates for other items.
+未能讀取故事。|Could not read story progress.
+已保存 A 同 B。|Plans A and B saved.
+未能保存，請匯出方案。|Could not save. Export the plans to keep them.
+請先修正輸入。|Correct the entry first.
+已還原範例，按保存先會取代本機方案。|Examples restored. Save to replace your local plans.
+已刪除本機方案。|Local plans deleted.
+未能刪除本機方案。|Could not delete local plans.
+方案檔案無效。|Invalid plan file.
+已套用，按保存保留。|Import applied. Save to keep it.
+已取消匯入。|Import cancelled.
+已結案|Case closed
+未開始|Not started
+Anna 版主線|Anna investigation
+已查看證物|Evidence examined
+有紀錄嘅遊戲|Games with records
+七日行動|Seven-day action
+進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。|Progress is kept in this browser. Download backups from the investigation or arcade.
+打開舊版故事|Open classic story
+已複製 / Link copied|Link copied
+請複製已選取的網址 / Copy the selected URL|Copy the selected URL
+可複製已選取網址 / URL selected|URL selected
+完成挑戰，返回案情|Finish challenge and return to the case
+返回案情|Back to the case
+挑戰完成|Challenge complete

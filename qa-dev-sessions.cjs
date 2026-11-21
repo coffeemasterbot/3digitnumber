@@ -2,7 +2,7 @@ const {chromium}=require(process.env.PLAYWRIGHT_PATH||'C:/Users/danie/.cache/cod
 const assert=require('node:assert/strict');
 (async()=>{const b=await chromium.launch({channel:'msedge'});try{
  const p=await b.newPage({viewport:{width:1100,height:700}});const requests=[];p.on('request',r=>{if(r.url().includes('/api/'))requests.push(r.url())});
- p.on('pageerror',e=>console.error(e.message));await p.goto('http://127.0.0.1:8789/#dev-tools');await p.locator('#dev-tools summary').click();
+ p.on('pageerror',e=>console.error(e.message));await p.goto('http://127.0.0.1:8789/?dev=1#dev-tools');await p.locator('#dev-tools summary').click();
  const before=await p.evaluate(()=>JSON.stringify(localStorage));
  for(const [game,target] of [['defence','round-2'],['instalments','garden-7-4'],['coins','pogo'],['shipping','blink'],['pause','temple-8']]){
   await p.locator('#dev-game').selectOption(game);await p.locator('#dev-target').selectOption(target);await p.locator('#dev-start').click();

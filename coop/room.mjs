@@ -1,5 +1,5 @@
 import {launchRocket,stepRocket,impactDamage} from '../source/fps/rocket.mjs';
-import {createMap,move,blocked,interaction,GEAR,WEAPONS,OFFERS} from '../source/fps/rules.mjs';
+import {weaponStores,changeMagazine,startReload,tickReload,createMap,move,blocked,interaction,GEAR,WEAPONS,OFFERS} from '../source/fps/rules.mjs';
 const gun=WEAPONS.pistol;
 const neutral=()=>({f:0,r:0,fire:false,use:false,yaw:0,pitch:0});
 const near=p=>Math.hypot(p.x,p.z+13)<2.7;
@@ -9,22 +9,22 @@ export class Room {
   this.phase='waiting';this.time=95;this.progress=0;this.verified=false;this.result='';
   const map=createMap(1);this.doors=map.doors;this.walls=map.walls;this.projectiles=[];this.impacts=[];this.round=(this.round||0)+1;
   this.bots=[[-11,5],[12,0],[-11,-11],[11,-13]].map(([x,z],i)=>({id:i,x,z,hp:72,origin:x,t:i,fireIn:2+i}));
-  this.players.forEach((p,i)=>Object.assign(p,{ready:false,x:i?1:-1,z:14,hp:100,weapon:"pistol",credits:350,rockets:0,launcher:false,pistolAmmo:gun.mag,rocketAmmo:0,ammo:gun.mag,cool:0,reload:0,checked:false,input:neutral()}));
+  this.players.forEach((p,i)=>Object.assign(p,{ready:false,x:i?1:-1,z:14,hp:100,weapon:"pistol",credits:350,launcher:false,...weaponStores(['pistol']),ammo:gun.mag,cool:0,reload:0,checked:false,input:neutral()}));
  }
  attach(send,{token,name},now){
   let p=token&&this.players.find(p=>p.token===token&&!p.send&&p.until>now);
   if(!p){if(token||this.players.length>=2||this.phase!=='waiting')throw Error('房間已滿或重連已逾時');
-   p={id:crypto.randomUUID(),token:crypto.randomUUID(),name:String(name||'玩家').slice(0,20),ready:false,hp:100,x:this.players.length?1:-1,z:14,ammo:gun.mag,cool:0,reload:0,checked:false,input:neutral(),seq:-1};
+   p={id:crypto.randomUUID(),token:crypto.randomUUID(),name:String(name||'玩家').slice(0,20),ready:false,hp:100,x:this.players.length?1:-1,z:14,weapon:'pistol',...weaponStores(['pistol']),ammo:gun.mag,cool:0,reload:0,checked:false,input:neutral(),seq:-1};
    this.players.push(p);
   }
   p.send=send;p.until=0;p.seq=-1;p.last=now;p.burst=0;p.window=now;
-  send({v:2,type:'joined',id:p.id,token:p.token,code:this.code});this.broadcast();return p;
+  send({v:3,type:'joined',id:p.id,token:p.token,code:this.code});this.broadcast();return p;
  }
  detach(p,now){p.send=null;p.ready=false;p.until=now+30000;p.input=neutral()}
  expire(now){if(this.phase==='playing'&&this.players.some(p=>!p.send&&now>=p.until))this.finish('隊員離線逾時');this.players=this.players.filter(p=>p.send||p.until>now)}
  finish(result){if(this.phase==='playing'){this.phase='result';this.projectiles=[];this.result=result;this.players.forEach(p=>p.ready=false)}}
  input(p,m,now){
-  if(!p.send||!m||m.v!==2||!Number.isSafeInteger(m.seq)||m.seq<=p.seq)return;
+  if(!p.send||!m||m.v!==3||!Number.isSafeInteger(m.seq)||m.seq<=p.seq)return;
   if(now-p.window>=1000){p.window=now;p.burst=0}if(++p.burst>60)return;
   p.seq=m.seq;
   if(m.type==='ready'&&this.phase!=='playing'){p.ready=true;if(this.players.length===2&&this.players.every(p=>p.ready&&p.send)){this.reset();this.phase='playing'}return}
@@ -34,14 +34,12 @@ export class Room {
    p.input={f:m.f,r:m.r,yaw:m.yaw%(2*Math.PI),pitch:Math.max(-1.2,Math.min(1.2,m.pitch)),fire:m.fire===true,use:m.use===true};p.last=now;return;
   }
   if(m.type==='buy'&&m.item==='bazooka'&&!p.launcher&&p.credits>=GEAR.bazooka.cost){
-   p.credits-=GEAR.bazooka.cost;p.launcher=true;p.rockets=3;p.rocketAmmo=1;
+   p.credits-=GEAR.bazooka.cost;p.launcher=true;p.magazines.bazooka=WEAPONS.bazooka.mag;p.reserves.bazooka=WEAPONS.bazooka.reserve;
   }
   if(m.type==='equip'&&['pistol','bazooka'].includes(m.weapon)&&m.weapon!==p.weapon&&(m.weapon==='pistol'||p.launcher)){
-   if(p.weapon==='pistol')p.pistolAmmo=p.ammo;else p.rocketAmmo=p.ammo;
-   p.weapon=m.weapon;p.reload=0;p.ammo=p.weapon==='pistol'?p.pistolAmmo:p.rocketAmmo;
+   changeMagazine(p,m.weapon);
   }
-  const spec=WEAPONS[p.weapon];
-  if(m.type==='reload'&&p.ammo<spec.mag&&!p.reload&&(p.weapon!=='bazooka'||p.rockets>0))p.reload=spec.reload;
+  if(m.type==='reload')startReload(p);
   if(m.type==='check'&&near(p))p.checked=true;
   if(m.type==='answer'&&p.checked&&near(p)&&!this.verified&&Number.isInteger(m.answer)&&m.answer>=0&&m.answer<OFFERS[0].answers.length){if(m.answer===OFFERS[0].right)this.verified=true;else this.finish('核實錯誤，裝置已引爆')}
   if(m.type==='door'){const i=interaction({...p,phase:'playing',verified:this.verified},this.doors);if(i?.type==='door'){const d=this.doors.find(d=>d.id===i.id);if(!this.players.some(a=>Math.abs(a.x-d.x)<d.w/2+.34&&Math.abs(a.z-d.z)<d.d/2+.34))d.open=!d.open}}
@@ -56,11 +54,11 @@ export class Room {
    const i=p.input,n=Math.max(1,Math.hypot(i.f,i.r)),c=Math.cos(i.yaw),s=Math.sin(i.yaw);
    move(p,(i.r*c-i.f*s)*5*dt/n,(-i.f*c-i.r*s)*5*dt/n,this.doors);
    const gun=WEAPONS[p.weapon];
-   p.cool=Math.max(0,p.cool-dt);if(p.reload){p.reload=Math.max(0,p.reload-dt);if(!p.reload)p.ammo=gun.mag}
-   if(i.fire&&p.ammo&&!p.cool&&!p.reload&&(p.weapon!=='bazooka'||p.rockets>0)){
+   p.cool=Math.max(0,p.cool-dt);tickReload(p,dt);
+   if(i.fire&&p.ammo&&!p.cool&&!p.reload){
     p.ammo--;p.cool=gun.cooldown;
     if(p.weapon==='bazooka'){
-     p.rockets--;
+
      const horizontal=Math.cos(i.pitch);
      this.projectiles.push(launchRocket(p.id,{x:p.x,y:1.55,z:p.z},{x:-s*horizontal,y:Math.sin(i.pitch),z:-c*horizontal},now/1000));
     }else{
@@ -93,8 +91,8 @@ export class Room {
   this.progress=using?Math.min(5,this.progress+dt):0;
   if(this.progress>=5)this.finish('合作拆解成功');else if(!this.time||this.players.every(p=>!p.hp))this.finish('任務失敗');
  }
- broadcast(){const snapshot={v:2,type:'state',phase:this.phase,result:this.result,round:this.round,time:this.time,progress:this.progress,verified:this.verified,
-  players:this.players.map(({id,name,x,z,hp,ammo,weapon,credits,launcher,rockets,ready,send,checked,input})=>({id,name,x,z,hp,ammo,weapon,credits,launcher,rockets,ready,online:!!send,checked,yaw:input.yaw})),
+ broadcast(){const snapshot={v:3,type:'state',phase:this.phase,result:this.result,round:this.round,time:this.time,progress:this.progress,verified:this.verified,
+  players:this.players.map(({id,name,x,z,hp,ammo,weapon,credits,launcher,reserves,reload,ready,send,checked,input})=>({id,name,x,z,hp,ammo,weapon,credits,launcher,reserve:reserves[weapon],reload,ready,online:!!send,checked,yaw:input.yaw})),
   projectiles:this.projectiles.map(r=>({...r})),impacts:this.impacts.slice(),bots:this.bots.map(({id,x,z,hp})=>({id,x,z,hp})),doors:this.doors};
   this.players.forEach(p=>p.send?.(snapshot));this.impacts=[];
  }

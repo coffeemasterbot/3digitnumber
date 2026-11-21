@@ -27,9 +27,10 @@ window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
   }
   next.onclick = () => {
     if (portrait()) return;
+    const shouldResume = interrupted;
     interrupted = false;
     dialog.close();
-    if (!playing()) resume();
+    if (shouldResume && !playing()) resume();
     window.dispatchEvent(new Event('resize'));
   };
   back.onclick = leave;

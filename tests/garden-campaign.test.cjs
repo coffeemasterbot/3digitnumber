@@ -42,3 +42,34 @@ test('roof finale limits simultaneous escorts with or without a live boss',()=>{
   }
   assert.deepEqual(rules.BOSS,{hp:60,exposed:9000,armored:3000,response:6000,minions:3});
 });
+
+test('the opening preparation does not spend wave time or spawn attackers',()=>{
+  for(const stage of rules.STAGES){
+    const opening=rules.wave(1,stage.world);
+    assert.deepEqual(rules.step(opening,14999,0),[]);
+    assert.equal(opening.preparation,1);
+    assert.equal(opening.elapsed,0);
+    assert.deepEqual(rules.step(opening,1,0),[]);
+    const events=rules.step(opening,16,0);
+    assert.equal(opening.elapsed,16);
+    assert.equal(events[0].type,'spawn');
+    assert.equal(rules.wave(2,stage.world).preparation,0);
+  }
+});
+
+test('both flagged waves leave a warning window before attackers spawn',()=>{
+  for(const number of [3,5]){
+    const wave=rules.wave(number,1);
+    assert.deepEqual(rules.step(wave,2399,0),[]);
+    assert.equal(rules.step(wave,1,0)[0].type,'spawn');
+  }
+});
+test('survival continues past five and special giant waves use dedicated rules',()=>{
+  const wave=rules.wave(5,1,'survival');
+  wave.spawned=wave.total;
+  assert.deepEqual(rules.step(wave,rules.DURATION,0),[{type:'next'}]);
+  assert.equal(rules.step(rules.wave(3,4,'giants'),2400,0)[0].giant,true);
+  assert.equal(rules.EXTRAS.mowers.noMowers,true);
+  assert.equal(rules.EXTRAS.limited.sun,100);
+  assert.equal(rules.EXTRAS.seeds.seeds.length,4);
+});

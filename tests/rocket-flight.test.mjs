@@ -18,11 +18,13 @@ test('sweep picks the nearest solid, including thin cover, and explodes once',()
 });
 test('direct damage, nearby splash and owner cap use the same 3D impact',()=>{
  const hit=stepRocket(launch(),1,[],[bot]);
- assert.equal(hit.direct,0);assert.equal(impactDamage(hit,bot,[]),120);
+ assert.equal(hit.direct,0);assert.equal(impactDamage(hit,bot,[]),220);
  assert.equal(impactDamage(hit,{x:0,z:hit.position.z,y:1.55},[],true),50);
- assert.equal(impactDamage(hit,{id:1,x:0,z:hit.position.z,y:5.1},[]),0);
+ assert.equal(impactDamage(hit,{id:1,x:0,z:hit.position.z,y:6.1},[]),0);
+ assert.equal(impactDamage(hit,{id:1,...hit.position},[]),160);
+ assert.equal(impactDamage(hit,{id:1,...hit.position,x:hit.position.x+4.5},[]),0);
  const amount=impactDamage(hit,{id:1,x:1,z:-7},[]);
- assert.ok(amount>0&&amount<100);
+ assert.ok(amount>100&&amount<160);
 });
 test('overhead flight clears cover and expires at maximum range',()=>{
  const shot=launch(3);

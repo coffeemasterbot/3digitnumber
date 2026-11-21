@@ -77,4 +77,87 @@
  #gameBoard {top:111px!important}
 }
 .zombie.mechanical-body .habit-body {background:none;border:0}
+.zombie.mechanical-body .habit-body svg {
+  width:2.15em;height:2.10em;max-width:none;
+  translate:-56% -27%;transform-origin:62% 60%;
+  filter:drop-shadow(-.08em .1em .08em #20231bcc);
+}
+.zombie.mechanical-body.exposed .habit-body svg {filter:drop-shadow(0 0 .08em #fff387) drop-shadow(-.08em .1em .08em #20231bcc)}
+.zombie.mechanical-body :is(.habit-label,.zombie-health-bar) {translate:-30px 0}
+html[lang=en] #plantSelection .plantCard .name {font-size:.67rem;max-width:7.5em;overflow:hidden;text-overflow:ellipsis}
+#gameContainer .boss-attack {
+  width:clamp(45px,7vw,88px);height:auto;border:0;background:none;box-shadow:none;
+  filter:drop-shadow(0 0 4px #251a17cf);z-index:12;
+}
+.boss-attack svg {display:block;width:100%;overflow:visible}
+.boss-impact-warning {
+  position:fixed;z-index:7;transform:translate(-50%,-50%);pointer-events:none;
+  border:3px dashed #ffe475;border-radius:7px;box-shadow:inset 0 0 0 1px #554325;
+  background:#8a4b2226;
+}
+.boss-impact-warning.ice {border-color:#a7e3ff;border-style:dotted;background:#377dac32}
+.boss-impact-warning.stomp {border:4px double #ffe475}
 .zombie .habit-body:has(svg){transform:none}
+
+#gameBoard .board-sun {
+  position: absolute;
+  display: grid;
+  place-content: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  transform: translate(-50%, -50%);
+  border: 2px solid #fff3ad;
+  border-radius: 50%;
+  background: #ffcd40;
+  color: #664715;
+  line-height: 1;
+  box-shadow: 0 2px 5px #2f2910ad;
+  filter: none;
+}
+#gameBoard .board-sun > span:first-child {
+  font-size: 1.65rem;
+  animation: none;
+}
+#gameBoard .board-sun::before {
+  content: "";
+  position: absolute;
+  inset: -11.5px;
+  border-radius: 50%;
+}
+#gameBoard .board-sun .sun-value {
+  position: relative;
+  inset: auto;
+  padding: 0;
+  background: transparent;
+  color: #513204;
+  font-size: .7rem;
+  line-height: 1;
+  text-shadow: none;
+}
+#gameBoard .board-sun:focus-visible {
+  outline: 3px solid #1a4a71;
+  outline-offset: 2px;
+}
+#gameBoard .board-sun:disabled {
+  opacity: .35;
+  pointer-events: none;
+}
+
+.lawnmower { top: 0; left: 0; }
+.garden-wave-warning {
+  position: absolute;
+  z-index: 100;
+  inset: 39% auto auto 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 2rem);
+  padding: .55rem .9rem;
+  border-radius: 9px;
+  border: 1px solid #eeb265;
+  background: #55372bf2;
+  color: #fff1c5;
+  font-weight: 800;
+  text-align: center;
+  pointer-events: none;
+}

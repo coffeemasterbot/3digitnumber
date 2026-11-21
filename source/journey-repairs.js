@@ -12,6 +12,24 @@
  const follow=window.chooseFollowup;window.chooseFollowup=function(k){if(s.followupDone)return;follow(k)};
  const connection=window.setConnection;window.setConnection=function(k){if(s.connection)return;connection(k)};
  const toggleKit=window.toggleKit;window.toggleKit=function(k){if(s.kitLocked)return notify('認領袋已帶到海濱；其他線索仍可喺案情簿重看。');toggleKit(k)};
+ window.copyHabitStory=async function(){
+   if(!s.planStart)return;
+   const completed=s.stamps.filter(stamp=>stamp&&!stamp.demo).length;
+   const copy='戶口三位數｜七日行動\n已完成 '+completed+'／7 日\n@poor_guysssss';
+   try{await navigator.clipboard.writeText(copy);notify('已複製 IG Story 打卡文案。')}
+   catch{
+     modal('複製 IG Story 打卡文案','<textarea id="habit-share-copy" readonly aria-label="IG Story 打卡文字"></textarea>');
+     $('habit-share-copy').value=copy;
+     $('habit-share-copy').focus();
+     $('habit-share-copy').select();
+   }
+ };
+ const renderPlanCard=planCard;planCard=function(){
+   const card=renderPlanCard();
+   if(!s.planStart||demo)return card;
+   const printButton=btn('列印','window.printCard()','secondary');
+   return card.replace(printButton,btn('複製 IG Story 打卡文案','window.copyHabitStory()','secondary')+printButton);
+ };
  // Repair the same clue when returning via a different UI: it costs time only once.
  const resolve=window.resolveClue;window.resolveClue=function(k,i){if(!evidence[k]||s.clues.includes(k))return;resolve(k,i)};
  const accept=window.acceptBudget;window.acceptBudget=function(){if(s.stage!==4||s.budgetStep<2)return;accept()};

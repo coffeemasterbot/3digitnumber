@@ -14,6 +14,12 @@ test('presentation links to the team Instagram in a new tab', () => {
 });
 
 test('completed talks appear in both languages and built editions', () => {
-  for (const page of [landing,built,offline]) assert.match(page,/十一月講座回顧/);
-  for (const page of [slides,builtSlides,offline]) assert.match(page,/rooms 1104 and 1103/);
+  for (const page of [landing,built,offline]) {
+    assert.match(page,/十一月講座回顧/);
+    assert.match(page,/<span>09\/11<\/span>.*?1104 室.*?<span>16\/11<\/span>.*?1103 室/s);
+  }
+  for (const page of [slides,builtSlides,offline]) {
+    assert.match(page,/9 November in room 1104 and 16 November in room 1103/);
+    assert.match(page,/9\/11 喺 1104 室，16\/11 喺 1103 室/);
+  }
 });

@@ -25,3 +25,13 @@ body[data-game=jet] #root [class*="bg-black/90"] {background:linear-gradient(135
 .jet-revive-primary:disabled{opacity:.55}
 .jet-revive button:focus-visible{outline:3px solid #126e9a;outline-offset:2px}
 @media(max-height:420px){.jet-revive section{padding:8px 18px}.jet-revive h2{font-size:20px}}
+
+.jet-launch-fields{display:flex;flex-wrap:wrap;gap:10px 15px;margin:16px 0}
+.jet-launch-fields label{display:grid;gap:4px;color:#4b4631;font-size:.875rem;font-weight:700}
+.jet-launch-fields :is(input,select){max-width:100%;min-height:36px;padding:4px 8px;border:1px solid #958263;border-radius:6px;color:#3c4f3b;background:#fff8e6}
+.jet-mission-copy,.jet-garage{margin:0 0 13px;color:#504832;font-size:.875rem}
+.jet-garage summary{font-weight:700}
+.jet-garage div{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:6px;margin-top:7px}
+.jet-garage label{padding-block:4px}
+.jet-garage input{accent-color:#3c6655}
+.jet-review h2{margin-top:14px}

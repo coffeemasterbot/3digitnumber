@@ -2,7 +2,7 @@ import test from 'node:test';import assert from 'node:assert/strict';
 import {Room} from '../coop/room.mjs';import {airRoute} from '../source/runner-air.mjs';import Forest from '../source/forest-rules.js';
 test('shared room validates two seats, reconnect, input sequence and one defuse clock',()=>{
  const room=new Room('A'),a=room.attach(()=>{},{},0),b=room.attach(()=>{},{},0);
- assert.throws(()=>room.attach(()=>{},{},0));const send=(p,type,seq,data={})=>room.input(p,{v:2,type,seq,...data},0);
+ assert.throws(()=>room.attach(()=>{},{},0));const send=(p,type,seq,data={})=>room.input(p,{v:3,type,seq,...data},0);
  send(a,'ready',1);send(b,'ready',1);assert.equal(room.bots.length,4);send(a,'answer',2,{answer:0});assert.equal(room.verified,false);
  for(const p of [a,b]){p.x=0;p.z=-13;send(p,'check',3);send(p,'answer',4,{answer:0});send(p,'input',5,{yaw:0,pitch:0,f:0,r:0,use:true});send(p,'input',5,{yaw:0,pitch:0,f:0,r:1})}
  room.step(.05,50);assert.equal(room.progress,.05);room.detach(a,60);assert.equal(a.input.use,false);assert.throws(()=>room.attach(()=>{},{token:'wrong'},65));assert.equal(room.attach(()=>{},{token:a.token},70).id,a.id);
@@ -44,9 +44,9 @@ test('two reflected segments need both mirror turns and a clear path past the cr
 });
 test('co-op launcher purchase, three shots, reload lock and friendly blast exclusion',()=>{
  const room=new Room('TEST'),a=room.attach(()=>{},{},0),b=room.attach(()=>{},{},0);
- const send=(p,type,data={})=>room.input(p,{v:2,seq:p.seq+1,type,...data},0);
+ const send=(p,type,data={})=>room.input(p,{v:3,seq:p.seq+1,type,...data},0);
  send(a,'ready');send(b,'ready');send(a,'buy',{item:'bazooka'});send(a,'buy',{item:'bazooka'});send(a,'equip',{weapon:'bazooka'});
- assert.equal(a.credits,0);assert.equal(a.rockets,3);
+ assert.equal(a.credits,0);assert.equal(a.ammo+a.reserves.bazooka,3);
  Object.assign(a,{x:0,z:12});Object.assign(b,{x:.5,z:9});
  Object.assign(room.bots[0],{x:0,z:9});Object.assign(room.bots[1],{x:1,z:9});
  send(a,'input',{f:0,r:0,yaw:0,pitch:0,fire:true});room.step(.05,50);
@@ -54,7 +54,7 @@ test('co-op launcher purchase, three shots, reload lock and friendly blast exclu
  for(let i=0;i<3;i++)room.step(.05,100+i*50);
  assert.equal(room.impacts.length,1);
  assert.equal(room.bots[0].hp,0);assert.ok(room.bots[1].hp<72);assert.equal(b.hp,100);assert.ok(a.hp<100);
- assert.equal(a.ammo,0);assert.equal(a.rockets,2);send(a,'reload');assert.equal(a.reload,2.5);
+ assert.equal(a.ammo,0);assert.equal(a.ammo+a.reserves.bazooka,2);send(a,'reload');assert.equal(a.reload,2.5);
  for(let shot=0;shot<2;shot++){for(let t=0;t<52;t++)room.step(.05,100);send(a,'reload')}
- assert.equal(a.rockets,0);assert.equal(a.ammo,0);assert.equal(a.reload,0);
+ assert.equal(a.ammo+a.reserves.bazooka,0);assert.equal(a.ammo,0);assert.equal(a.reload,0);
 });

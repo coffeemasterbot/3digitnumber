@@ -41,12 +41,119 @@ function walkerArt(type){
     (hats[type]||'')+'</g>');
 }
 const habits={boss:'機械博士',...Object.fromEntries(Object.entries(GardenEnemies.kinds).map(([k,v])=>[k,v[0]])),normal:'信用卡超支',cone:'情緒消費',bucket:'分期疊加',fast:'限時衝動',strong:'只還最低額',giant:'債務巨人'};
-function paint(){document.querySelectorAll('.plantCard').forEach(card=>{const icon=card.querySelector('.emoji');if(icon&&card.dataset.plant&&!icon.dataset.drawn){icon.innerHTML=GardenAbilities.cards[card.dataset.plant]?GardenAbilities.icon(card.dataset.plant):art(card.dataset.plant);icon.dataset.drawn='1'}});for(const p of gameState.plants){if(!p.element||p.element.dataset.art)continue;p.element.dataset.art=p.type;p.element.firstChild?.remove();p.element.insertAdjacentHTML('afterbegin',GardenAbilities.cards[p.type]?GardenAbilities.icon(p.type):art(p.type));if(p.type==='sunflower')p.element.insertAdjacentHTML('beforeend','<span class="sun-charge" role="progressbar" aria-label="吸收陽光" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span>')}for(const z of gameState.zombies){if(!z.element)continue;if(!z.element.dataset.habit){z.element.dataset.habit=z.type;if(z.type==='giant')z.element.classList.add('giant');z.element.firstChild?.remove();z.element.insertAdjacentHTML('afterbegin','<span class="habit-body">'+walkerArt(z.type)+'</span><span class="habit-label">'+habits[z.type]+'</span>');z.healthBar.setAttribute('role','progressbar');z.healthBar.setAttribute('aria-label',habits[z.type]+'生命')}z.healthBar.dataset.hp=Math.max(0,Math.ceil(z.health))+'/'+zombieTypes[z.type].maxHealth;z.healthBar.setAttribute('aria-valuenow',String(Math.max(0,z.health)));z.healthBar.setAttribute('aria-valuemax',String(zombieTypes[z.type].maxHealth))}}
-const oldPlace=placePlant;placePlant=function(cell){oldPlace(cell);paint()};const oldSpawn=spawnZombie;spawnZombie=function(...args){oldSpawn(...args);paint()};const oldHealth=updateZombieHealth;updateZombieHealth=function(z){oldHealth(z);paint()};
-const sun=produceSun;produceSun=function(p){const before=new Set(document.querySelectorAll('.sun'));sun(p);document.querySelectorAll('.sun').forEach(el=>{if(!before.has(el)){el.classList.add('plant-sun');el.animate([{transform:'translate(0,0) scale(.3)'},{transform:'translate(25px,-40px) scale(1.2)',offset:.45},{transform:'translate(45px,30px) scale(1)'}],{duration:900,fill:'forwards'});el.setAttribute('aria-label','收集向日葵產生的'+SunflowerRules.yieldAmount+'陽光')}});p.element?.animate([{filter:'brightness(1)'},{filter:'brightness(1.8)'},{filter:'brightness(1)'}],700)};
-// A sun is consumable exactly once, even before its collection animation finishes.
-const collect=collectSun;collectSun=function(el,v){if(gameState.isPaused||gameState.isGameOver||el.dataset.collected)return;el.dataset.collected='1';collect(el,v)};
-const falling=spawnFallingSun;spawnFallingSun=function(){falling();const el=[...document.querySelectorAll('.sun')].at(-1);if(el){const rect=gameState.boardRect;el.style.left=(rect.left+35+Math.random()*Math.max(0,rect.width-70))+'px';el.style.top='0px';el.classList.add('sky-sun');el.animate([{transform:'translateY(-40px)'},{transform:'translateY('+Math.max(180,rect.top+rect.height*.6)+'px)'}],{duration:4000,fill:'forwards',easing:'ease-out'});el.setAttribute('aria-label','收集掉落的50陽光')}};
-const pause=togglePause,resume=resumeGame;function motion(){document.querySelectorAll('.sun').forEach(s=>s.getAnimations().forEach(a=>gameState.isPaused?a.pause():a.play()))}togglePause=function(){pause();motion()};resumeGame=function(){resume();motion()};
-window.gardenVisualSnapshot=()=>({habits:gameState.zombies.map(z=>({type:z.type,hp:z.health,label:habits[z.type]})),suns:document.querySelectorAll('.sun').length,art:document.querySelectorAll('.plant svg').length,charges:gameState.plants.filter(p=>p.type==='sunflower').map(p=>p.productionCharge||0)});paint();
+function paintPlantsInDeck(){
+ for(const card of document.querySelectorAll('.plantCard')){
+  const icon=card.querySelector('.emoji');
+  if(!icon||!card.dataset.plant||icon.dataset.drawn)continue;
+  icon.innerHTML=GardenAbilities.cards[card.dataset.plant]?GardenAbilities.icon(card.dataset.plant):art(card.dataset.plant);
+  icon.dataset.drawn='1';
+ }
+}
+function paintPlant(plant){
+ if(!plant?.element||plant.element.dataset.art) return;
+ const el=plant.element;
+ el.dataset.art=plant.type;
+ el.firstChild?.remove();
+ el.insertAdjacentHTML('afterbegin',GardenAbilities.cards[plant.type]?GardenAbilities.icon(plant.type):art(plant.type));
+ if(plant.type==='sunflower'){
+  el.insertAdjacentHTML('beforeend','<span class="sun-charge" role="progressbar" aria-label="吸收陽光" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"></span>');
+  plant.sunMeter=el.lastElementChild;
+ }
+}
+function paintHealth(zombie){
+ if(!zombie.element||!zombie.healthBar)return;
+ const bar=zombie.healthBar;
+ const hp=Math.max(0,Math.ceil(zombie.health));
+ const display=hp+'/'+zombieTypes[zombie.type].maxHealth;
+ if(bar.dataset.hp===display)return;
+ bar.dataset.hp=display;
+ bar.setAttribute('aria-valuenow',String(hp));
+}
+function paintZombie(zombie){
+ if(!zombie?.element||zombie.element.dataset.habit)return;
+ const el=zombie.element;
+ el.dataset.habit=zombie.type;
+ if(zombie.type==='giant')el.classList.add('giant');
+ el.firstChild?.remove();
+ el.insertAdjacentHTML('afterbegin','<span class="habit-body">'+walkerArt(zombie.type)+'</span><span class="habit-label">'+habits[zombie.type]+'</span>');
+ zombie.healthBar.setAttribute('role','progressbar');
+ zombie.healthBar.setAttribute('aria-label',habits[zombie.type]+'生命');
+ zombie.healthBar.setAttribute('aria-valuemax',String(zombieTypes[zombie.type].maxHealth));
+ paintHealth(zombie);
+}
+const oldPlace=placePlant;
+placePlant=function(cell){
+ const last=gameState.plants.at(-1);
+ const result=oldPlace(cell);
+ const planted=gameState.plants.at(-1);
+ if(planted!==last)paintPlant(planted);
+ return result;
+};
+const oldSpawn=spawnZombie;
+spawnZombie=function(...args){
+ const last=gameState.zombies.at(-1);
+ const result=oldSpawn(...args);
+ const spawned=gameState.zombies.at(-1);
+ if(spawned!==last)paintZombie(spawned);
+ return result;
+};
+const oldHealth=updateZombieHealth;
+updateZombieHealth=function(zombie){oldHealth(zombie);paintHealth(zombie)};
+
+// Tokens live in board coordinates, so the visual and tap target move together on resize.
+const board=document.getElementById('gameBoard');
+const tokens=new Set();
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)');
+function showSun({value,x,y,falling=false}){
+ const token=document.createElement('button');
+ token.type='button';
+ token.className='sun board-sun'+(falling?' sky-sun':' plant-sun');
+ token.setAttribute('aria-label','收集 '+value+' 陽光');
+ token.innerHTML='<span aria-hidden="true">☀</span><span class="sun-value">'+value+'</span>';
+ const position=percent=>'clamp(min(35px, 50%), '+percent+'%, max(50%, calc(100% - 35px)))';
+ token.style.left=position(x);
+ token.style.top=position(falling&&!reduceMotion.matches?12:y);
+ const collect=()=>collectSun(token,value);
+ token.addEventListener('click',collect);
+ token.addEventListener('pointerenter',event=>{if(event.pointerType==='mouse'&&event.buttons===1)collect()});
+ board.append(token);
+ let animation;
+ if(!falling&&!reduceMotion.matches){
+  animation=token.animate?.([{scale:'0.8'},{scale:'1.08',offset:.45},{scale:'1'}],{duration:500});
+ }
+ tokens.add({token,animation,fall:falling&&!reduceMotion.matches?{elapsed:0,start:12,end:y,position}:null,expires:(gameState.activeClock||0)+(falling?12500:9500)});
+}
+produceSun=function(plant){
+ if(!plant.element?.parentElement)return;
+ const column=Number(plant.element.parentElement.dataset.col);
+ const row=Number(plant.element.parentElement.dataset.row);
+ showSun({value:plantTypes[plant.type].sunAmount,x:(column+.5)/9*100,y:(row+.5)/5*100});
+};
+spawnFallingSun=function(){showSun({value:50,x:10+Math.random()*80,y:52,falling:true})};
+const collect=collectSun;
+collectSun=function(token,value){
+ if(gameState.isPaused||gameState.isGameOver||token.disabled||!token.isConnected)return;
+ token.disabled=true;
+ collect(token,value);
+};
+const activeStep=window.gardenActiveStep;
+window.gardenActiveStep=dt=>{
+ for(const record of tokens){
+  if(!record.token.isConnected||record.token.disabled){tokens.delete(record);continue}
+  if(gameState.activeClock>=record.expires){record.token.remove();tokens.delete(record);continue}
+  const fall=record.fall;
+  if(fall){
+   fall.elapsed+=Math.max(0,Math.min(50,dt));
+   const fraction=Math.min(1,fall.elapsed/(4000/.6));
+   record.token.style.top=fall.position(fall.start+(fall.end-fall.start)*fraction);
+   if(fraction===1)record.fall=null;
+  }
+ }
+ activeStep?.(dt);
+};
+const pause=togglePause,resume=resumeGame;
+function sunMotion(){for(const {animation} of tokens)if(animation)gameState.isPaused?animation.pause():animation.play()}
+togglePause=function(){pause();sunMotion()};
+resumeGame=function(){resume();sunMotion()};
+window.gardenVisualSnapshot=()=>({habits:gameState.zombies.map(z=>({type:z.type,hp:z.health,label:habits[z.type]})),suns:document.querySelectorAll('.sun').length,art:document.querySelectorAll('.plant svg').length,charges:gameState.plants.filter(p=>p.type==='sunflower').map(p=>p.productionCharge||0)});paintPlantsInDeck();
 })();

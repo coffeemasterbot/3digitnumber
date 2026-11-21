@@ -1,0 +1,460 @@
+失物認領處｜戶口三位數|Lost & Found · The investigation
+調查工具|Investigation tools
+案情簿|Case file
+專家提示|Expert hints
+存檔|Save
+關閉證物|Close evidence
+失物箱|Lost property box
+失物箱上嘅字條|Note on the lost property box
+城市地圖|City map
+儲物櫃|Locker
+結案|Case closed
+陳警長|Sergeant Chan
+偵探|Detective
+醫生|Doctor
+心理學家|Psychologist
+社工|Social worker
+黑客|Hacker
+咒術師|Mystic
+失物箱喺檔案室，可以逐件查。|The box is in the records room. Examine each item.
+將你見到嘅嘢同你估嘅嘢分開。餐廳單嘅總額，同睇到嘅菜品有冇出入？|Separate what you saw from what you assumed. Does the restaurant bill match the items on it?
+櫃桶嘅法文標籤可以搵中文釋義。問過房東，再比較阿俊嘅日常需要。|Look up the French labels in the drawer. Speak to the landlord and compare Ah Jun's day-to-day needs.
+記帳中斷未必代表唔關心。對照記帳本同實際收據，睇下有邊啲開支容易漏。|A gap in the budget book doesn't mean he stopped caring. Compare it with the receipts to see which expenses were easy to miss.
+先聽佢最擔心乜，再一齊分開「而家要處理」同「仲要核實」嘅帳目。|Listen to his biggest worry first. Then separate what needs attention today from figures that still need verification.
+四幕調查|Investigation in four acts
+陳警長請你接手一宗失蹤案。過去三個月，每逢 6 號就有一位年輕人失蹤。阿俊寄來一箱失物，幾日冇返工，亦冇返屋企。|Sergeant Chan asks you to take a missing person case. A young person has disappeared on the sixth of each of the last three months. Ah Jun sent in a box of belongings. He hasn't been home or at work for days.
+佢寄出呢個箱之前，留低一張字條。|He left a note before sending the box.
+打開失物箱|Open the box
+阿俊寄件|Sent by Ah Jun
+「我哋只有呢箱嘢。你睇到嘅線索，可能同我哋唔同。」　陳警長|“This box is all we have. You might spot clues we've missed.” — Sergeant Chan
+碎屏舊手機|Old phone with a cracked screen
+貼返埋嘅餐廳單|Restaurant bill taped back together
+剩返一頁嘅日記|Diary with one page left
+已查看|Examined
+去對面酒店|Go to the hotel across the street
+先查看三件失物。|Examine the three items first.
+警局對面嘅酒店|The hotel opposite the police station
+你熄咗房燈。好似有一張單據，喺門罅下面慢慢滑入嚟。|You turn out the light. A slip of paper seems to slide beneath the door.
+查看異夢|Revisit the strange dream
+去警局睇城市地圖|Go to the station to see the map
+酒店異夢|A strange dream at the hotel
+你聽到布料擦過床尾。醒咗之後，窗外已經天光，枕邊多咗一張空白紅色單據。|You hear fabric brush the foot of the bed. By the time you wake, it's daylight and a blank red slip is lying next to your pillow.
+你將單據收好，朝早返去警局。|You put the slip away and return to the station in the morning.
+警局|Police station
+酒店|Hotel
+阿俊嘅屋企|Ah Jun's home
+咖啡店|Café
+一片白色方格|A group of white squares
+過咗一晚，陳警長喺警局攤開地圖。你由同一條街去到阿俊住嘅唐樓。|The next morning, Sergeant Chan spreads out the map. You follow the same street to Ah Jun's walk-up building.
+屋企平面圖|Apartment floor plan
+雪櫃|Fridge
+櫃桶|Drawer
+電腦枱|Desk
+衣櫃|Wardrobe
+房東證詞|Landlord's account
+手機銀行訊息|Phone banking messages
+六張散紙收據|Six small receipts
+殘破記帳本|Damaged budget book
+重看手機訊息|Review the phone messages
+輸入手機密碼|Enter the phone PIN
+核對銀行訊息|Check the banking messages
+去咖啡店|Go to the café
+查齊屋企線索、核對銀行訊息，再完成「預留應急資源」。|Find the clues at home, check the banking messages, then complete “Set aside emergency funds”.
+咖啡店員工休息室|Café staff room
+店長交低備用鎖匙。「佢幾日冇返嚟，入去拎返阿俊啲嘢啦。」|The manager hands over a spare key. “He hasn't been in for days. Go and get Ah Jun's things.”
+休息室有一排儲物櫃，其中一個貼住阿俊名字|A row of staff lockers, one labelled Ah Jun
+阿俊|Ah Jun
+去自修室 C 區 13 號|Go to the study room, Section C, Booth 13
+先查收據同記帳本。|Check the receipts and budget book first.
+自修室 C 區 13 號|Study room · Section C, Booth 13
+地圖上嘅白格原來係自修室包廂。陳警長喺門外等你，阿俊喺入面諗住確認一筆新借款。|The white squares are study booths. Sergeant Chan waits outside. Inside, Ah Jun is about to confirm a new loan.
+只要撳確認，我就可以借到兩萬蚊，清咗之前嘅卡數，撐過今個月。|If I confirm, I can borrow HK$20,000, clear my old card debt and get through this month.
+先聽你講，今晚最擔心啲乜？|Let's hear you out. What are you most worried about tonight?
+叫佢即刻自己處理|Tell him to sort it out immediately
+「我最驚係一停落嚟，就要面對晒所有人。」阿俊願意一齊睇貸款畫面。|“I'm afraid that if I stop, I'll have to face everyone.” Ah Jun agrees to look at the loan terms with you.
+一齊核對帳單，完成結案|Review the bills together and close the case
+試另一句開場|Try a different opening
+門後面靜咗。可以先問阿俊最擔心乜，畀佢時間答你。|It goes quiet behind the door. Ask Ah Jun what worries him most and give him time to answer.
+結案 · 認領返下一步|Case closed · Choose a next step
+門鎖打開。阿俊願意先暫停確認借款，同你一齊逐筆核對帳目。|The door unlocks. Ah Jun agrees to pause the loan application and go through the transactions with you.
+面子消費|Spending to keep up appearances
+對照衣櫃、雪櫃同餐廳單，分開為咗維持形象嘅開支同生活所需。|Compare the wardrobe, fridge and restaurant bill. Separate spending on appearances from everyday needs.
+小額開支|Small expenses
+應急資源|Emergency funds
+先辨認有時限嘅必需開支，再睇有咩資源可以調動。|Identify essential costs with deadlines, then check what funds support them.
+借新還舊|Taking out a loan to repay debt
+比較總還款、成本、日期同支援選擇，先決定下一步。|Compare total repayments, costs, timing and available support before deciding.
+入帳同扣款時間|Timing of credits and debits
+5 號晚入帳，6 號凌晨扣款。要用完整記錄先可以解釋結餘。|The salary arrived on the evening of the fifth. The debits were early on the sixth. A full statement is needed to explain the balance.
+開始七日行動卡|Start the seven-day action card
+回看案情簿|Reopen the case file
+舊手機冇電，屏幕由右上裂開。充電後要輸入六位數字。|The phone is out of power and cracked at the top right. Once charged, it asks for a six-digit PIN.
+查看銀行訊息|View the banking messages
+案情簿等你找到密碼線索。|Find a PIN clue to unlock the next entry in the case file.
+餐廳帳單|Restaurant bill
+便宜意粉|Low-priced pasta
+清水|Water
+1 份|1 serving
+1 杯|1 glass
+印出總額|Printed total
+收據曾經被撕開，菜單只有一份意粉同一杯水。先記低出入。|The bill was torn apart. It lists only one pasta and a glass of water. Note the discrepancy.
+明天就是6號了，一切都會好起來的。|Tomorrow is the sixth. Everything will be all right.
+其他頁都被撕走，句子下面留低一條重重嘅筆痕。|The other pages were torn out. The sentence is heavily underlined.
+雪櫃入面幾乎空晒，剩低一塊發霉嘅麵包同一瓶自來水。|The fridge is nearly empty. There's mouldy bread and a bottle of tap water.
+醫生提示|Doctor's note
+胃藥|Stomach medicine
+止痛藥|Painkiller
+褪黑素|Melatonin
+三瓶都過期。房東可能知道多啲。|All three bottles have expired. The landlord may know more.
+電腦屏幕角落貼住一張黃色便利貼。|A yellow sticky note is attached to the corner of the monitor.
+心心241125，勿忘|Hearts. 241125. Don't forget.
+衣櫃掛住面試用嘅名牌西裝，下面有幾對限量球鞋。屋企嘅日常食物同呢度見到嘅嘢形成對比。|The wardrobe holds a designer interview suit and several pairs of limited-edition trainers. They stand in contrast to the food at home.
+佢以前每月 6 號一早就交租，依家已經欠咗三個月。上個月佢胃痛，想借 $200 睇醫生。|He used to pay rent early on the sixth of each month. He's now three months behind. Last month he had stomach pain and asked to borrow $200 to see a doctor.
+呢段係房東嘅證詞。扣款同出糧時間要以可見記錄核對。|This is the landlord's account. Check the salary and payment times against recorded transactions.
+星巴克咖啡|Starbucks coffee
+便利店飯糰|Convenience-store rice ball
+外賣平台配送費|Food delivery fee
+網購|Online purchase
+影片網站自動續費|Streaming subscription renewal
+的士|Taxi
+六張樣本合計|Total for the six sample receipts
+呢啲係櫃入面搵到嘅樣本。|These samples were found in the locker.
+記帳本|Budget book
+早餐 $10　午餐 $30|Breakfast $10 · Lunch $30
+之後好多頁都留白。中間一頁被用力劃爛。|Many pages after that are blank. One in the middle has been scratched through.
+到底錢花去哪了？？？|Where did all the money go?
+我明明沒買什麼大件啊！|I didn't buy anything expensive!
+這個月又超支了，下個月一定記！|Over budget again. I'll definitely track it next month!
+同事話阿俊經常搶住請客，嗰張餐廳單係佢幫成枱埋單嗰次。|A colleague says Ah Jun often insisted on paying. The restaurant bill was for a meal when he covered the whole table.
+手機上嘅銀行訊息|Banking messages on the phone
+日期|Date
+交易|Transaction
+金額|Amount
+工資入帳|Salary credited
+自動扣款|Automatic debit
+顯示餘額|Displayed balance
+語音備忘錄逐字稿|Voice memo transcript
+為什麼？為什麼我又變回窮光蛋了？明天怎麼面對大家……|Why? Why am I broke again? How am I going to face everyone tomorrow?
+播放廣東話旁白|Play narration
+由呢幾筆訊息，可以得出咩結論？|What can we conclude from these messages?
+$1.50 已經可以由三筆扣款完整解釋。|The three debits fully explain the $1.50 balance.
+推算餘額同畫面唔一致，仲有交易或期初餘額要核對。|The calculated balance differs from the displayed balance. Check other transactions or the opening balance.
+用餐廳單同散紙收據自動補晒差額。|Assume the restaurant bill and receipts account for the entire difference.
+核對結論|Check the conclusion
+未核實差額|Unverified difference
+預留應急資源|Set aside emergency funds
+分頭查線索|Split up to look for clues
+追查小額支出|Trace small expenses
+比較優惠總支出|Compare the total cost of an offer
+核對新貸款條款|Verify the new loan terms
+房東話阿俊曾經想借 $200 睇醫生。用櫃桶同房東證詞核對應急需要。|The landlord says Ah Jun tried to borrow $200 to see a doctor. Check the drawer and the landlord's account to confirm the urgent need.
+種植至少兩株植物，守完花園第一波，保留最少 50 陽光。|Place at least two plants, defend the first wave and keep at least 50 sun.
+沿地圖分頭查，再會合。|Follow separate routes on the map, then meet up.
+合作解開重量神殿第一關。|Solve the first stage of the temple together.
+細額支出好容易唔記得。|Small expenses are easy to forget.
+沿街道拾到 5 件收據。|Collect five receipts along the street.
+一個優惠值唔值得，要睇埋額外支出。|Include extra costs when deciding whether an offer is worth it.
+飛行 20 秒並拾到 5 個資源，留意沿途成本。|Fly for 20 seconds and collect five resources. Watch for costs along the way.
+阿俊想用一筆 $20,000 新貸款還舊債。先核對條款，再決定下一步。|Ah Jun wants to use a new $20,000 loan to repay old debt. Check the terms before deciding what to do.
+核對終端資料，再完成一輪裝置拆解。|Verify the information at the terminal, then complete one defusal.
+玩挑戰|Play challenge
+用證物推理|Use evidence
+改用證物推理|Use evidence instead
+進入挑戰|Start challenge
+由網站繼續調查，進入挑戰|Continue the investigation on the website to start the challenge
+已完成遊戲挑戰|Game challenge completed
+已完成證物推理|Evidence challenge completed
+證物推理已完成。|Evidence challenge completed.
+睇醫生嘅開支應該點處理？|How should you handle the doctor's bill?
+等下一次出糧先理，$200 唔算多。|Wait until next payday. $200 isn't much.
+求診係即時需要。問清費用及可用支援，將應急金納入預算。|Medical care is an immediate need. Check the cost and available support, and budget for emergencies.
+先假定手機上嘅入帳額仍然可以用。|Assume the salary shown on the phone is still available.
+再比對房東嘅 $200 證詞，同手機顯示現時餘額。|Compare the landlord's account of the $200 with the current balance on the phone.
+喺確認新貸款前，可以同阿俊做乜？|What can you do with Ah Jun before confirming the loan?
+先按確認，將所有還款留到下個月。|Confirm first and leave all the repayments until next month.
+只比較即時入帳金額，揀最大嗰筆。|Compare only the cash available immediately and choose the largest loan.
+暫停確認，一齊核對總還款、到期日同手續費，再商量支援。|Pause. Check the total repayments, due dates and fees together, then discuss support.
+先比較要還幾多同幾時還，再判斷新貸款會唔會令負擔增加。|Compare how much needs to be repaid and when, then decide whether the new loan makes things harder.
+揀一個最有證物支持嘅做法|Choose the answer best supported by the evidence
+核對證物|Check the evidence
+手機仍然鎖住。去電腦枱睇下有冇六位數相關嘅線索。|The phone is still locked. Look for a clue at the desk.
+六位數密碼|Six-digit PIN
+解鎖|Unlock
+密碼唔啱，對照電腦枱張便利貼再試。|That PIN didn't work. Check the sticky note at the desk and try again.
+打開失物箱後，你睇過嘅證物會記喺呢度。|Once you open the box, evidence you've examined will appear here.
+陳警長同你喺呢度攤開地圖。失物箱同證物紀錄喺案情簿。|You look at the map here with Sergeant Chan. The lost property and evidence are in the case file.
+酒店就喺警局正對面。你醒來時，枕邊多咗一張紅色單據。|The hotel is just opposite the station. There was a red slip by your pillow when you woke up.
+阿俊返工嘅地方。查清屋企嘅線索再出發。|Ah Jun works here. Check the clues at his home first.
+地圖上冇寫用途。再搵多啲線索。|The map doesn't say what these are. Look for more clues.
+調查存檔|Investigation save
+調查進度保留喺呢個瀏覽器。可以下載備份或者匯入以前嘅調查進度。|Progress is stored in this browser. Download a backup or import a previous investigation.
+下載目前進度|Download progress
+下載損壞原檔|Download the unreadable save
+選擇備份檔|Choose a backup
+重新調查|Restart investigation
+會清除本機 Anna 調查進度。|This clears the local Anna investigation save.
+確認重設 Anna 調查|Confirm reset of the Anna investigation
+未能讀取存檔。原檔已保留，可到「存檔」匯出或重設。|Could not read the save. The original is still available under Save, where you can export or reset it.
+呢個瀏覽器暫時未能儲存。可以繼續調查，或者由「存檔」下載進度。|This browser could not save progress. You can keep investigating or download your progress under Save.
+← 戶口三位數 website v1|← Lost & Found website
+人生失物認領處|Lost & Found · Classic
+玩法提示|How to play
+聲音|Sound
+更多 ⋯|More ⋯
+一個關於阿俊嘅互動故事|An interactive story about Ah Jun
+1 開箱|1 Open the box
+2 調查|2 Investigate
+3 對話|3 Talk
+4 行動|4 Take action
+今晚 22:10 ／ 最後一更|Tonight, 22:10 / The last shift
+「唔好再|“Please stop
+搵我啦。」|looking for me.”
+阿俊留低四件失物，仲有一封未覆嘅訊息。|Ah Jun left four belongings and a message with no reply.
+佢話，23:30 會離開觀塘海濱。你係今晚當值嘅認領員。見面之前，你想先弄清楚乜？|He says he's leaving the Kwun Tong waterfront at 23:30. You're on duty at the lost property office. What do you want to find out before you meet him?
+打開佢留低嘅箱|Open the box he left
+玩法：撳物件睇線索 → 揀回應 → 跟「下一步」。唔使預先識理財。|Play: inspect items, choose a response and follow “Next”. You don't need any prior financial knowledge.
+啲嘢唔使還畀我。|You don't need to return the things to me.
+我都唔知點同你講。|I don't know how to tell you.
+已讀|Read
+對方停止輸入|Stopped typing
+箱蓋寫住：#0409 ／ 阿俊|Written on the lid: #0409 / Ah Jun
+進度已存喺呢個瀏覽器|Progress saved in this browser
+虛構個案 · 可以慢慢討論|Fictional case · Take your time to discuss
+關於遊戲|About the game
+阿俊嘅故事之後 ／ 輪到自己|After Ah Jun's story / Your turn
+唔使一晚變成另一個人。|You don't have to change overnight.
+只揀一件，聽日做得到嘅事。|Pick one thing you can do tomorrow.
+本記帳簿只寫咗三日。第 4 日唔追求完美，只練習再開始。|The budget book stops after three days. On day four, practise starting again.
+🌱 由一筆開始|🌱 Start with one expense
+換個提醒|Choose a different reminder
+我會……|I will…
+喺咩時候做？|When will I do it?
+例如：每晚刷牙之後|e.g. after brushing my teeth each evening
+由今日開始七日|Start seven days today
+更新行動|Update my action
+下載行動卡|Download action card
+複製文字|Copy text
+列印|Print
+認領返自己嘅下一步|Choose my next step
+唔使填戶口、收入或者欠款。行動卡同打卡只存喺呢個瀏覽器。|Leave out account, income and debt details. Your card and check-ins stay in this browser.
+複製 IG Story 打卡文案|Copy check-in text for Instagram Stories
+重新開始故事？|Restart the story?
+保留進度|Keep progress
+清除故事並重新開始|Clear story and restart
+進度將不會儲存。你仍可完成故事及下載行動卡。|Progress will not be saved. You can still finish the story and download your action card.
+退出練習|Exit practice
+四幕互動故事|Interactive story in four acts
+一個人／同朋友一齊|Solo or with friends
+可以隨時停低|Pause anytime
+第一幕 ／ 留低嘅嘢|Act 1 / What he left behind
+箱入面，|In the box are
+有四件未講完嘅事。|four unfinished stories.
+佢唔係冇試過。|He did try.
+你仲欠一個原因。|You're still missing a reason.
+先揀一件。每件失物只需要你作一個判斷。|Choose one item. Each belonging asks you to make one judgement.
+四件失物都睇過。依家可以聯絡識佢嘅人，查清楚帳單背後發生咗乜。|You've examined all four items. Contact people who know him to find out what was happening behind the bills.
+每次調查 · 故事時間 +5 分鐘|Each investigation advances story time by five minutes
+你可以改變調查次序。已整理嘅證物可以隨時重看。|Inspect items in any order. You can review evidence whenever you need to.
+手機震咗一下。|The phone vibrates.
+阿俊：「唔好同我講『早知就唔好買』。」|Ah Jun: “Please don't tell me I shouldn't have bought it.”
+搵人問多一句|Ask someone for more information
+✓ 已整理|✓ Examined
+碎屏手機|Cracked phone
+$50。仲有十四封訊息。|$50. And fourteen messages.
+可用餘額　HK$50.00|Available balance: HK$50.00
+螢幕裂咗，銀行通知仲睇得清。十四封新訊息，都係「即批貸款」推銷。|The screen is cracked, but the bank notification is still readable. All fourteen new messages promote instant loans.
+餘額只話到佢此刻有幾多錢。收入、欠款同幾時出糧，仲未知道。|The balance only tells you how much he has at this moment. You don't yet know his income, debt or payday.
+你會點回覆佢？|How would you respond?
+我想先聽你講，唔會替你亂作決定。|I'd like to listen first. I won't make decisions for you.
+得五十蚊？你平時到底點用錢？|Only fifty dollars? What do you normally spend on?
+你傳咗一句唔責備嘅說話。暫時未有回覆。|You send a message without blaming him. There's no reply yet.
+凌晨帳單|Late-night bill
+02:15。十一筆付款。|02:15. Eleven payments.
+當晚課金　$8,000|In-game purchases that night: $8,000
+同一隻遊戲，十一筆交易。最後一筆付款之前，手機有一通未接來電。|Eleven purchases in the same game. There was a missed call before the final payment.
+帳單話到花咗幾多，未話到點解。你想搵到付款之前發生過乜。|The bill shows how much he spent. Find out what happened before he paid.
+邊一條問題，會帶你再行近一步？|Which question gets you closer to an explanation?
+佢抽中咩稀有角色？|Which rare character did he get?
+付款之前，佢經歷咗啲乜？|What happened to him before he paid?
+你喺案情簿寫低：「情緒先出現，定付款先出現？」|You write in the case file: “What came first, the feeling or the payment?”
+限量波鞋|Limited-edition trainers
+每月 $300，好似負擔得起。|$300 a month sounds affordable.
+$3,600 ÷ 12 期|$3,600 ÷ 12 instalments
+鞋盒底仲壓住四張分期確認信。佢寫咗「下個月再算」，但五筆都未供完。|Four other instalment confirmations lie underneath the shoebox. He wrote “deal with it next month”, but all five plans still have payments due.
+一筆月供唔等於全部承諾。五筆一齊扣，先見到生活仲剩幾多位。|One instalment is only part of the commitment. Add all five to see what's left for everyday expenses.
+你會拎走邊條線索？|Which clue will you keep?
+五筆月供嘅總額，同扣款日期。|The total for all five instalments and their payment dates.
+只記低鞋每月三百蚊。|Only the $300 monthly cost of the trainers.
+你保留晒五張確認信。阿媽可能知道佢出糧之後嘅情況。|You keep all five confirmations. His mum may know what happens after payday.
+摺埋嘅字條|Folded note
+背面，仲有一句。|There's another line on the back.
+我撐唔住。|I can't keep going like this.
+你將摺角攤開。背面寫住：「其實我試過改。」下面係觀塘海濱，3號觀景亭。|You unfold the corner. The back reads: “I did try to change.” Below that: Kwun Tong waterfront, Pavilion 3.
+呢句說話唔係帳單。係一個人仲未講完嘅故事。|This is part of someone's unfinished story.
+你會帶住邊個問題去見佢？|What will you ask him when you meet?
+點樣令佢承認自己錯？|How can you make him admit he was wrong?
+佢試過啲乜？最難行落去係邊一步？|What has he tried? Which step has been hardest to keep up?
+你決定先聽完佢嘅故事，再同佢諗下一步。|You decide to hear him out, then think about the next step together.
+放返案情簿|Return to the case file
+放返枱面，睇下一件|Put it back and examine another item
+四件失物已整理|All four items examined
+仲有失物未整理。|There are still items to examine.
+你刪返呢句。單憑餘額，未知道一個人經歷咗乜。試下留一個佢願意開口嘅位置。|You delete that line. A balance tells you little about what he went through. Try giving him room to talk.
+呢條線索仲未足夠作出呢個判斷。翻睇件失物，再揀一次。|The clue doesn't support that conclusion yet. Look again and choose another answer.
+第二幕 ／ 帳單背後|Act 2 / Behind the bills
+你知道嘅，|You now know
+已經多過一個餘額。|more than a balance.
+同一個阿俊，|One person,
+四個人見到四個角度。|four different perspectives.
+先問兩個人，再親手解開一個帳單疑點。其他調查，由你決定。|Speak to two people and resolve one question about the bills. You can choose whether to investigate further.
+仲可以問多一個人，或者帶住線索出發。你問過邊個，會影響海濱嗰段對話。|Speak to another person or take the clues to the waterfront. Who you talked to can shape the conversation there.
+阿媽|Mum
+阿欣|Yan
+阿凱|Hoi
+阿May|May
+知道出糧之後嘅事|Knows what happens after payday
+最近一次約會嘅人|His most recent date
+凌晨打過電話畀佢|Called him that night
+見過佢張購物車|Saw his shopping cart
+佢話今個月一定儲。但幾筆分期一齊扣，連生活費都未計，已經冇咗一大截。|He said he'd definitely save this month. When the instalments cleared, a big part of his pay was gone before living expenses.
+我冇叫佢次次請。佢怕我覺得佢冇能力，連飲品、外賣、的士都唔敢話想慳。|I never asked him to pay every time. He worried I'd think he couldn't afford it, so he never suggested cutting back on drinks, takeaways or taxis.
+嗰晚佢畀上司責備。我打畀佢，佢冇聽。之後佢話，抽卡嗰陣先覺得自己贏返啲嘢。|His boss told him off that night. I called, but he didn't pick up. Later he said drawing cards was the first time he felt he'd won something back.
+佢話免運即係慳錢。其實啲加購品，仲喺袋入面未拆。|He thought free shipping meant saving money. The extra items are still unopened.
+五張分期信，依家可以拼埋。|Now you can compare the five instalment confirmations.
+每張收據都細。但一個月呢？|Each receipt is small. What about a whole month?
+付款之前，原來有一段委屈。|Something hurt him before he paid.
+幫佢揀返真正需要嗰張單。|Help him pick the order that covers what he needs.
+已聯絡|Contacted
+帶住線索去海濱|Take the clues to the waterfront
+繼續調查會推進故事時間；阿俊可能等得更焦急。線索唔會因為你讀得慢而消失。|Investigating advances story time and Ah Jun may grow more anxious. Clues won't disappear while you read.
+看看其他帳單疑點|Look at other questions about the bills
+五張消費提醒卡|Five spending reminder cards
+語音訊息|Voice message
+重看呢個疑點|Review this question
+查清呢個疑點|Investigate this question
+先問另一個人|Talk to someone else first
+自選調查|Optional investigation
+解開一個就可以帶線索出發。想再查先繼續。|Resolve one question before leaving with the clues. Investigate further if you want to.
+🧋 三張細額收據|🧋 Three small receipts
+🛍️ 免運購物車|🛍️ Free-shipping cart
+👟 五筆月供|👟 Five instalment plans
+⏸️ 凌晨付款之前|⏸️ Before the late-night payments
+再開始|Start again
+已記錄|Recorded
+一小步|One small step
+由下一筆開始|Start with the next expense
+記低咗一小步|One small step recorded
+揀一件細到做得到嘅事。|Choose one small action you can do.
+先揀一個想試嘅小行動。|Choose a small action to try first.
+已複製行動卡。|Action card copied.
+選取並複製行動卡|Select and copy the action card
+行動卡文字|Action card text
+記低一筆支出|Record one expense
+記低一日細額支出|Track small expenses for one day
+付款前停十分鐘|Wait ten minutes before paying
+結帳前刪走一件未需要嘅貨品|Remove one nonessential item before checkout
+加埋所有月供，寫低扣款日|Add up every instalment and note the payment dates
+由下一筆重新記，唔使補到完美|Start tracking with the next expense
+先問兩個人，再解開一個帳單疑點。|Talk to two people and resolve one question about the bills first.
+房間傳嚟一張相|A photo arrives
+你出發之前|Before you leave
+全新嘅記帳簿。|A new budget book.
+只寫咗三日。|Only three days filled in.
+旁邊疊住十二封未拆嘅銀行信。第三日，佢仲寫住：『今次一定做到。』|Twelve unopened bank letters lie next to it. On the third day he wrote, “I can do it this time.”
+字條背面嗰句『其實我試過改』，原來係真嘅。|The note was telling the truth: “I did try to change.”
+帶埋本簿，去見佢|Take the book and go to meet him
+第三幕 ／ 觀塘海濱 · 23:25|Act 3 / Kwun Tong waterfront · 23:25
+KWUN TONG ／ 3號觀景亭|KWUN TONG / Pavilion 3
+佢見到你，|When he sees you,
+先收埋咗個電話。|he puts away his phone.
+用你查到嘅，|Use what you discovered
+問一句貼近佢嘅說話。|to ask him a question that connects.
+三日，|Three days
+唔代表只可以得三日。|don't have to be the end.
+今晚，唔使解決晒。|You don't have to fix it all tonight.
+先令聽朝有下一步。|Give tomorrow a next step.
+你又係嚟教訓我？……咁我唔講喇。|Did you come to lecture me too? Then I won't say anything.
+我以為你都唔會嚟。我唔想再畀人話亂使錢。|I thought you wouldn't come either. I don't want another lecture about my spending.
+你真係嚟咗。我唔想再畀人話亂使錢。|You actually came. I don't want another lecture about my spending.
+阿凱同你講咗？嗰晚我只係想有樣嘢做得好。點知更加衰。|Hoi told you? I just wanted to do one thing well that night. I only made it worse.
+阿欣其實冇迫我。但我怕話冇錢，會畀人睇低。|Yan didn't pressure me. I was afraid she'd look down on me if I said I couldn't afford it.
+我知啲帳單唔會自己消失。但我一打開，就覺得自己好失敗。|I know the bills won't disappear. Every time I open one, I feel like I've failed.
+本記帳簿寫咗三日就停。我係咪根本改唔到？|I kept the budget book for three days and then stopped. Am I just unable to change?
+你唔使幫我還晒。可唔可以先陪我，諗聽朝點過？|You don't have to pay it all back for me. Could you stay and help me plan for tomorrow?
+對唔住，我講得太快。我想聽你而家最擔心乜。|I spoke too quickly. I'd like to hear what worries you most right now.
+我唔急住判斷你。你而家最驚邊件事？|I'm here to listen. What scares you most right now?
+早知就唔好買咁多，你自己搞成咁。|You shouldn't have bought so much. You brought this on yourself.
+你嗰晚好委屈。抽卡似乎幫你頂住咗一陣，但帳單仲喺度。|That night hurt. Drawing cards seems to have helped for a while, but the bill is still there.
+原來你怕失去關係。可以一齊講預算，唔使靠請客先留住人。|You were afraid of losing the relationship. You can talk about budgets together without having to pay for everyone.
+一個餘額唔代表你係點嘅人。我想同你睇清楚，唔係評你分。|Your balance doesn't define you. I want to look at it with you.
+你有收入，應該冇乜大問題啦。|You have income, so it probably isn't a big problem.
+本簿證明你試過。唔使補到完美，下一筆重新開始得唔得？|The book shows that you tried. Could you start again with the next expense?
+不如覆嗰啲即批貸款，先頂住。|Maybe reply to the instant-loan messages to get through this month.
+坐低，一齊排聽朝|Sit down and plan tomorrow together
+阿俊避開眼神，冇接住講。你仲可以換一句，修補對話。|Ah Jun looks away. Try another response to repair the conversation.
+「再借，係咪只會將問題推到下個月？」未核實還款能力，先唔作新借貸決定。|“Would another loan just push the problem into next month?” Check what he can repay before deciding.
+可以先望開畫面，用自己嘅說話講。唔使擲骰，唔使讀得完美。|Look away from the screen and use your own words if you'd like. No dice or perfect performance required.
+改用旁白方式|Switch to narration
+用旁白，唔使演危機情緒|Continue as a narrator
+你坐喺阿俊旁邊，先聽需要，唔急住判斷。你將失物同佢嘅說話連起來，陪佢了解可信任嘅人同專業支援。|You sit with Ah Jun and listen to what he needs. Connect the clues to what he tells you and help him identify trusted people and professional support.
+阿俊望返本只寫咗三日嘅記帳簿：「咁……由下一筆開始？」|Ah Jun looks at the budget book with three days filled in. “So… start with the next expense?”
+由下一步繼續|Continue from the next step
+阿俊願意同你一齊諗下一步。|Ah Jun is ready to think about the next step with you.
+先修補，再繼續|Repair and continue
+先聽，先問|Listen and ask
+第四幕 ／ 先過好聽朝|Act 4 / Plan for tomorrow
+我有六百蚊人工未出。|My $600 pay hasn't come through.
+有收入，點解第二日會唔夠？|If I have income, why am I short on day two?
+原來唔只睇一星期總數。|The weekly total isn't enough to tell me what I need.
+人工到帳|Pay received
+人工未到手|Pay still pending
+呢日完結後嘅可用現金|Cash available at the end of the day
+今日入帳|Paid in today
+基本餐費 $30 ＋ 交通 $12|Essential meals $30 + transport $12
+先保基本需要；故事簡化為每日同一安排。|Cover essentials first. This example uses the same costs each day.
+保留原本餐費 $45 ＋ 交通 $28|Keep the original meals $45 + transport $28
+查一查：原來仲有兩張已持有嘅 $30 飯券|Check: two $30 meal vouchers are already available
+只可用於 Day 1、Day 2，唔係新增現金。|Use them on days 1 and 2. They reduce meal costs without increasing cash.
+睇埋第二日|View the second day
+到出糧嗰日|Go to payday
+返第一日，重新安排|Return to day one and revise
+阿俊嘅下一步，排好咗|Ah Jun's next step is ready
+攤開七日帳目|Open the seven-day forecast
+每日先保餐費同必要交通。若現有資源仍然唔夠，應先確認支援同付款安排。|Cover meals and essential transport each day. If available funds fall short, confirm support and payment arrangements.
+先安排實際現金缺口。|Address the cash shortfall first.
+失物開箱|Open the belongings
+拼出原因|Piece together the reasons
+海濱對話|Waterfront conversation
+聽朝之後|After tomorrow
+今日可用現金|Cash available today
+待查|To verify
+解鎖|Unlock
+虛構群組 ／ 今晚邊度食|Fictional group chat / Where to eat tonight
+幕間二 · 一個唔只關於錢嘅邀請|Interlude 2 · An invitation about more than money
+阿俊，留咗你位！|Ah Jun, we saved you a seat!
+大學同學群組 · 新訊息|Classmates group · New message
+今晚火鍋，每人 $280。|Hotpot tonight, $280 each.
+你話今次想請大家飲嘢，仲算唔算？|Are you still treating everyone to drinks?
+阿俊問你點回覆。只係遊戲入面嘅草稿，唔會發送真實訊息。|Ah Jun asks how to reply. This is only an in-game draft.
+今次超咗預算，我飯後同你哋散步得唔得？|That's over my budget. Could I join you for a walk after dinner?
+今晚想休息。聽日我再搵你傾。|I want to rest tonight. I'll check in tomorrow.
+得，我照嚟。|Sure, I'll come.
+群組回覆|Group reply
+同學|Classmates
+記低呢個後果，繼續調查|Note the consequence and continue
+出發前 ／ 放入認領袋|Before leaving / Pack the bag
+幕間三 · 帶兩件就夠|Interlude 3 · Bring two items
+見到佢嗰陣，|When you see him,
+你想先由邊度傾？|what will you talk about first?
+揀兩件實物放入袋，帶出唔同話題。其餘資料留喺案情簿，唔會遺失。|Choose two items to bring up different topics. The remaining evidence stays in the case file.
+三日記帳簿|Three-day budget book
+同佢一齊從下一筆重新開始。|Help him restart with the next expense.
+分期確認信|Instalment confirmations
+對清月供同還款日期。|Compare monthly payments and due dates.
+聯絡備忘卡|Contact card
+由阿俊揀一個願意聯絡嘅人。|Let Ah Jun choose someone he wants to contact.
+日常收據|Everyday receipts
+傾清佢想保留嘅生活同關係。|Talk about the routines and relationships he wants to keep.
+✓ 已放入|✓ Packed
+拎起認領袋，出發|Pick up the bag and go
+袋入面已有兩件。可以先拎返一件出嚟。|The bag already has two items. You can take one out first.

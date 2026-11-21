@@ -54,6 +54,7 @@ export function impactDamage(event,target,solids,self=false){
  const from=event.position;
  const delta={x:target.x-from.x,y:(target.y??1.05)-from.y,z:target.z-from.z};
  const distance=Math.hypot(delta.x,delta.y,delta.z);
- if(distance>=3.5||solids.some(solid=>entry(from,delta,solid,0)<1))return 0;
- return Math.min(self?50:100,Math.round(100*(1-distance/3.5)));
+ const {blastRadius,splash,selfCap}=WEAPONS.bazooka;
+ if(distance>=blastRadius||solids.some(solid=>entry(from,delta,solid,0)<1))return 0;
+ return Math.min(self?selfCap:splash,Math.round(splash*(1-distance/blastRadius)));
 }

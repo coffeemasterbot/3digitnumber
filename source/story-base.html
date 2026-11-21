@@ -19,13 +19,15 @@
 <script src="journey-core.js"></script><script>
 /* Local single-file edition. All inline handlers are exposed on window. */
 const KEY='life-lost-found-guided-v5';
+const ACTION_KEY='lost-found-action-v1';
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fresh=()=>({...JourneyCore.branch(),version:6,started:false,stage:1,unlocked:1,minutes:0,clues:[],witnesses:[],mini:{},talk:0,repairs:0,talkOutcome:'',budgetStep:0,basic:false,vouchers:false,budgetDone:false,habit:'',trigger:'',planStart:'',stamps:Array(7).fill(null),profile:'N',complete:false,openingChoice:'',route:'',delay:false,gapAck:false});
 let s=fresh(),demo=false,beforeDemo=null,toastTimer,activeMini='',pauseStep=0,returnFocus=null;
-const saveSession=JourneyCore.load({getItem:k=>localStorage.getItem(k)},fresh());s=saveSession.state;
-const personalCard=new URLSearchParams(location.search).has('plan');
-function save(explicit=false){if(demo||(personalCard&&!explicit))return;if(saveSession.status==='recovery'){$('save-status').textContent='原儲存檔已保留；目前進度未儲存';return}if(saveSession.status==='unavailable'){$('save-status').textContent='進度將不會儲存；完成後請下載行動卡';return}try{localStorage.setItem(KEY,JSON.stringify(s));saveSession.status='ready';$('save-status').textContent='進度已存喺呢個瀏覽器'}catch{saveSession.status='unavailable';$('save-status').textContent='進度將不會儲存；完成後請下載行動卡'}window.journeySaveStatus?.()}
+const routeQuery=new URLSearchParams(location.search);
+const standaloneArcade=routeQuery.has('arcade'),personalCard=routeQuery.has('plan');
+const saveSession=JourneyCore.load({getItem:k=>standaloneArcade?null:personalCard?(localStorage.getItem(ACTION_KEY)??localStorage.getItem(k)):localStorage.getItem(k)},fresh());s=saveSession.state;
+function save(explicit=false){if(standaloneArcade||demo||(personalCard&&!explicit))return;if(saveSession.status==='recovery'){$('save-status').textContent='原儲存檔已保留；目前進度未儲存';return}if(saveSession.status==='unavailable'){$('save-status').textContent='進度將不會儲存；完成後請下載行動卡';return}try{const data=personalCard?{version:s.version,habit:s.habit,trigger:s.trigger,planStart:s.planStart,stamps:s.stamps,profile:s.profile}:s;localStorage.setItem(personalCard?ACTION_KEY:KEY,JSON.stringify(data));saveSession.status='ready';$('save-status').textContent='進度已存喺呢個瀏覽器'}catch{saveSession.status='unavailable';$('save-status').textContent='進度將不會儲存；完成後請下載行動卡'}window.journeySaveStatus?.()}
 function time(){const m=Math.min(70,Number(s.minutes)||0);return s.stage>=3?'23:25':`${22+Math.floor((10+m)/60)}:${String((10+m)%60).padStart(2,'0')}`}
 function spend(n){s.minutes=Math.min(70,(Number(s.minutes)||0)+n)}
 function hkDate(){const p=Object.fromEntries(new Intl.DateTimeFormat('en',{timeZone:'Asia/Hong_Kong',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(x=>[x.type,x.value]));return `${p.year}-${p.month}-${p.day}`}
@@ -87,10 +89,21 @@ window.toggleHabitDay=function(i,e){if(!Number.isInteger(i)||i<0||i>6||!s.planSt
 window.finishCase=function(){if(!s.planStart)return;s.complete=true;render(true);window.fireConfetti()};
 function ending(){return `<section class="scene"><div class="copy"><div class="kicker">#0409 ／ 已有人同行</div><h2>「本簿，<br>我想拎返。」</h2><p>阿俊冇突然多咗錢。帳單亦未消失。但佢願意打開本簿，同一個信任嘅人，睇下一筆。</p><div class="response good">你帶畀佢嘅：<br>${s.witnesses.includes(2)?'睇見付款背後嘅委屈。':s.witnesses.includes(1)?'睇見佢想保住嘅關係。':'先聽需要，再作判斷。'}<br>${s.repairs?'講錯咗，仍然願意修補。':'留低一個可以繼續講嘅位置。'}<br>${s.gapAck?'唔假裝缺口已經解決，先確認支援。':'將未來收入，同今日可用嘅錢分清楚。'}</div><div class="actions">${btn('保留我嘅行動卡','window.downloadActionCard()')}${btn('返去七日打卡','window.returnPlan()','secondary')}</div><p class="subtle">最後同同伴講一句：你曾經以為阿俊係點嘅人？依家有咩唔同？</p></div><div class="visual surface"><div class="big-icon">📒</div><div class="kicker">唔係清零，而係重新開始</div><h3>三日之後，<br>仲有第四日。</h3><div class="rule"></div><p>當 ${esc(s.trigger)}，<br>我會 ${esc(s.habit)}。</p><div class="tags"><span class="tag">七日後，再睇有冇做到</span></div></div></section>`}
 window.returnPlan=function(){s.complete=false;render(true)};
-function actionCardText(){const review=new Date(s.planStart+'T12:00:00Z');review.setUTCDate(review.getUTCDate()+6);const lines=['人生失物認領處｜七日行動卡',demo?'【評審示範，並非真實完成紀錄】':'本機玩家計劃','開始：'+s.planStart,'檢視：'+review.toISOString().slice(0,10),'當 '+s.trigger+'，我會 '+s.habit+'。','提醒：'+(profiles[s.profile]||profiles.N)[1],'',...s.stamps.map((x,i)=>`Day ${i+1}${i===3?' 三日之後，再開始':''}：${x?(demo||x.demo?'示範':(x.backfill?'補記 ':'已記錄 ')+x.date):'未記錄'}`),'','記帳中斷，可以由下一筆重新開始。','計劃只存喺本機；唔係財務或心理診斷。','債務輔導資料：https://www.ifec.org.hk/web/tc/moneyessentials/debts-and-borrowing/manage-exist-debt/counselling.page'];return lines.join('\n')}
+function actionCardText(){const review=new Date(s.planStart+'T12:00:00Z');review.setUTCDate(review.getUTCDate()+6);
+if(window.siteLocale?.language==='en'){
+ const t=window.siteLocale.text;
+ return ['Lost & Found | Seven-day action card',demo?'Demo check-ins':'Local player plan',
+  'Start: '+s.planStart,'Review: '+review.toISOString().slice(0,10),
+  'At '+s.trigger+', I will '+s.habit,'Reminder: '+t((profiles[s.profile]||profiles.N)[1]),'',
+  ...s.stamps.map((stamp,i)=>'Day '+(i+1)+': '+(stamp?(demo||stamp.demo?'Demo':(stamp.backfill?'Backfilled ':'Recorded ')+stamp.date):'Not recorded')),
+  '', 'If you stop tracking, start again with the next expense.',
+  'This plan stays on your device.',
+  'Debt counselling: https://www.ifec.org.hk/web/tc/moneyessentials/debts-and-borrowing/manage-exist-debt/counselling.page'].join('\n');
+}
+const lines=['人生失物認領處｜七日行動卡',demo?'【評審示範，並非真實完成紀錄】':'本機玩家計劃','開始：'+s.planStart,'檢視：'+review.toISOString().slice(0,10),'當 '+s.trigger+'，我會 '+s.habit+'。','提醒：'+(profiles[s.profile]||profiles.N)[1],'',...s.stamps.map((x,i)=>`Day ${i+1}${i===3?' 三日之後，再開始':''}：${x?(demo||x.demo?'示範':(x.backfill?'補記 ':'已記錄 ')+x.date):'未記錄'}`),'','記帳中斷，可以由下一筆重新開始。','計劃只存喺本機；唔係財務或心理診斷。','債務輔導資料：https://www.ifec.org.hk/web/tc/moneyessentials/debts-and-borrowing/manage-exist-debt/counselling.page'];return lines.join('\n')}
 window.copyCard=async function(){const text=actionCardText();try{await navigator.clipboard.writeText(text);notify('已複製行動卡。')}catch{modal('選取並複製行動卡','<textarea id="card-copy" readonly aria-label="行動卡文字"></textarea>');$('card-copy').value=text;$('card-copy').select()}};
 window.printCard=function(){let sheet=$('print-card');if(!sheet){sheet=document.createElement('pre');sheet.id='print-card';document.body.append(sheet)}sheet.textContent=actionCardText();window.print()};
-window.downloadActionCard=function(){if(!s.planStart)return notify('先揀一個想試嘅小行動。');const url=URL.createObjectURL(new Blob([actionCardText()],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download='人生失物認領處_七日行動卡'+(demo?'_示範':'')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+window.downloadActionCard=function(){if(!s.planStart)return notify('先揀一個想試嘅小行動。');const url=URL.createObjectURL(new Blob([actionCardText()],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=window.siteLocale?.language==='en'?'lost-found-action-card'+(demo?'-demo':'')+'.txt':'人生失物認領處_七日行動卡'+(demo?'_示範':'')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
 window.jumpToStage=function(n,judge=false){if(!Number.isInteger(n)||n<1||n>4)return;if(judge)enterDemo();if(n>s.unlocked&&!demo)return notify('跟住眼前嘅線索先行落去。');s.started=true;s.stage=n;render(true)};
 window.openJournal=function(){modal('案情簿 ／ 你真正知道嘅事',`${s.clues.length?s.clues.map(k=>`<div class="journal-entry"><strong>${evidence[k].icon} ${evidence[k].name}</strong><p>${evidence[k].quote}。${evidence[k].detail}</p><button class="textbtn" onclick="window.inspectClue('${k}')">重看證物 ↗</button></div>`).join(''):'<p>箱仲未打開。先由一件失物開始。</p>'}${s.witnesses.length?'<div class="rule"></div><h3>聽過嘅說話</h3>'+s.witnesses.map(i=>`<div class="journal-entry"><strong>${witnesses[i].name}</strong><p>${witnesses[i].quote}</p></div>`).join(''):''}<div class="rule"></div><p class="subtle">故事時間會因調查而推進，唔會按你閱讀嘅速度倒數。未查清楚嘅事，可以帶住問題去問。</p>`)};
 window.pauseShift=function(){modal('休息一下，個故事會等你',`<p>放低裝置，飲啖水。進度會留喺呢個瀏覽器。</p><p class="subtle">故事涉及債務同情緒困擾。你可以用旁白代替真人演繹，唔使分享自己嘅財務經歷。</p><div class="actions">${btn('準備好，再繼續','window.closeModal()')}</div>`)};
@@ -101,7 +114,7 @@ window.judgeStage=function(n){enterDemo();if(n>=2)s.clues=Object.keys(evidence);
 window.autoFillDemoData=function(){window.judgeStage(4);s.mini={coins:true,shipping:true,instalments:true,pause:true};render();notify('已解鎖示範。真實打卡冇被改動。')};
 window.completeAll7DaysDemo=function(){enterDemo();s.stage=4;s.budgetDone=true;s.habit=s.habit||'記低一筆支出';s.trigger=s.trigger||'每晚刷牙之後';s.planStart=s.planStart||hkDate();s.complete=false;s.stamps=Array.from({length:7},()=>({date:hkDate(),demo:true}));render();window.fireConfetti()};
 window.resetFullDemo=function(){modal('重新開始 V5？','<p>只會清除呢個瀏覽器嘅 V5 進度同打卡。已下載嘅行動卡會保留。</p><div class="actions">'+btn('保留進度','window.closeModal()','secondary')+btn('清除 V4 並重新開始','window.confirmReset()')+'</div>')};
-window.confirmReset=function(){if(demo){window.exitDemo();return}try{localStorage.removeItem(KEY)}catch{}s=fresh();window.closeModal();render(true)};
+window.confirmReset=function(){if(demo){window.exitDemo();return}if(!standaloneArcade)try{localStorage.removeItem(personalCard?ACTION_KEY:KEY)}catch{}s=fresh();window.closeModal();render(true)};
 window.aboutGame=function(){modal('關於呢個認領處',`<p>四幕敘事 TRPG：查失物、拼原因、練習同行、帶走一個七日小行動。無擲骰，亦無以一條說話決定一個人嘅生死。</p><p class="subtle">時間係敘事節奏，唔係真實倒數。故事人物、帳單同金額全屬虛構。建議慢慢討論，唔使完成所有自選調查。</p><div class="rule"></div><h3>現實中需要協助？</h3><p>債務輔導：東華三院 2548 0803；明愛 18288。</p><p><a href="https://www.ifec.org.hk/web/tc/moneyessentials/debts-and-borrowing/manage-exist-debt/counselling.page" target="_blank" rel="noopener">投委會：債務輔導服務資料 ↗</a></p><p class="subtle">如遇即時人身危險，應由現場工作人員聯絡緊急服務。角色演繹唔等於專業危機介入。</p><div class="rule"></div><p class="subtle">玩法及記錄方式沿用 V5；聲音偏好獨立儲存。舊版檔案保留。遊戲唔收集銀行資料，亦唔會將行動卡上傳。請自行保管共用裝置嘅紀錄。</p>`)};
 $('dialog').addEventListener('click',e=>{if(e.target===$('dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)window.closeModal()}});
 render();

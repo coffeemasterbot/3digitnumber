@@ -3,7 +3,8 @@
  const defaults=()=>({A:core.example(),B:{...core.example(),payday:5}});
  const fields={openingCents:'手上現金',pendingIncomeCents:'預計收入',payday:'到帳日（1–7）',foodCents:'每日餐費',travelCents:'每日交通',voucherCents:'頭兩日每張飯券面值',phoneCents:'必要電話費',phoneDay:'電話費到期日',socialCostCents:'可調聚餐支出',socialDay:'聚餐付款日'};
  const quick=['openingCents','pendingIncomeCents','payday'];
- const money=cents=>new Intl.NumberFormat('zh-HK',{style:'currency',currency:'HKD',currencyDisplay:'narrowSymbol'}).format(cents/100);
+ const hkd=new Intl.NumberFormat('zh-HK',{style:'currency',currency:'HKD',currencyDisplay:'narrowSymbol'});
+ const money=cents=>hkd.format(cents/100);
  let scenarios=defaults(), active='A', pending=null;
  const status=text=>{el('lab-status').textContent=text};
  function unpack(raw){
@@ -15,7 +16,7 @@
  function fieldsFor(id,names,isQuick){
   for(const name of names){
    const label=document.createElement('label'),input=document.createElement('input');
-   label.textContent=fields[name];input.dataset.field=name;input.dataset.quick=String(isQuick);
+   label.textContent=fields[name]+(name.endsWith('Cents')&&!isQuick?'（HK$）':'');input.dataset.field=name;input.dataset.quick=String(isQuick);
    input.inputMode=name.endsWith('Cents')?'decimal':'numeric';input.required=true;
    input.addEventListener('input',()=>{
     const cash=name.endsWith('Cents'),v=input.value.trim();
@@ -23,7 +24,7 @@
     const [whole,fraction='']=v.split('.');
     const value=cash?Number(whole)*100+Number(fraction.padEnd(2,'0')):Number(v);
     input.setCustomValidity(valid&&value<=100000000?'':'請輸入範圍內嘅金額（最多兩位小數）或第 1 至 7 日。');
-    if(!input.reportValidity()){status('輸入未完成，結果沿用上一個有效安排。');return}
+    if(!input.validity.valid){status('輸入未完成，結果沿用上一個有效安排。');return}
     scenarios[isQuick?'A':active][name]=value;render(input);status('方案已修改，按「保存 A／B」保留。');
    });label.append(input);el(id).append(label);
   }
@@ -34,22 +35,39 @@
    const n=input.dataset.field,v=scenarios[input.dataset.quick==='true'?'A':active][n];input.value=n.endsWith('Cents')?v/100:v;input.setCustomValidity('');
   }
   const a=core.calculateCashflow(scenarios.A),b=core.calculateCashflow(scenarios.B);
-  const describe=r=>r.firstDeficitDay?'第 '+r.firstDeficitDay+' 日首次不足，當日差 '+money(-r.ledger[r.firstDeficitDay-1].balanceCents)+'。最大缺口 '+money(r.gapCents):'七日每日結餘均足夠';
-  const peak=Math.max(1,...a.ledger.map(day=>Math.abs(day.balanceCents)));
-  el('balance-days').innerHTML=a.ledger.map(day=>{
-   const width=Math.abs(day.balanceCents)/peak*100;
-   return '<div class="balance-day"><span>第 '+day.day+' 日'+(day.incomeCents?' · 到帳':'')+'</span><span class="balance-track"><i class="'+(day.balanceCents<0?'deficit':'')+'" style="width:'+width+'%"></i></span><strong>'+money(day.balanceCents)+'</strong></div>';
-  }).join('');
-  el('quick-result').textContent='A · '+describe(a)+'。期末 '+money(a.closingCents);
-  el('lab-summary').textContent='B · '+describe(b)+'。期末 '+money(b.closingCents);
+  el('lab-scenarios').textContent='A：'+(scenarios.A.pendingIncomeCents?'第 '+scenarios.A.payday+' 日到帳':'冇預計收入')+' · B：'+(scenarios.B.pendingIncomeCents?'第 '+scenarios.B.payday+' 日到帳':'冇預計收入');
+  el('lab-closing').textContent='A '+money(a.closingCents)+' / B '+money(b.closingCents);
+  el('lab-first-gap').textContent=b.firstDeficitDay?'第 '+b.firstDeficitDay+' 日 · 差 '+money(-b.ledger[b.firstDeficitDay-1].balanceCents):'七日結餘均非負數';
+  el('lab-max-gap').textContent=money(b.gapCents);
+  el('lab-first-gap').classList.toggle('negative',!!b.firstDeficitDay);
+  el('lab-max-gap').classList.toggle('negative',!!b.gapCents);
+  const peak=Math.max(1,...[a,b].flatMap(r=>r.ledger.map(day=>Math.abs(day.balanceCents))));
+  function bar(row,label){
+   const balance=row.balanceCents,width=Math.abs(balance)/peak*100;
+   return '<span class="lab-series"><span>'+label+'</span><span class="balance-track" aria-hidden="true"><i class="'+(balance<0?'deficit':'')+'" style="width:'+width+'%"></i></span><strong class="'+(balance<0?'negative':'')+'">'+money(balance)+'</strong></span>';
+  }
+  el('balance-days').innerHTML=a.ledger.map((day,i)=>'<div class="balance-day"><span class="day-label">第 '+day.day+' 日</span>'+bar(day,'A')+bar(b.ledger[i],'B')+'</div>').join('');
+  if(el('lab-ledger').open)renderLedger(a,b);
+ }
+ function renderLedger(a,b){
   const current=(active==='A'?a:b).ledger;
   el('lab-table').innerHTML='<table><caption>方案 '+active+' 每日明細及兩個方案結餘</caption><thead><tr>'+['日','收入','餐費','交通','飯券抵扣','電話','聚餐','A 結餘','B 結餘'].map(x=>'<th scope="col">'+x+'</th>').join('')+'</tr></thead><tbody>'+current.map((r,i)=>'<tr><th scope="row">'+r.day+'</th>'+[r.incomeCents,r.foodCents,r.travelCents,r.voucherCents,r.phoneCents,r.socialCostCents,a.ledger[i].balanceCents,b.ledger[i].balanceCents].map(c=>'<td class="'+(c<0?'negative':'')+'">'+money(c)+'</td>').join('')+'</tr>').join('')+'</tbody></table>';
  }
- fieldsFor('quick-fields',quick,true);fieldsFor('lab-fields',Object.keys(fields),false);render();
+ fieldsFor('quick-fields',quick,true);
+ fieldsFor('lab-income-fields',quick,false);
+ fieldsFor('lab-expense-fields',Object.keys(fields).filter(name=>!quick.includes(name)),false);
+ el('lab-ledger').addEventListener('toggle',()=>{if(el('lab-ledger').open)renderLedger(core.calculateCashflow(scenarios.A),core.calculateCashflow(scenarios.B))});
+ render();
  document.querySelectorAll('[name=lab-tab]').forEach(r=>r.onchange=()=>{active=r.value;render()});
  el('lab-copy').onclick=()=>{scenarios.B={...scenarios.A};document.querySelector('[name=lab-tab][value=B]').click();render();status('已複製到 B。')};
  el('lab-delay').onclick=()=>{if(scenarios[active].payday>5)return status('延遲兩日會超出七日範圍。');scenarios[active].payday+=2;render()};
  el('lab-story').onclick=()=>{try{
+  const anna=window.AnnaCase?.load(localStorage);
+  if(anna?.state.clues.includes('bank')){
+    scenarios[active]={...core.example(),openingCents:window.AnnaCase.BANK.reportedCents,pendingIncomeCents:0,
+      foodCents:0,travelCents:0,voucherCents:0,phoneCents:0,socialCostCents:0};
+    render();status('已帶入手機顯示餘額 $1.50。其他收支可用自訂假設試算。');return;
+  }
   const s=JSON.parse(localStorage.getItem(core.KEY));
   if(!s?.clues?.includes('phone'))return status('目前未查到手上現金，可先用自訂範例。');
   const known=s.budgetDone?core.storyScenario(s):{...core.example(),pendingIncomeCents:0,foodCents:0,travelCents:0,voucherCents:0,phoneCents:0};

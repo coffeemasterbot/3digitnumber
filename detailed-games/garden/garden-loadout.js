@@ -5,7 +5,7 @@ function configureGardenSeeds(stageControl,startButton) {
   stageControl.after(host);
   startButton.hidden=true;
   const unlock=id=>GardenAbilities.cards[id]?.[2]||1;
-  const available=id=>unlock(id)<=gardenLevel()&&(id!=='repeater'||gardenRepeaterAvailable());
+  const available=id=>unlock(id)<=gardenLevel()&&(id!=='repeater'||gardenRepeaterAvailable())&&(window.gardenSeedRestriction?.()?.includes(id)??true);
   function plants(){
     return cards.map(card=>{
       const id=card.dataset.plant,world=unlock(id);

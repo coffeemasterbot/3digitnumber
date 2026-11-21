@@ -7,7 +7,6 @@
 import { useRef, useEffect, useCallback, useState } from 'react';
 import {
   Player, Missile, Coin, PowerUpItem, Particle,
-  BackgroundBuilding, BackgroundStar,
   GameState, PowerUpType, UIState, Difficulty,
 } from '@/types/game';
 import {
@@ -17,60 +16,42 @@ import {
   MISSILE_SPAWN_BASE, COIN_SPAWN_BASE, POWERUP_SPAWN_INTERVAL,
   COIN_SCORE, DISTANCE_SCORE_RATE,
   SHIELD_DURATION, MAGNET_DURATION, BOOST_DURATION, MAGNET_RADIUS,
-  MAX_LIVES, INVINCIBLE_FRAMES, COIN_SIZE, POWERUP_SIZE,
+  MAX_LIVES, INVINCIBLE_FRAMES, POWERUP_SIZE,
 } from '@/utils/constants';
-import { rectIntersects, pointInCircle } from '@/utils/collision';
+import { rectIntersects } from '@/utils/collision';
+import { advanceCoins } from '@/utils/coin-motion';
 import { spawnMissile, spawnCoinPattern, spawnPowerUp } from '@/utils/spawner';
+import { COURSES, completedCourses, courseCoinLine, courseHazardHits, courseMotion, courseObstacle, coursePassed, normalizeSeed, seededCourse, type Course, type Tool } from '@/utils/courses';
 import {
-  drawBackground, drawParticles, drawPlayer,
+  drawBackground, drawParticles, drawPlayer, drawVehicleExit,
   drawMissile, drawCoin, drawPowerUp, drawCoinPop,
 } from '@/utils/renderer';
-import {getTeleportPreview} from '@/utils/teleport';
+import {getTeleportPreview,nextTeleportHeight,TELEPORT_PREVIEW_TICKS} from '@/utils/teleport';
 import { useSound } from './useSound';
 
-// ── Background generators ──────────────────────
-function generateStars(): BackgroundStar[] {
-  return Array.from({ length: 120 }, () => ({
-    x: Math.random() * CANVAS_WIDTH,
-    y: Math.random() * CANVAS_HEIGHT,
-    size: Math.random() < 0.7 ? 1 : 2,
-    brightness: Math.random() * 0.7 + 0.3,
-  }));
-}
-
-function generateBuildings(count: number, yBase: number, palette: string[]): BackgroundBuilding[] {
-  const buildings: BackgroundBuilding[] = [];
-  let x = 0;
-  for (let i = 0; i < count; i++) {
-    const w = 40 + Math.random() * 90;
-    const h = 50 + Math.random() * (yBase - 80);
-    buildings.push({
-      x,
-      y: yBase - h,
-      width: w,
-      height: h,
-      color: palette[Math.floor(Math.random() * palette.length)],
-      windowRows: Math.floor(h / 20),
-      windowCols: Math.floor(w / 18),
-    });
-    x += w + Math.random() * 20;
+const thrustKeys = ['Space', 'ArrowUp', 'KeyW'];
+function updateParticles(particles: Particle[], steps = 1) {
+  let live = 0;
+  for (const particle of particles) {
+    particle.x += particle.vx * steps;
+    particle.y += particle.vy * steps;
+    particle.life -= steps;
+    if (particle.life > 0) particles[live++] = particle;
   }
-  return buildings;
+  particles.length = live;
 }
-
-const FAR_PALETTE=['#e7bd92','#d5ad85','#edcda7'];
-const MID_PALETTE=['#bd765b','#ca9874','#d5ac82'];
 
 const vehicles: PowerUpType[]=['mecha','glider','drill','gravity','blink','dragon'];
-export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode:string,vehicle:string) {
+export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode:string,vehicle:string,mission:number,seed:string,tools:readonly Tool[]) {
   const canvasRef  = useRef<HTMLCanvasElement | null>(null);
   const rafRef     = useRef<number>(0);
   const frameRef   = useRef(0);
 
-  // ── Persistent background assets ────────────
-  const starsRef         = useRef<BackgroundStar[]>(generateStars());
-  const buildingsRef     = useRef<BackgroundBuilding[]>(generateBuildings(40, GROUND_Y, MID_PALETTE));
-  const buildingsFarRef  = useRef<BackgroundBuilding[]>(generateBuildings(30, GROUND_Y, FAR_PALETTE));
+  const lastDraw = useRef<GameState | null>(null);
+  const frameCallback = useRef<FrameRequestCallback | null>(null);
+  const keyboardThrust = useRef(new Set<string>());
+  const pointerThrust = useRef(false);
+  const finishedAt = useRef(-Infinity);
 
   // ── Game objects ─────────────────────────────
   const playerRef   = useRef<Player>(createPlayer());
@@ -92,14 +73,18 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
 
   // ── Spawn timers ─────────────────────────────
   const missileTimerRef = useRef(MISSILE_SPAWN_BASE);
+  const hazardCount = useRef(0);
   const coinTimerRef    = useRef(20);
+  const motif = useRef(0);
+  const teleport = useRef<{y:number,due:number}|null>(null);
   const powerUpTimerRef = useRef(90);
   const spent=useRef(0);
   const vehicleCycle=useRef(0);const blastRef=useRef(0);
+  const route=useRef<Course|null>(null), passed=useRef(false), encounter=useRef(0), deposit=useRef(0);
+  const equipped=useRef<Set<Tool>>(new Set());
+  const bestKey=mode==='practice'?'jj_highscore':mode==='mission'?'jet-best-mission-'+(COURSES[mission]?.id??COURSES[0].id):mode==='seed'?'jet-best-seed-'+normalizeSeed(seed):'jet-best-'+mode;
 
   // ── High score (localStorage) ─────────────────
-  // Use both a ref (for sync access inside game loop) and state (for UI re-renders)
-  const [highScore, setHighScore] = useState<number>(0);
   const highScoreRef = useRef<number>(0);
 
   // ── React UI state ───────────────────────────
@@ -121,11 +106,14 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
 
   // ── Sync high score from localStorage ────────
   useEffect(() => {
-    const stored = parseInt(localStorage.getItem(mode==="practice"?"jj_highscore":"jet-best-"+mode) ?? '0', 10);
+    let stored = 0;
+    try {
+      const parsed = Number(localStorage.getItem(bestKey));
+      if (Number.isSafeInteger(parsed) && parsed >= 0) stored = parsed;
+    } catch {}
     highScoreRef.current = stored;
-    setHighScore(stored);
     setUIState(prev => ({ ...prev, highScore: stored }));
-  }, [mode]);
+  }, [bestKey]);
 
   // ── Player factory ────────────────────────────
   function createPlayer(): Player {
@@ -160,42 +148,85 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     scrollRef.current    = 0;
     frameRef.current     = 0;
     missileTimerRef.current = MISSILE_SPAWN_BASE;
+    hazardCount.current = 0;
     coinTimerRef.current    = 20;
+    motif.current=0;
+    teleport.current=null;
     spent.current=0;powerUpTimerRef.current = 180;vehicleCycle.current=0;blastRef.current=0;
+    passed.current=false;encounter.current=0;deposit.current=0;
     tappedRef.current=false;thrustingRef.current=false;
+    thrustTickRef.current = 0;
+    keyboardThrust.current.clear();
+    pointerThrust.current = false;
+    lastClock.current = 0;
+    fixedAcc.current = 0;
   }, [difficulty]);
 
   // ── Start / restart game ──────────────────────
   const startGame = useCallback(() => {
+    if (gameStateRef.current === 'playing' || performance.now() - finishedAt.current < 400) return;
     resetGame();
+    route.current=mode==='mission'?(COURSES[mission]??COURSES[0]):mode==='seed'?seededCourse(seed):null;
+    equipped.current=new Set(tools.slice(0,2));
+    const prepared=route.current?.vehicle;
+    if(prepared)playerRef.current.powerUp=prepared;
+    if(equipped.current.has('magnet'))playerRef.current.magnetFrames=MAGNET_DURATION;
+    if(equipped.current.has('shield'))playerRef.current.shieldFrames=5400;
     if(mode==="trial"&&vehicles.includes(vehicle as PowerUpType)){playerRef.current.powerUp=vehicle as PowerUpType;playerRef.current.powerUpTimer=0}
     gameStateRef.current = 'playing';
     play('start');
     play('bgm');
     syncUI();
-  }, [resetGame, play,mode,vehicle]);
+  }, [resetGame, play,mode,vehicle,mission,seed,tools]);
+
+  function releaseThrust() {
+    keyboardThrust.current.clear();
+    pointerThrust.current = false;
+    tappedRef.current = false;
+    thrustingRef.current = false;
+    playerRef.current.isThrusting = false;
+  }
 
   // ── Pause / resume ────────────────────────────
-  const togglePause = useCallback(() => {
-    if (gameStateRef.current === 'playing') {
+  const pauseGame = useCallback(() => {
+    if (gameStateRef.current !== 'playing') return;
       gameStateRef.current = 'paused';
-      thrustingRef.current=false;
-      playerRef.current.isThrusting=false;
+      releaseThrust();
       stopBGM();
-    } else if (gameStateRef.current === 'paused') {
+      syncUI();
+  }, [stopBGM, difficulty, mode, soundEnabled]);
+
+  const togglePause = useCallback(() => {
+    if (gameStateRef.current === 'playing') pauseGame();
+    else if (gameStateRef.current === 'paused') {
+      lastClock.current = 0;
+      fixedAcc.current = 0;
       gameStateRef.current = 'playing';
       play('bgm');
+      syncUI();
     }
+  }, [play, pauseGame, difficulty, mode, soundEnabled]);
+
+  function showStart() {
+    releaseThrust();
+    stopBGM();
+    gameStateRef.current = 'start';
+    scrollRef.current = 0;
     syncUI();
-  }, [play, stopBGM]);
+  }
 
   // ── Thrust (press/hold) ───────────────────────
-  const setThrusting = useCallback((value: boolean) => {
-    if(value && gameStateRef.current !== 'playing') return;
+  const updateThrust = useCallback(() => {
+    const value = gameStateRef.current === 'playing' && (pointerThrust.current || keyboardThrust.current.size > 0);
     if(value&&!thrustingRef.current&&gameStateRef.current==='playing')tappedRef.current=true;
     thrustingRef.current = value;
     playerRef.current.isThrusting = value;
   }, []);
+
+  const setThrusting = useCallback((value: boolean) => {
+    pointerThrust.current = value && gameStateRef.current === 'playing';
+    updateThrust();
+  }, [updateThrust]);
 
   // ── Die ───────────────────────────────────────
   function die() {
@@ -215,9 +246,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     livesRef.current--;
     play('hit');
     if (livesRef.current <= 0) {
-      tappedRef.current=false;
-      thrustingRef.current=false;
-      p.isThrusting=false;
+      releaseThrust();
       play('death');
       stopBGM();
       gameStateRef.current = 'dying';
@@ -239,10 +268,26 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
   // Uses refs throughout so it's safe to call from any callback without stale-closure issues
   function settle(){
     if(!['dying','revive'].includes(gameStateRef.current))return;
-    gameStateRef.current='gameover';
-    const hs=Math.max(highScoreRef.current,Math.floor(scoreRef.current));highScoreRef.current=hs;setHighScore(hs);
-    try{localStorage.setItem(mode==='practice'?'jj_highscore':'jet-best-'+mode,String(hs))}catch{}
+    finishRun();
+  }
+  function summarize() {
+    return {mode, state: gameStateRef.current, score: Math.floor(scoreRef.current), seconds: frameRef.current / 60,completed:passed.current,course:route.current?.id};
+  }
+  function finishRun() {
+    gameStateRef.current = 'gameover';
+    finishedAt.current = performance.now();
+    const hs = Math.max(highScoreRef.current, Math.floor(scoreRef.current));
+    highScoreRef.current = hs;
+    try{
+      localStorage.setItem(bestKey,String(hs));
+      if(mode==='mission'&&passed.current&&route.current){
+        const wins=completedCourses(localStorage);
+        if(!wins.includes(route.current.id))localStorage.setItem('jet-courses-v2',JSON.stringify([...wins,route.current.id]));
+      }
+    }catch{}
+    stopBGM();
     syncUI();
+    window.dispatchEvent(new CustomEvent('arcade-game-state', { detail: summarize() }));
   }
   function revive(){
     if(gameStateRef.current!=='revive'||spent.current||coinsCountRef.current<100)return;
@@ -251,19 +296,21 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
   }
   function syncUI() {
     const p = playerRef.current;
+    scheduleFrame();
+    const activePowerUp = p.powerUp !== 'none' ? p.powerUp : (p.shieldFrames || 0) > 0 ? 'shield' : (p.magnetFrames || 0) > 0 ? 'magnet' : 'none';
+    const effectFrames = activePowerUp === 'shield' ? p.shieldFrames : activePowerUp === 'magnet' ? p.magnetFrames : p.powerUpTimer;
     setUIState({
       gameState: gameStateRef.current,
       score: Math.floor(scoreRef.current),
       highScore: highScoreRef.current, // ← ref, always current
       distance: Math.floor(distanceRef.current),
       coins: coinsCountRef.current-spent.current,
-      activePowerUp: p.powerUp!=='none'?p.powerUp:(p.shieldFrames||0)>0?'shield':(p.magnetFrames||0)>0?'magnet':'none',
-      powerUpTimeLeft: p.powerUpTimer > 0
-        ? p.powerUpTimer / getPowerUpDuration(p.powerUp)
-        : 0,
+      activePowerUp,
+      powerUpTimeLeft: Math.min(1, (effectFrames || 0) / getPowerUpDuration(activePowerUp)),
       lives: livesRef.current,
       difficulty,
       soundEnabled,
+      course:route.current?{title:route.current.title,remaining:Math.max(0,Math.ceil(route.current.seconds-frameRef.current/60)),target:route.current.coins,passed:passed.current,seed:mode==='seed'?route.current.id:undefined}:undefined,
     });
   }
 
@@ -277,26 +324,30 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
 
   const deathFrames=useRef(0),lastClock=useRef(0),fixedAcc=useRef(0);
   (window as any).orientationPause=togglePause;
-  (window as any).detailedGameSnapshot=()=>({mode,dashFrames:playerRef.current.dashFrames||0,collected:coinsCountRef.current,spent:spent.current,available:coinsCountRef.current-spent.current,state:gameStateRef.current,score:Math.floor(scoreRef.current),lives:livesRef.current,distance:distanceRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,magnet:playerRef.current.magnetFrames,shield:playerRef.current.shieldFrames,teleportPreview:playerRef.current.teleportPreview,vehicleVisualState:playerRef.current.vehicleVisualState,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type})),coins:coinsCountRef.current,seconds:frameRef.current/60});
+  (window as any).detailedGameSummary=summarize;
+  (window as any).detailedGameSnapshot=()=>({...summarize(),dashFrames:playerRef.current.dashFrames||0,collected:coinsCountRef.current,spent:spent.current,available:coinsCountRef.current-spent.current,lives:livesRef.current,distance:distanceRef.current,player:{x:playerRef.current.x,y:playerRef.current.y,power:playerRef.current.powerUp,timer:playerRef.current.powerUpTimer,magnet:playerRef.current.magnetFrames,shield:playerRef.current.shieldFrames,teleportPreview:playerRef.current.teleportPreview,vehicleVisualState:playerRef.current.vehicleVisualState,expired:playerRef.current.expiredType,expiredTimer:playerRef.current.expiredTimer,expiredReason:playerRef.current.expiredReason},missiles:missilesRef.current.map(m=>({x:m.x,y:m.y,type:m.type,hazard:m.hazard})),coins:coinsCountRef.current});
   function endVehicle(p:Player,reason:string){p.expiredType=p.powerUp;p.expiredTimer=100;p.expiredReason=reason;for(let i=0;i<(matchMedia('(prefers-reduced-motion:reduce)').matches?0:16);i++){const a=i*Math.PI/8;p.particles.push({x:p.x+p.width/2,y:p.y+p.height/2,vx:Math.cos(a)*3,vy:Math.sin(a)*3,life:40,maxLife:40,size:4,color:'#e9bc66'})}play('powerup')}
   // ── Main game loop ────────────────────────────
-  const gameLoop = useCallback(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+  function scheduleFrame() {
+    if (!rafRef.current && frameCallback.current && !document.hidden) {
+      rafRef.current = requestAnimationFrame(frameCallback.current);
+    }
+  }
 
-    rafRef.current = requestAnimationFrame(gameLoop);
-
-    const clockNow=performance.now(),delta=lastClock.current?Math.min(.1,(clockNow-lastClock.current)/1000):0;lastClock.current=clockNow;const gs = gameStateRef.current;
+  const gameLoop = useCallback((ctx: CanvasRenderingContext2D, clockNow: number) => {
+    const gs = gameStateRef.current;
+    const sceneChanged = gs !== lastDraw.current;
+    lastDraw.current = gs;
+    const delta = lastClock.current ? Math.min(.05, Math.max(0, (clockNow - lastClock.current) / 1000)) : 0;
+    lastClock.current = clockNow;
     if (gs === 'dying') {
       deathFrames.current += delta * 60;
       const player=playerRef.current;
-      player.y=Math.min(GROUND_Y-player.height,player.y+deathFrames.current*.28);
-      player.particles=player.particles.map(pt=>({...pt,x:pt.x+pt.vx,y:pt.y+pt.vy,life:pt.life-1})).filter(pt=>pt.life>0);
+      player.y=Math.min(GROUND_Y-player.height,player.y+deathFrames.current*.28*delta*60);
+      updateParticles(player.particles, delta * 60);
       renderFrame(ctx);
       if (deathFrames.current > 65) {
-        if (spent.current) settle();
+        if (spent.current||route.current?.keepReserve) settle();
         else {
           gameStateRef.current='revive';
           syncUI();
@@ -306,19 +357,22 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     }
     if (gs === 'start' || gs === 'gameover') {
       // Still draw background on start/gameover for visual richness
-      drawBackground(ctx, scrollRef.current, starsRef.current, buildingsRef.current, buildingsFarRef.current);
+      if (sceneChanged) drawBackground(ctx, scrollRef.current);
       return;
     }
     if (gs === 'paused'||gs==='revive') {
       // Don't advance, just re-render current state
-      renderFrame(ctx);
+      if (sceneChanged) renderFrame(ctx);
       return;
     }
 
-    fixedAcc.current+=delta;let steps=0;while(fixedAcc.current>=1/60&&steps++<6&&gameStateRef.current==='playing'){fixedAcc.current-=1/60;
+    fixedAcc.current+=delta;let steps=0;
+    while(fixedAcc.current+1e-9>=1/60&&steps++<3&&gameStateRef.current==='playing'){
+    fixedAcc.current=Math.max(0,fixedAcc.current-1/60);
     frameRef.current++;
     const frame = frameRef.current;
-    const speed = speedRef.current*((playerRef.current.dashFrames||0)>0?1.65:1);
+    const warmup = 0.7 + 0.3 * Math.min(1, frame / 1800);
+    const speed = speedRef.current * warmup * ((playerRef.current.dashFrames || 0) > 0 ? 1.65 : 1);
 
     // Ramp up speed
     speedRef.current = Math.min(MAX_SPEED, speedRef.current + SPEED_RAMP);
@@ -337,13 +391,16 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       p.velocity=Math.max(-7,Math.min(7,p.velocity+(p.invertedGravity?-GRAVITY:GRAVITY)));
     }else if(p.powerUp==='blink'){
       p.velocity=0;
-      if(tapped){
-        const preview=getTeleportPreview(p,missilesRef.current);
-        const target=preview.targets.find(t=>t.id===p.teleportPreview?.nextId&&t.safe);
-        if(target)p.y=target.y;
+      if(tapped&&p.teleportPreview){
+        p.y=p.teleportPreview.y;
+        p.teleportPreview=undefined;
+        teleport.current=null;
+      }
+      if(!teleport.current||frame>=teleport.current.due){
+        teleport.current={y:nextTeleportHeight(p,teleport.current?.y),due:frame+TELEPORT_PREVIEW_TICKS};
       }
     }else if (p.powerUp==='dragon'?!thrustingRef.current:thrustingRef.current) {
-      p.velocity = Math.max(p.velocity + THRUST*(p.powerUp==='mecha'?.65:1), MAX_RISE_SPEED);
+      p.velocity = Math.max(p.velocity + THRUST*(p.powerUp==='mecha'?.65:warmup), MAX_RISE_SPEED);
       // Jetpack flame particles
       if (frame % 2 === 0) {
         p.particles.push({
@@ -403,22 +460,42 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     }
 
     // Update particles
-    p.particles = p.particles
-      .map(pt => ({ ...pt, x: pt.x + pt.vx, y: pt.y + pt.vy, life: pt.life - 1 }))
-      .filter(pt => pt.life > 0);
+    updateParticles(p.particles);
 
     // ── Spawn objects ───────────────────────────
+    const course=route.current;
+    if(course){
+      const next=course.encounters[encounter.current];
+      if(next&&frame>=Math.round(next[0]*60)){
+        missilesRef.current.push(courseObstacle(next[1],next[2],speed,equipped.current.has('forecast')?96:72));
+        encounter.current++;
+      }
+      const coins=course.deposits[deposit.current];
+      if(coins&&frame>=Math.round(coins[0]*60)){
+        coinsRef.current.push(...courseCoinLine(coins[1],deposit.current,mode==='seed'?course.id:''));
+        deposit.current++;
+      }
+    }else{
     missileTimerRef.current--;
     if (missileTimerRef.current <= 0) {
       const difficultyFactor = difficulty === 'easy' ? 1 : difficulty === 'medium' ? 0.7 : 0.5;
       const scoreBonus = Math.max(0, 1 - scoreRef.current / 3000);
-      const barrier=spawnMissile(speed,scoreRef.current);barrier.warningFrames=72;barrier.hazard=frame%2?'missile':'zapper';if(barrier.hazard==='zapper'){barrier.width=28;barrier.height=95}missilesRef.current.push(barrier);
-      missileTimerRef.current = Math.max(40, MISSILE_SPAWN_BASE * difficultyFactor * (0.5 + scoreBonus));
+      const barrier = spawnMissile(speed, scoreRef.current);
+      barrier.warningFrames = equipped.current.has('forecast') ? 96 : 72;
+      barrier.warningAlpha = barrier.warningFrames;
+      barrier.hazard = hazardCount.current++ % 2 === 0 ? 'zapper' : 'missile';
+      if (barrier.hazard === 'zapper') {
+        barrier.width = 28;
+        barrier.height = 95;
+        barrier.y = Math.min(barrier.y, GROUND_Y - barrier.height);
+      }
+      missilesRef.current.push(barrier);
+      missileTimerRef.current = Math.max(40, MISSILE_SPAWN_BASE * difficultyFactor * (0.5 + scoreBonus) / warmup);
     }
 
     coinTimerRef.current--;
     if (coinTimerRef.current <= 0) {
-      coinsRef.current.push(...spawnCoinPattern(speed));
+      coinsRef.current.push(...spawnCoinPattern(motif.current++,missilesRef.current));
       coinTimerRef.current = COIN_SPAWN_BASE;
     }
 
@@ -427,13 +504,21 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       const pickup=spawnPowerUp();pickup.type=([...vehicles,'shield','magnet','boost'] as PowerUpType[])[Math.floor(Math.random()*9)];pickup.x=CANVAS_WIDTH-POWERUP_SIZE;pickup.y=Math.max(CEILING_Y+15,Math.min(GROUND_Y-50,p.y));powerUpsRef.current.push(pickup);
       powerUpTimerRef.current = POWERUP_SPAWN_INTERVAL;
     }
+    }
 
     // ── Move missiles ───────────────────────────
-    missilesRef.current = missilesRef.current
-      .map(m => {
-        if (!m.active) return m;
-        if(m.warningFrames&&m.warningFrames>0)return {...m,x:CANVAS_WIDTH-m.width,warningFrames:m.warningFrames-1};
-        if(m.hazard==='zapper')return {...m,x:m.x-speed};
+    missilesRef.current = missilesRef.current.filter(m => {
+        if (!m.active) return false;
+        if (m.warningFrames && m.warningFrames > 0) {
+          m.x = CANVAS_WIDTH - m.width;
+          m.warningFrames--;
+          return true;
+        }
+        if (m.hazard && m.hazard !== 'missile') {
+          m.x -= speed;
+          courseMotion(m);
+          return m.x + m.width > -50;
+        }
         let vx = m.velocityX;
         let vy = m.velocityY;
         // Homing: steer toward player
@@ -447,48 +532,29 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
             vy += (dy / dist) * steering * 2;
           }
         }
-        return { ...m, x: m.x + vx, y: m.y + vy, velocityX: vx, velocityY: vy };
-      })
-      .filter(m => m.x + m.width > -50 && m.y > -200 && m.y < CANVAS_HEIGHT + 200);
+        m.x += vx;
+        m.y += vy;
+        m.velocityX = vx;
+        m.velocityY = vy;
+        return m.x + m.width > -50 && m.y > -200 && m.y < CANVAS_HEIGHT + 200;
+      });
 
     // ── Move coins ──────────────────────────────
-    coinsRef.current = coinsRef.current
-      .map(c => {
-        if (!c.active) return c;
-        let { x, y } = c;
-        x -= speed;
-
-        // Magnet attraction
-        if ((p.magnetFrames||0)>0) {
-          const cx = x + COIN_SIZE / 2;
-          const cy = y + COIN_SIZE / 2;
-          const pcx = p.x + p.width / 2;
-          const pcy = p.y + p.height / 2;
-          if (pointInCircle(cx, cy, pcx, pcy, MAGNET_RADIUS)) {
-            const dx = pcx - cx;
-            const dy = pcy - cy;
-            const dist = Math.hypot(dx, dy);
-            x += (dx / dist) * 6;
-            y += (dy / dist) * 6;
-          }
-        }
-
-        // Decrease pop timer
-        const collectedTimer = c.collectedTimer > 0 ? c.collectedTimer - 1 : 0;
-        return { ...c, x, y, collectedTimer };
-      })
-      .filter(c => c.x + COIN_SIZE > -20 || c.collected);
+    advanceCoins(coinsRef.current, speed, p);
 
     // ── Move power-ups ──────────────────────────
-    powerUpsRef.current = powerUpsRef.current
-      .map(pu => ({ ...pu, x: pu.x - speed, angle: pu.angle + 0.04 }))
-      .filter(pu => pu.x + POWERUP_SIZE > -20);
+    powerUpsRef.current = powerUpsRef.current.filter(pu => {
+      if (!pu.active) return false;
+      pu.x -= speed;
+      pu.angle += .04;
+      return pu.x + POWERUP_SIZE > -20;
+    });
 
     // ── Collision: player ↔ missiles ────────────
     if (!p.invincible&&!(p.dashFrames||0)) {
       for (const m of missilesRef.current) {
-        if (!m.active) continue;
-        if (rectIntersects(p, m)) {
+        if (!m.active || (m.warningFrames || 0) > 0) continue;
+        if (courseHazardHits(p, m)) {
           if ((p.shieldFrames||0)>0||vehicles.includes(p.powerUp)) {
             // Shield absorbs hit
             if(!vehicles.includes(p.powerUp)){p.shieldFrames=0;m.active=false;p.invincible=true;p.invincibleTimer=60;break}
@@ -496,7 +562,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
             p.powerUp = 'none';
             p.powerUpTimer = 0;
             p.invincible = true;
-            p.invincibleTimer = 48;
+            p.invincibleTimer = equipped.current.has('eject')?90:48;
             m.active = false;
             play('hit');break;
           } else {
@@ -543,17 +609,21 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     // Sync UI every 10 frames
     if (frame % 10 === 0) syncUI();
 
-    if(mode==='practice'&&frameRef.current>=5400&&gameStateRef.current==='playing'){gameStateRef.current='gameover';highScoreRef.current=Math.max(highScoreRef.current,Math.floor(scoreRef.current));localStorage.setItem(mode==='practice'?'jj_highscore':'jet-best-'+mode,String(highScoreRef.current));stopBGM();syncUI()}
+    if (mode === 'practice' && frameRef.current >= 5400 && gameStateRef.current === 'playing') finishRun();
+    if(course&&frame>=course.seconds*60){
+      passed.current=coursePassed(course,frame,coinsCountRef.current-spent.current,spent.current);
+      finishRun();
+    }
     }
     // ── Draw ────────────────────────────────────
-    renderFrame(ctx);
-  }, [difficulty, play, stopBGM, highScore,mode]);
+    if (steps || sceneChanged) renderFrame(ctx);
+  }, [difficulty, play, stopBGM, mode, bestKey, soundEnabled]);
 
   function renderFrame(ctx: CanvasRenderingContext2D) {
     const frame = frameRef.current;
     const p = playerRef.current;
 
-    drawBackground(ctx, scrollRef.current, starsRef.current, buildingsRef.current, buildingsFarRef.current);
+    drawBackground(ctx, scrollRef.current);
 
     // Coins
     for (const c of coinsRef.current) {
@@ -575,11 +645,12 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     drawParticles(ctx, p.particles);
 
     // Player
-    p.teleportPreview=p.powerUp==='blink'&&gameStateRef.current==='playing'?getTeleportPreview(p,missilesRef.current):undefined;
+    if(p.powerUp!=='blink')teleport.current=null;
+    p.teleportPreview=p.powerUp==='blink'&&teleport.current?getTeleportPreview(p,missilesRef.current,teleport.current.y):undefined;
     p.vehicleVisualState={active:p.powerUp,gravity:p.invertedGravity?'up':'down',airborne:p.y>CEILING_Y+1&&p.y+p.height<GROUND_Y-1,velocityY:p.velocity};
     drawPlayer(ctx, p, frame);if(blastRef.current>0){ctx.strokeStyle='#fff0b2';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(p.x+p.width,p.y+22);ctx.lineTo(p.x+420,p.y+22);ctx.stroke()}
 
-    if((p.expiredTimer||0)>0){const k=matchMedia('(prefers-reduced-motion:reduce)').matches?0:1-(p.expiredTimer||0)/100,cx=p.x+p.width/2,cy=p.y+p.height/2;ctx.save();ctx.globalAlpha=1-k;ctx.strokeStyle='#fff0c5';ctx.lineWidth=3;ctx.setLineDash([8,5]);ctx.beginPath();ctx.arc(cx,cy,32+k*45,0,Math.PI*2);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=Math.min(1,(p.expiredTimer||0)/20);ctx.fillStyle='#fff2d4';ctx.fillRect(p.x-25,p.y-42,210,26);ctx.fillStyle='#765131';ctx.font='bold 13px Microsoft JhengHei';ctx.textAlign='left';ctx.fillText((p.expiredType==='mecha'?'儲備機甲':p.expiredType==='glider'?'計劃滑翔翼':'界線鑽頭')+' · '+p.expiredReason,p.x-18,p.y-24);ctx.restore()}
+    drawVehicleExit(ctx,p);
     // Magnet field hint
     if ((p.magnetFrames||0)>0) {
       ctx.save();
@@ -597,47 +668,66 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
 
   // ── Start / stop rAF ─────────────────────────
   useEffect(() => {
-    rafRef.current = requestAnimationFrame(gameLoop);
+    const ctx = canvasRef.current?.getContext('2d', { alpha: false });
+    if (!ctx) return;
+    lastClock.current = 0;
+    frameCallback.current = clock => {
+      rafRef.current = 0;
+      if (document.hidden) return;
+      gameLoop(ctx, clock);
+      if (gameStateRef.current === 'playing' || gameStateRef.current === 'dying') scheduleFrame();
+    };
+    scheduleFrame();
     return () => {
       cancelAnimationFrame(rafRef.current);
-      stopBGM();
+      rafRef.current = 0;
+      frameCallback.current = null;
     };
   }, [gameLoop, stopBGM]);
 
   // ── Keyboard input ────────────────────────────
   useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {if(e.target instanceof Element&&e.target.closest('input,textarea,dialog,[role=dialog],button'))return;
-      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.target instanceof Element && e.target.closest('input, select, textarea')) return;
+      if (thrustKeys.includes(e.code)) {
+        if (e.code === 'Space' && e.target instanceof Element && e.target.closest('button, a')) return;
         e.preventDefault();
         if (gameStateRef.current === 'start' || gameStateRef.current === 'gameover') {
-          startGame();
-        } else if (gameStateRef.current === 'playing') {
-          setThrusting(true);
+          if (!e.repeat) startGame();
+        } else if (!e.repeat && gameStateRef.current === 'playing') {
+          keyboardThrust.current.add(e.code);
+          updateThrust();
         }
       }
       if (e.code === 'Escape' || e.code === 'KeyP') {
-        if (gameStateRef.current === 'playing' || gameStateRef.current === 'paused') {
+        if (!e.repeat && (gameStateRef.current === 'playing' || gameStateRef.current === 'paused')) {
           togglePause();
         }
       }
     };
     const onKeyUp = (e: KeyboardEvent) => {
-      if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') {
-        setThrusting(false);
-      }
+      if (keyboardThrust.current.delete(e.code)) updateThrust();
+    };
+    const onVisibility = () => {
+      if (document.hidden) { pauseGame(); lastClock.current = 0; }
+      else scheduleFrame();
     };
     window.addEventListener('keydown', onKeyDown);
     window.addEventListener('keyup', onKeyUp);
+    window.addEventListener('blur', pauseGame);
+    document.addEventListener('visibilitychange', onVisibility);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
+      window.removeEventListener('blur', pauseGame);
+      document.removeEventListener('visibilitychange', onVisibility);
     };
-  }, [startGame, setThrusting, togglePause]);
+  }, [startGame, updateThrust, togglePause, pauseGame]);
 
   return {
     canvasRef,
     uiState,
-    startGame,revive,settle,
+    startGame, showStart, revive, settle,
     togglePause,
     setThrusting,
   };

@@ -1,9 +1,8 @@
-import SoundButton from'./SoundButton';
 'use client';
 
+import SoundButton from './SoundButton';
 import VehicleIcon from './VehicleIcon';
-import { motion } from 'framer-motion';
-import { PowerUpType } from '@/types/game';
+import type { UIState, PowerUpType } from '@/types/game';
 
 interface Props {
   score: number;
@@ -17,12 +16,13 @@ interface Props {
   soundEnabled: boolean;
   onSoundToggle: () => void;
   onPause: () => void;
+  course?: UIState['course'];
 }
 
 const POWERUP_CONFIG: Record<PowerUpType, { icon: string; color: string; label: string }> = {
-  shield: { icon: '🛡', color: '#00d4ff', label: 'SHIELD'  },
-  magnet: { icon: '🧲', color: '#ff44ff', label: 'MAGNET'  },
-  boost:  { icon: '⚡', color: '#00ff88', label: 'BOOST'   },
+  shield: { icon: '🛡', color: '#97e6fa', label: '護盾 · 可擋一次' },
+  magnet: { icon: '🧲', color: '#f4c7f0', label: '磁鐵 · 吸近金幣' },
+  boost:  { icon: '⚡', color: '#a9f2c0', label: '疾衝 · 短暫免傷' },
   mecha:{icon:'🤖',color:'#f3b948',label:'儲備機甲 · 自動擋擊'},
   glider:{icon:'🛩',color:'#efd6aa',label:'計劃滑翔翼 · 點按拍翼'},
   drill:{icon:'⚙',color:'#de8057',label:'界線鑽頭 · 著地點按跳躍'},
@@ -42,7 +42,7 @@ function Heart({ filled }: { filled: boolean }) {
 
 export default function HUD({
   score, highScore, distance, coins, lives, maxLives,
-  activePowerUp, powerUpTimeLeft, soundEnabled, onSoundToggle, onPause,
+  activePowerUp, powerUpTimeLeft, soundEnabled, onSoundToggle, onPause, course,
 }: Props) {
   const pwCfg = POWERUP_CONFIG[activePowerUp];
 
@@ -52,25 +52,21 @@ export default function HUD({
       <div className="flex items-start justify-between px-3 pt-2 gap-2">
         {/* Score + distance */}
         <div className="flex flex-col gap-0.5 min-w-[110px]">
-          <motion.div
-            key={score}
-            initial={{ scale: 1.15 }}
-            animate={{ scale: 1 }}
-            transition={{ duration: 0.15 }}
-            className="font-black font-mono text-2xl text-cyan-300 leading-none tabular-nums"
-            style={{ textShadow: '0 0 12px rgba(0,212,255,0.7)' }}
+          <div
+            className="font-black font-mono text-2xl text-amber-100 leading-none tabular-nums"
+            aria-label={`飛行距離 ${distance} 米`}
           >
-            {score.toLocaleString()}
-          </motion.div>
-          <div className="font-mono text-xs text-cyan-700 leading-none">{Math.floor(distance)}m</div>
+            {distance.toLocaleString()} <span className="text-sm">m</span>
+          </div>
+          <div className="font-mono text-xs text-amber-100 leading-none mt-1">分數 {score.toLocaleString()}</div>
         </div>
 
         {/* Best score (centre) */}
         <div className="flex flex-col items-center gap-0.5">
-          <div className="font-mono text-xs text-yellow-700 uppercase tracking-widest leading-none">最佳</div>
+          <div className="font-mono text-xs text-amber-100 leading-none">{course?.title??'本機最高分'}</div>
           <div className="font-mono font-bold text-base text-yellow-400 leading-none tabular-nums"
             style={{ textShadow: '0 0 8px rgba(255,215,0,0.5)' }}>
-            {highScore.toLocaleString()}
+            {course?course.remaining+' 秒'+(course.target?' · 金幣 '+Math.min(coins,course.target)+' / '+course.target:''):highScore.toLocaleString()}
           </div>
         </div>
 
@@ -83,8 +79,11 @@ export default function HUD({
             <SoundButton enabled={soundEnabled} onToggle={onSoundToggle}/>
             {/* Pause */}
             <button
+              type="button"
+              aria-label="暫停"
+              title="暫停（P）"
               onClick={onPause}
-              className="pointer-events-auto w-7 h-7 rounded-lg border border-cyan-900 bg-black/60 text-xs flex items-center justify-center hover:border-cyan-500 transition-colors font-mono font-bold text-cyan-600 hover:text-cyan-400"
+              className="pointer-events-auto w-11 h-11 rounded-lg border border-amber-200 bg-black/70 text-sm flex items-center justify-center font-mono font-bold text-amber-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-200"
             >
               II
             </button>
@@ -101,11 +100,8 @@ export default function HUD({
 
       {/* Active power-up bar (bottom-left) */}
       {activePowerUp !== 'none' && (
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          className="absolute bottom-20 left-3 flex items-center gap-2"
+        <div
+          className="absolute bottom-12 left-3 flex items-center gap-2 rounded-lg bg-black/70 px-2 py-1.5"
         >
           {['mecha','glider','drill'].includes(activePowerUp)?<VehicleIcon type={activePowerUp}/>:<span className="text-xl">{pwCfg.icon}</span>}
           <div className="flex flex-col gap-0.5">
@@ -114,13 +110,13 @@ export default function HUD({
             </span>
             {!['mecha','glider','drill','gravity','blink','dragon'].includes(activePowerUp) && (
             <div className="w-24 h-1.5 rounded-full bg-white/10 overflow-hidden">
-              <motion.div
+              <div
                 className="h-full rounded-full"
                 style={{ backgroundColor: pwCfg.color, width: `${powerUpTimeLeft * 100}%`, boxShadow: `0 0 6px ${pwCfg.color}` }}
               />
             </div>)}
           </div>
-        </motion.div>
+        </div>
       )}
     </div>
   );

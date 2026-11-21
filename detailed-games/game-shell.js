@@ -1,19 +1,160 @@
-(()=>{const kind=document.body.dataset.game;let musicTimer=null;let muted=localStorage.getItem('arcade-music-muted')==='true',ctx,bus,beat=0,last=0;const bar=document.createElement('div');bar.className='shell-controls';bar.innerHTML='<button id="shell-sound">音樂：開</button><span id="shell-timer" style="font-size:12px;padding:6px;color:#ffe0a1"></span><button id="shell-full">全螢幕 ↗</button><button id="shell-back">遊戲選單</button>';document.body.append(bar);const sound=document.getElementById('shell-sound');const label=()=>sound.textContent=muted?'音樂：關':'音樂：開';label();document.getElementById('shell-back').onclick=()=>{if(parent!==window)parent.postMessage({type:'website-v1-back'},location.origin);else location.href='../../#play'};document.getElementById('shell-full').onclick=async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen()}catch{}};sound.onclick=()=>{muted=!muted;localStorage.setItem('arcade-music-muted',String(muted));if(bus)bus.gain.value=muted?0:.16;label()};if(kind==='jet')sound.hidden=true;
-function note(freq,dur,vol,type){if(!ctx)return;const o=ctx.createOscillator(),g=ctx.createGain(),t=ctx.currentTime;o.type=type;o.frequency.setValueAtTime(freq,t);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);o.connect(g);g.connect(bus);o.start();o.stop(t+dur);o.onended=()=>{o.disconnect();g.disconnect()}}
-function state(){if(kind==='garden'){try{return {state:gameState.isGameOver?'gameover':gameState.isVictory?'victory':gameState.isPaused?'paused':'playing',score:gameState.score,wave:gameState.wave}}catch{return {state:'start'}}}return window.detailedGameSnapshot?.()||{state:'start'}}
-if(kind!=='jet'){const unlock=()=>{if(!ctx){ctx=new AudioContext();bus=ctx.createGain();bus.gain.value=muted?0:.16;bus.connect(ctx.destination)}ctx.resume()};document.addEventListener('pointerdown',unlock);document.addEventListener('keydown',unlock);musicTimer=setInterval(()=>{const s=state();if(window.gameAudio||!ctx||s.state!=='playing'||muted||document.hidden)return;beat++;if(kind==='garden'){const chord=[[60,64,67],[57,60,64],[53,57,60],[55,59,62]][Math.floor(beat/16)%4],melody=[72,76,79,76,74,72,67,71,69,72,76,79,77,76,74,71],slot=beat%16;if(slot%4===0){note(440*2**((chord[0]-12-69)/12),.55,.21,'sine');for(const n of chord)note(440*2**((n-69)/12),.75,.035,'triangle')}note(440*2**((melody[slot]-69)/12),.3,.11,'triangle');if(slot%2===1)note(440*2**((chord[slot%3]+12-69)/12),.18,.035,'sine');return}const roots=[110,98,87.31,103.83],root=roots[Math.floor(beat/16)%4];if(beat%2===0)note(root,.17,.19,'sawtooth');note(root*[2,3,4,3,2,4,3,2][beat%8],.08,.09,'square');if(beat%4===0)note(55,.1,.4,'sine');if(beat%4===2)note(800,.035,.045,'triangle')},60000/(kind==='runner'?164:108)/2)}
-if(kind==='runner'){let lastCoin=-1;window.addEventListener('runner-coin',e=>{
- if(window.gameAudio){if(!muted)window.gameAudio.effect('coin',e.detail);return}if(!ctx||muted||ctx.state!=='running'||state().state!=='playing'||ctx.currentTime-lastCoin<.07)return;
- lastCoin=ctx.currentTime;note(880,.095,.12,'sine');
-})}
-const uiTimer=setInterval(()=>{const s=state();if(kind!=='jet'&&window.gameAudio){const picker=kind==='garden'&&document.getElementById('garden-intro');if(document.hidden||muted||(!picker&&s.state!=='playing'))window.gameAudio.pause();else{window.gameAudio.track(kind==='runner'?'runner':picker?'garden-picker':gameState.boss?'garden-boss':'garden-'+gardenLevel());window.gameAudio.resume()}}document.getElementById('shell-timer').textContent=kind==='garden'?'第 '+(s.wave||1)+'/5 波':kind==='jet'&&s.mode!=='practice'?Math.floor(s.seconds||0)+'s':Math.max(0,90-Math.floor(kind==='jet'?(s.seconds||0):(s.powers?.time||0)))+'s';if(s.state==='gameover'||s.state==='victory'){if(last!==s.state){const k=kind==='runner'?'coins':kind==='jet'?'shipping':'instalments';try{const a=JSON.parse(localStorage.getItem('website-v1-arcade')||'{}'),r=JSON.parse(localStorage.getItem('website-v1-records')||'{}');a[k]={score:s.score||0,levels:s.wave,completed:s.state==='victory'||kind==='runner'&&(s.powers?.time||0)>=90||kind==='jet'&&(s.seconds||0)>=90};r[k]={best:Math.max(r[k]?.best||0,s.score||0),plays:(r[k]?.plays||0)+1};localStorage.setItem('website-v1-arcade',JSON.stringify(a));localStorage.setItem('website-v1-records',JSON.stringify(r))}catch{}}}last=s.state},500);
-window.addEventListener('pagehide',()=>{if(typeof musicTimer!=='undefined')clearInterval(musicTimer);clearInterval(uiTimer);ctx?.close().catch(()=>{})});
-window.detailedMusicStatus=()=>({kind,muted,running:ctx?.state==='running',state:state().state});
-if(kind==='garden'){window.detailedGameSnapshot=()=>{const s=state();return {...s,sun:gameState.sun,plants:gameState.plants.length,zombies:gameState.zombies.length}};window.addEventListener('load',()=>{togglePause();document.getElementById('pauseMenu').style.display='none';const intro=document.createElement('div');intro.id='garden-intro';intro.innerHTML='<section><small>完整植物防守 · 五個世界 · 五關戰役</small><h1>守住你嘅花園</h1><p>十種植物・逐波升級嘅敵人<br>先種生產，再安排防線；點陽光收集資源。</p><p>揀上方植物，再撳草地。手機建議橫向。</p><button id="garden-start">開始守護</button></section>';document.body.append(intro);document.getElementById('garden-start').onclick=()=>{intro.remove();resumeGame()}})}
-window.addEventListener('load',()=>installLandscapeGate({
-  playing:()=>state().state==='playing',
-  pause:()=>kind==='garden'?togglePause():window.orientationPause?.(),
-  resume:()=>kind==='garden'?resumeGame():window.orientationPause?.(),
-  leave:()=>document.getElementById('shell-back').click()
-}));
+(() => {
+  const kind = document.body.dataset.game;
+  const recordsKey = 'website-v1-records';
+  const progressKey = 'website-v1-arcade';
+  const parentOrigin = location.origin === 'null' ? '*' : location.origin;
+  let muted = false;
+  try { muted = localStorage.getItem('arcade-music-muted') === 'true'; } catch {}
+  const bar = document.createElement('div');
+  bar.className = 'shell-controls';
+  bar.innerHTML = '<button id="shell-sound" type="button">音樂</button><span id="shell-timer"></span><button id="shell-full" type="button">全螢幕 ↗</button><button id="shell-back" type="button">遊戲選單</button>';
+  document.body.append(bar);
+
+  const sound = document.getElementById('shell-sound');
+  const timer = document.getElementById('shell-timer');
+  const full = document.getElementById('shell-full');
+  const back = document.getElementById('shell-back');
+  sound.hidden = kind === 'jet';
+  timer.hidden = kind !== 'garden';
+  function labelSound() {
+    sound.textContent = muted ? '音樂：關' : '音樂：開';
+    sound.setAttribute('aria-pressed', String(!muted));
+  }
+  labelSound();
+  sound.onclick = () => {
+    muted = !muted;
+    try { localStorage.setItem('arcade-music-muted', String(muted)); } catch {}
+    labelSound();
+    update();
+  };
+
+  full.onclick = async () => {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await document.documentElement.requestFullscreen();
+    } catch {
+      full.textContent = '未能開啟全螢幕 · 重試';
+    }
+  };
+  document.addEventListener('fullscreenchange', () => {
+    full.textContent = document.fullscreenElement ? '離開全螢幕' : '全螢幕 ↗';
+  });
+  full.hidden = !document.fullscreenEnabled;
+
+  function state() {
+    if (kind !== 'garden') return window.detailedGameSummary?.() ?? window.detailedGameSnapshot?.() ?? {state:'start'};
+    if (typeof gameState === 'undefined') return {state:'start'};
+    const phase = gameState.isVictory ? 'victory' : gameState.isGameOver ? 'gameover' : gameState.isPaused ? 'paused' : 'playing';
+    return {state:phase, score:gameState.score, wave:gameState.wave, mode:window.gardenMode?.()||'campaign'};
+  }
+
+  function readMap(key) {
+    try {
+      const value = JSON.parse(localStorage.getItem(key));
+      if (value && typeof value === 'object' && !Array.isArray(value)) return value;
+    } catch {}
+    return {};
+  }
+
+  let lastPhase = 'start';
+  let recorded = false;
+  let lastRun;
+  function flushResult(snapshot = state(), exiting = false) {
+    const phase = String(snapshot.state).toLowerCase();
+    if (kind === 'runner' && snapshot.runNumber != null) {
+      if (lastRun !== snapshot.runNumber) recorded = false;
+      lastRun = snapshot.runNumber;
+    } else if (phase === 'playing' && ['start','menu','gameover','victory'].includes(lastPhase)) recorded = false;
+    lastPhase = phase;
+    const finished = phase === 'gameover' || phase === 'victory';
+    const abandoned = !finished && exiting && kind === 'runner' && snapshot.distance > 0;
+    if (window.arcadeTest || window.arcadeStory || recorded || (!finished && !abandoned)) return;
+    if (abandoned) window.saveRunnerAttempt?.();
+    recorded = true;
+    const key = {runner:'coins',jet:'shipping',garden:'instalments'}[kind];
+    if (!key) return;
+    const score = Number.isFinite(snapshot.score) ? Math.max(0, Math.floor(snapshot.score)) : 0;
+    const progress = readMap(progressKey);
+    const records = readMap(recordsKey);
+    const mode = snapshot.mode;
+    const separateScore = kind==='garden'?mode&&mode!=='campaign':mode&&mode!=='practice';
+    if (finished) progress[key] = {
+      score,
+      levels: snapshot.wave,
+      completed: snapshot.completed === true || phase === 'victory' || (kind === 'runner' && (!snapshot.mode||snapshot.mode==='practice') && snapshot.powers?.time >= 90)
+        || (kind === 'jet' && snapshot.mode === 'practice' && snapshot.seconds >= 90),
+    };
+    const previous = records[key];
+    records[key] = {
+      best: Math.max(Number.isFinite(previous?.best) ? previous.best : 0, separateScore?0:score),
+      plays: (Number.isSafeInteger(previous?.plays) && previous.plays >= 0 ? previous.plays : 0) + 1,
+    };
+    try {
+      localStorage.setItem(progressKey, JSON.stringify(progress));
+      localStorage.setItem(recordsKey, JSON.stringify(records));
+      if (parent !== window) parent.postMessage({type:'arcade-records-change'}, parentOrigin);
+    } catch {}
+  }
+  // Give the launcher a chance to persist results before it removes or reloads an iframe.
+  window.flushArcadeResult = () => flushResult(state(), true);
+  back.onclick = () => {
+    window.flushArcadeResult();
+    if (parent !== window) parent.postMessage({type:'website-v1-back'}, parentOrigin);
+    else location.href = '../../#play';
+  };
+
+  let activeTrack;
+  function update() {
+    const snapshot = state();
+    flushResult(snapshot);
+    if (!timer.hidden) {
+      const text = '第 ' + (snapshot.wave || 1) + (snapshot.mode==='survival'?'':'/5') + ' 波';
+      if (timer.textContent !== text) timer.textContent = text;
+    }
+    const audio = window.gameAudio;
+    if (!audio || kind === 'jet') return;
+    const picker = kind === 'garden' && document.getElementById('garden-intro');
+    const track = document.hidden || muted || (!picker && snapshot.state !== 'playing')
+      ? null : kind === 'runner' ? 'runner' : picker ? 'garden-picker'
+        : gameState.boss ? 'garden-boss' : 'garden-' + gardenLevel();
+    if (track === activeTrack) return;
+    activeTrack = track;
+    if (track) {
+      audio.track(track);
+      audio.resume();
+    } else audio.pause();
+  }
+  if (kind === 'runner') {
+    window.addEventListener('runner-coin', event => {
+      if (!muted) window.gameAudio?.effect('coin', event.detail);
+    });
+  }
+  window.addEventListener('arcade-game-state', update);
+  document.addEventListener('visibilitychange', update);
+  // The older Garden loop may change state without emitting an event.
+  const uiTimer = setInterval(update, 500);
+  window.addEventListener('pagehide', () => { window.flushArcadeResult(); clearInterval(uiTimer); });
+  window.detailedMusicStatus = () => ({kind, muted, running:!!activeTrack, state:state().state});
+
+  if (kind === 'garden') {
+    window.detailedGameSnapshot = () => ({
+      ...state(), sun:gameState.sun, plants:gameState.plants.length, zombies:gameState.zombies.length,
+    });
+    window.addEventListener('load', () => {
+      togglePause();
+      document.getElementById('pauseMenu').style.display = 'none';
+      const intro = document.createElement('div');
+      intro.id = 'garden-intro';
+      intro.innerHTML = '<section><small>五個世界 · 五關戰役</small><h1>守住你嘅花園</h1><p>先種陽光植物儲資源，再安排防線。</p><p>揀植物，再撳草地。撳陽光收集。</p><button id="garden-start" type="button">選關同揀植物</button></section>';
+      document.body.append(intro);
+      document.getElementById('garden-start').onclick = () => { intro.remove(); resumeGame(); update(); };
+      update();
+    });
+  }
+  window.addEventListener('load', () => installLandscapeGate({
+    playing:() => state().state === 'playing',
+    pause:() => kind === 'garden' ? togglePause() : window.orientationPause?.(),
+    resume:() => kind === 'garden' ? resumeGame() : window.orientationPause?.(),
+    leave:() => back.click(),
+  }));
 })();

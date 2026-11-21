@@ -5,6 +5,7 @@ import type { ObstacleData } from './Obstacle';
 import type { CoinData } from './Coin';
 
 interface PlayerState {
+  x?: number;
   lane: number;
   isJumping: boolean;
   isSliding: boolean;
@@ -20,9 +21,9 @@ export function useCollision() {
     playerState: PlayerState,
     playerZ: number
   ): ObstacleData | null => {
-    const playerLane = LANES[playerState.lane];
+    const playerLane = playerState.x ?? LANES[playerState.lane];
     
-    for(const obstacle of obstacles)if(obstacleHit(obstacle,playerLane,playerZ,playerState.y-.85,playerState.isSliding))return obstacle;
+    for(const obstacle of obstacles)if(obstacleHit(obstacle,playerLane,playerZ,playerState.y-.9,playerState.isSliding))return obstacle;
     return null;
   }, []);
 
@@ -31,7 +32,7 @@ export function useCollision() {
     playerState: PlayerState,
     playerZ: number
   ): CoinData[] => {
-    const playerLane = LANES[playerState.lane];
+    const playerLane = playerState.x ?? LANES[playerState.lane];
     const collectedCoins: CoinData[] = [];
     
     for (const coin of coins) {

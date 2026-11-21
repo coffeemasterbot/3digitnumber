@@ -17,7 +17,7 @@ const jsString=value=>value.replace(/[^\x00-\x7F]/g,char=>'\\u'+char.charCodeAt(
 
 let home=fs.readFileSync(path.join(output,'index.html'),'utf8');
 home=replaceRequired(home,
-  '公開遊戲連結，不需要登入。排行榜會顯示玩家自選暱稱及每局成績。',
+  '公開遊戲連結，不需要登入。此分享版本不設線上排行榜。',
   '呢個 GitHub Pages 版本毋須登入；遊戲最佳分數只保存在本機，不設共用排行榜。',
   'Pages score notice');
 

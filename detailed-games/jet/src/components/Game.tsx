@@ -5,6 +5,7 @@ import { AnimatePresence } from 'framer-motion';
 import { Difficulty } from '@/types/game';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, MAX_LIVES } from '@/utils/constants';
 import { useGameEngine } from '@/hooks/useGameEngine';
+import { completedCourses, type Tool } from '@/utils/courses';
 import StartScreen from './StartScreen';
 import GameOverScreen from './GameOverScreen';
 import PauseMenu from './PauseMenu';
@@ -16,19 +17,23 @@ export default function Game() {
   // ── User preferences ──────────────────────────
   const [mode,setMode]=useState((window as any).arcadeTest?'trial':'endless');
   const [vehicle,setVehicle]=useState((window as any).arcadeTest?.target||'mecha');
+  const [mission,setMission]=useState(0);
+  const [seed,setSeed]=useState('HARBOR');
+  const [tools,setTools]=useState<Tool[]>([]);
   const difficulty:Difficulty='medium';
   const [soundEnabled, setSoundEnabled] = useState(()=>{try{return localStorage.getItem('jet-sound-enabled')==='true'}catch{return false}});
 
   const {
     canvasRef,
     uiState,
-    startGame,revive,settle,
+    startGame,showStart,revive,settle,
     togglePause,
     setThrusting,
-  } = useGameEngine(difficulty, soundEnabled,mode,vehicle);
+  } = useGameEngine(difficulty, soundEnabled,mode,vehicle,mission,seed,tools);
+  let completed:string[]=[];
+  try{completed=completedCourses(localStorage)}catch{}
 
   (window as any).detailedUIState=uiState;
-  const prevScoreRef = useRef(0);
 
   // Track if current game over is a new high score
   const isNewHighScore =
@@ -37,51 +42,36 @@ export default function Game() {
     uiState.score >= uiState.highScore &&
     uiState.highScore > 0;
 
-  const handleRestart = useCallback(() => {
-    prevScoreRef.current = uiState.score;
-    startGame();
-  }, [startGame, uiState.score]);
-
-  const handleMenu = useCallback(() => {
-    // Return to start screen: reload page or just reset state
-    // We simply call startGame then immediately reach a way to show start screen.
-    // Simplest: set internal state via a separate flag.
-    window.location.reload();
-  }, []);
-
   const toggleSound = useCallback(() => {
     setSoundEnabled(prev => {const next=!prev;try{localStorage.setItem('jet-sound-enabled',String(next))}catch{}return next});
   }, []);
 
-  useEffect(()=>{
-    const audio=(window as any).gameAudio;if(!audio)return;
-    if(!soundEnabled||uiState.gameState!=='playing'||document.hidden)audio.pause();
-    else {audio.track('jet');audio.resume()}
-  },[soundEnabled,uiState.gameState]);
+  useEffect(() => {
+    if (uiState.gameState === 'playing') canvasRef.current?.focus({ preventScroll: true });
+  }, [uiState.gameState, canvasRef]);
   // ── Canvas responsiveness ─────────────────────
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
 
   useEffect(() => {
+    const parent = wrapperRef.current?.parentElement;
+    if (!parent) return;
     const measure = () => {
-      if (!wrapperRef.current) return;
-      const parent = wrapperRef.current.parentElement;
-      if (!parent) return;
       const maxW = parent.clientWidth - 16;  // 8px padding each side
       const maxH = parent.clientHeight - 16;
       const scaleX = maxW / CANVAS_WIDTH;
       const scaleY = maxH / CANVAS_HEIGHT;
-      setScale(Math.min(1.7, scaleX, scaleY));
+      if (maxW > 0 && maxH > 0) setScale(Math.min(1.7, scaleX, scaleY));
     };
     measure();
-    window.addEventListener('resize', measure);
-    return () => window.removeEventListener('resize', measure);
+    const observer = new ResizeObserver(measure);
+    observer.observe(parent);
+    return () => observer.disconnect();
   }, []);
 
   return (
     <div
       className="relative flex items-center justify-center w-full h-full"
-      style={{ touchAction: 'none' }}
     >
       {/* ── Scaled canvas wrapper ──────────────── */}
       <div
@@ -93,12 +83,11 @@ export default function Game() {
           transformOrigin: 'center',
         }}
       >
-        {/* Outer neon border */}
+        {/* Workshop cabinet frame */}
         <div
           className="absolute inset-0 rounded-2xl pointer-events-none z-30"
           style={{
-            boxShadow:
-              '0 0 0 2px rgba(0,212,255,0.3), 0 0 40px rgba(0,212,255,0.08), inset 0 0 40px rgba(0,0,0,0.6)',
+            boxShadow: '0 0 0 1px #927050, 0 8px 20px #30231b40',
             borderRadius: '1rem',
           }}
         />
@@ -106,6 +95,8 @@ export default function Game() {
         {/* Canvas */}
         <canvas
           ref={canvasRef}
+          tabIndex={-1}
+          aria-label="飛行場，按住空白鍵或觸控上升，放開下降"
           width={CANVAS_WIDTH}
           height={CANVAS_HEIGHT}
           style={{
@@ -113,7 +104,6 @@ export default function Game() {
             borderRadius: '1rem',
             width:  CANVAS_WIDTH  * scale,
             height: CANVAS_HEIGHT * scale,
-            imageRendering: 'pixelated',
           }}
         />
 
@@ -122,7 +112,8 @@ export default function Game() {
           {uiState.gameState === 'start' && (
             <StartScreen
               key="start" mode={mode} vehicle={vehicle} setMode={setMode} setVehicle={setVehicle}
-
+              mission={mission} setMission={setMission} seed={seed} setSeed={setSeed}
+              tools={tools} setTools={setTools} completed={completed}
               onStart={startGame}
               highScore={uiState.highScore}
               soundEnabled={soundEnabled}
@@ -141,8 +132,10 @@ export default function Game() {
               isNewHighScore={isNewHighScore}
               soundEnabled={soundEnabled}
               onSoundToggle={toggleSound}
-              onRestart={handleRestart}
-              onMenu={handleMenu}
+              onRestart={startGame}
+              onMenu={showStart}
+              course={uiState.course}
+              practice={mode==='practice'}
             />
           )}
 
@@ -150,8 +143,8 @@ export default function Game() {
             <PauseMenu
               key="pause"
               onResume={togglePause}
-              onRestart={handleRestart}
-              onMenu={handleMenu}
+              onRestart={startGame}
+              onMenu={showStart}
               soundEnabled={soundEnabled}
               onSoundToggle={toggleSound}
             />
@@ -159,7 +152,7 @@ export default function Game() {
         </AnimatePresence>
 
         {/* ── HUD (shown during play + pause) ─── */}
-        {(uiState.gameState === 'playing' || uiState.gameState === 'paused') && (
+        {uiState.gameState === 'playing' && (
           <HUD
             score={uiState.score}
             highScore={uiState.highScore}
@@ -172,30 +165,15 @@ export default function Game() {
             soundEnabled={soundEnabled}
             onSoundToggle={toggleSound}
             onPause={togglePause}
+            course={uiState.course}
           />
         )}
 
         {/* ── Mobile touch controls ─────────────── */}
-        <MobileControls
-          onThrustStart={() => {
-            if (uiState.gameState === 'start' || uiState.gameState === 'gameover') {
-              startGame();
-            } else {
-              setThrusting(true);
-            }
-          }}
-          onThrustEnd={() => setThrusting(false)}
-          onPause={togglePause}
-          isPlaying={uiState.gameState === 'playing'}
-        />
+        {uiState.gameState === 'playing' && <MobileControls onThrustChange={setThrusting} />}
       </div>
 
       {/* ── Bottom hints (desktop only) ─────────── */}
-      <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-center pointer-events-none">
-        <p className="font-mono text-xs text-cyan-900 tracking-wider">
-          SPACE／W／↑ 上升 &nbsp;·&nbsp; P 暫停
-        </p>
-      </div>
     </div>
   );
 }

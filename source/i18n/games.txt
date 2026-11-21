@@ -1,0 +1,528 @@
+預算守護花園|Budget Garden
+預算守護花園 · 完整防守|Budget Garden · Full defence
+植物防守|Plant defence
+揀好植物，守住五條防線。先預留生產，再決定點分配有限資源。|Choose plants to defend five lanes. Fund production first, then decide where your limited resources will go.
+零應急儲備|No emergency reserve
+破解「零應急儲備」|Tackle “no emergency reserve”
+預留緩衝，安排先後|Set aside a buffer and prioritise
+如果一開始花晒陽光，突發進攻時仲有幾多選擇？現實中，你會為必要開支同突發需要預留幾多？|If you spend all your sun, what options remain when a surprise attack starts? How much would you set aside for essentials and emergencies?
+散紙追蹤|Change Chase
+散紙追蹤 3D|Change Chase 3D
+3D 跑酷|3D runner
+換線、跳躍，拾返細額收據。跑得越遠，誘惑越密。|Change lanes, jump and collect receipts. Temptations pile up as you run farther.
+破解「對小錢無感」|Notice the small expenses
+留意細額支出|Keep track of small expenses
+遊戲拾取會加分；現實買嘢會花錢。你今日有邊幾筆細額支出？加埋一星期係幾多？|Collectibles earn points here. In life, purchases cost money. What did you spend in small amounts today, and what would a week of that add up to?
+優惠氣流|Jetstream Savings
+優惠氣流 飛行挑戰|Jetstream Savings · Flight challenge
+噴射飛行|Jetpack flight
+揹起噴射背包穿過實驗室，避開導彈、收集金幣。揀練習、載具試駕或者無盡飛行。|Fly through the lab, dodge missiles and collect coins. Choose practice, a vehicle test or an endless run.
+破解「湊免運費與優惠陷阱」|Spot free-shipping and offer traps
+優惠前先睇總支出|Check the total cost before taking an offer
+追逐拾取物會唔會令你撞上障礙？如果為咗免運而加購，最後總額有冇反而增加？|Can chasing a pickup lead you into a hazard? If you add products for free shipping, does the final bill actually go down?
+冰火同行|Fire & Ice Together
+雙角色合作|Two-character co-op
+行動等埋規劃。踩掣、開閘，喺倒數前一齊到門口。|Plan together. Press switches and open gates to reach the exits before time runs out.
+破解「衝動與補償性消費」|Recognise impulse and comfort spending
+行動前停一停，同伴先商量|Pause and talk it through before acting
+兩個角色各自行先會唔會卡住？下次想即刻買嘢時，可以先同邊個商量，或者留幾多時間再決定？|Can the characters get stuck by rushing ahead alone? The next time you want to buy something immediately, who could you talk to, or how long could you wait?
+預算防衛戰|Budget Defence
+預算防衛戰 · 機械人拆彈任務|Budget Defence · Robot defusal mission
+3D 機械人拆彈|3D robot defusal
+第一身穿過街區、利用掩體制止消費壞習慣機械人。核對帳目，拆解財務炸彈。|Move through the streets, use cover and stop robots representing spending habits. Verify the accounts and defuse the financial device.
+破解「Min Pay 與透支未來」|Understand minimum payments and future debt
+核實資料，保留必要資源|Check the facts and protect essential funds
+裝備買得越多就一定越好？遇到還款壓力時，你會先核對到期日、還款安排，定只睇眼前可用額？|Does buying more equipment always help? When repayments are difficult, check due dates and repayment terms alongside the cash you have now.
+遊戲選單|Game menu
+返回遊戲選單|Back to game menu
+全螢幕 ↗|Fullscreen ↗
+離開全螢幕|Exit fullscreen
+未能開啟全螢幕 · 重試|Fullscreen unavailable · Retry
+暫停|Pause
+繼續|Continue
+返回|Back
+主選單|Main menu
+重試|Retry
+退出|Exit
+設定|Settings
+取消|Cancel
+開始|Start
+繼續遊戲|Continue game
+立即重玩|Play again now
+遊戲暫停|Game paused
+重新開始|Restart
+繼續挑戰|Resume challenge
+重新試過|Try again
+開局|Start
+玩法|Mode
+難度|Difficulty
+選擇難度|Choose difficulty
+輕鬆|Relaxed
+標準|Standard
+挑戰|Challenge
+關卡|Stage
+下一關|Next stage
+操作說明|Controls
+音樂|Music
+音樂：開|Music: on
+音樂：關|Music: off
+聲音：開|Sound: on
+聲音：關|Sound: off
+♫ 聲音：開|♫ Sound: on
+♫ 聲音：關|♫ Sound: off
+音量|Volume
+觸控操作|Touch controls
+減少動態效果|Reduce motion
+畫面全螢幕|Fullscreen
+建議橫向遊玩|Rotate to landscape
+📱 建議橫向遊玩|Rotate to landscape
+轉橫手機，會睇得更清楚。|Turn your phone sideways for a clearer view.
+跑局狀態|Run status
+滑板|Board
+跳躍|Jump
+換線|Change lanes
+滑鏟|Slide
+向左|Left
+向右|Right
+飛行|Fly
+載入賽道…|Loading course…
+3D 畫面暫停|3D display paused
+瀏覽器未能啟動 WebGL 3D。可返回大廳。|WebGL 3D is unavailable in this browser. Return to the arcade to keep playing.
+瀏覽器未能啟動 WebGL 3D。你可以重試，或者返回大廳。|WebGL 3D could not start. Retry or return to the arcade.
+3D 畫面中斷。你可以等畫面恢復、重試或返回大廳。|The 3D display was interrupted. Wait for it to recover, retry or return to the arcade.
+重試 3D|Retry 3D
+開始跑酷|Start run
+再跑一轉|Run again
+今次跑局完結|Run ended
+順利完成跑局|Run complete
+休息一下|Paused
+得分|Score
+距離|Distance
+散紙|Change
+最佳|Best
+最佳紀錄|Personal best
+低欄跳過、高欄滑鏟。見斜坡可以跑上靜止列車。|Jump low barriers and slide under high ones. Use ramps to run onto parked trains.
+遊玩模式|Game mode
+90 秒練習|90-second practice
+無盡跑酷|Endless run
+無盡飛行|Endless flight
+任務路線|Mission route
+固定種子挑戰|Seeded challenge
+揀路線|Choose route
+揀另一條路線|Choose a different route
+路線代碼|Route code
+例如 HARBOUR-8|e.g. HARBOUR-8
+複製|Copy
+已複製路線代碼。|Route code copied.
+已選取代碼，可以按 Ctrl+C 複製。|Code selected. Press Ctrl+C to copy.
+← → 換線 · ↑ 跳 · ↓ 滑鏟 · B 滑板 · P 暫停|← → lanes · ↑ jump · ↓ slide · B board · P pause
+← → 換線、↑／空白跳、↓ 滑鏟、B 放滑板。手機可用畫面控制。|← → change lanes, ↑/Space jump, ↓ slide, B deploy board. On-screen controls are available on mobile.
+按住空白鍵、W、↑ 或觸控上升，放開下降。見到邊緣預警，提早換高度。|Hold Space, W, ↑ or touch to rise. Release to descend. Change height when an edge warning appears.
+飛行模式|Flight mode
+八關任務|Eight missions
+載具試駕|Vehicle trial
+航線|Course
+航線代碼|Course code
+試駕載具|Choose a vehicle
+裝備車庫|Equipment garage
+預警延長|Longer warning
+起飛吸附|Starting magnet
+安全彈出|Safe ejection
+一次防護|One-hit shield
+開始飛行|Start flight
+成績保存於本機|Scores saved locally
+成績只保存在本機|Scores saved locally
+每局成績可見於共同排行榜|Runs appear on the shared leaderboard
+本次分數|Run score
+飛行距離|Distance flown
+收集金幣|Coins collected
+本機最佳|Local best
+本次航程結束|Flight ended
+任務完成|Mission complete
+任務未完成|Mission incomplete
+落地，再準備下一程。|Land and prepare for the next run
+保留緩衝，順利到達終點。|You kept a reserve and reached the finish.
+留一點緩衝，下一次飛得更從容。|Keep a little in reserve for your next flight.
+個人最佳紀錄更新|New personal best
+返回準備畫面|Back to preparation
+本機保存此模式嘅最佳紀錄。|Best scores for this mode are saved locally.
+離線版本只保留本機紀錄。選擇另一條路線，再試一次。|Offline records stay on this device. Choose another route and try again.
+儲備機甲|Reserve mech
+界線鑽車|Boundary drill
+計劃滑翔翼|Planner glider
+重力裝置|Gravity rig
+瞬移裝置|Teleporter
+龍型載具|Dragon rig
+點按翻轉|Tap to flip
+點按轉移|Tap to teleport
+按住下降|Hold to descend
+睇住透明載具同落點標示，點按轉移。|Watch the landing marker and tap when it reaches the position you want.
+起飛試航|Test flight
+按住向上、放開下降。拾至少 4 枚金幣並抵達終點。|Hold to rise, release to descend. Collect at least four coins and reach the finish.
+邊緣預警|Edge warnings
+留意前方鎖定，等提示出現先揀飛行高度。|Watch for lock-on warnings before choosing a flight height.
+旋轉電閘|Rotating zappers
+避開旋轉電棒。見到它轉過中線，預先轉高度。|Dodge the rotating bars. Change height before they cross your path.
+工房活塞|Workshop pistons
+活塞會上下行，從行程另一邊通過。|Pistons move up and down. Pass on the open side.
+翻轉走廊|Gravity corridor
+駕駛重力裝置，點按翻轉。提早由上面或下面穿越。|Tap to flip the gravity rig. Pick the upper or lower route early.
+瞬移走廊|Teleport corridor
+同一代碼可以重玩相同航線。|Use the same code to replay this route.
+預算守護花園戰役|Budget Garden campaign
+陽光|Sun
+植物圖鑑|Plant guide
+返回花園|Back to garden
+波數：|Wave:
+下一波|Next wave
+最後一波|Final wave
+單發苗|Single shooter
+雙發苗|Burst shooter
+三路苗|Three-lane shooter
+冷靜苗|Frost shooter
+烈焰苗|Flame shooter
+穿刺苗|Piercing shooter
+生產花|Sun producer
+吞噬花|Chomping flower
+緩衝牆|Buffer wall
+鏟走植物|Remove plant
+收集陽光|Collect sun
+生存模式|Survival
+挑戰模式|Challenge mode
+選擇關卡|Select stage
+選擇植物|Choose plants
+開始戰鬥|Start battle
+開始防守|Start defence
+返回選關|Back to stage select
+查看紀錄|View records
+個人排行榜|Local leaderboard
+🏆 個人排行榜|🏆 Local leaderboard
+🎉 挑戰完成！ 🎉|🎉 Challenge complete! 🎉
+你守住今關五波！|You held off all five waves!
+防線失守，再試一次？|The defence fell. Try again?
+今次分數：|Run score:
+完成波數：|Waves completed:
+擊敗敵人：|Enemies defeated:
+紀錄已保留喺呢個裝置。|Records are saved on this device.
+財務風暴 · 機械博士|Financial storm · Mechanical Doctor
+機械博士|Mechanical Doctor
+機械博士生命|Mechanical Doctor health
+冰凍應急卡|Emergency freeze card
+火球：使用應急卡|Fireball: use the emergency freeze card
+冰球：同行辣椒|Iceball: use pepper in this lane
+重擊：前排準備受損|Stomp: a front plant is about to be hit
+裝甲防守|Armour engaged
+信用卡超支|Credit card overspending
+情緒消費|Emotional spending
+分期疊加|Stacked instalments
+限時衝動|Limited-time impulse
+只還最低額|Minimum payment only
+債務巨人|Debt giant
+限時搶購|Flash sale
+優惠剪報|Coupon clipping
+超額衝刺|Overspending rush
+跟風消費|Trend spending
+跟風分身|Trend follower
+浮動支出|Variable expenses
+隱藏月費|Hidden subscription
+訂閱屏障|Subscription shield
+滾存分期|Rolled-over instalments
+小額分期|Small instalments
+進入森林|Enter the forest
+同機雙人|Two players on one device
+一人切換|Solo character switching
+準備好，開始|Ready, start
+重量神殿|Temple of Weight
+運動神殿|Temple of Motion
+光線神殿|Temple of Light
+冰仔|Ice
+火仔|Fire
+行動|Action
+規劃|Planning
+重置機關|Reset mechanisms
+立即重試|Retry now
+拉桿已開啟。|Lever on.
+拉桿已關閉。|Lever off.
+鏡面轉咗方向。|Mirror rotated.
+左鍵／X 射擊|Left click / X to fire
+右鍵拖動／←／→ 轉向|Right drag / ← → to turn
+Q 瞄準|Q to aim
+按住右鍵拖動轉向，放開即停。Esc 暫停。V 切換全螢幕。|Hold right click and drag to turn. Release to stop. Esc pauses, V toggles fullscreen.
+觸控板：可用方向鍵轉向、X 射擊、Q 瞄準。手機：左下方向掣移動、右邊拖動瞄準、右下射擊。|Trackpad: use arrows to turn, X to fire and Q to aim. On mobile, use the movement pad, drag to turn and tap Fire.
+移動|Move
+瞄準|Aim
+射擊|Fire
+互動|Interact
+WASD／畫面方向掣|WASD / on-screen arrows
+右鍵拖動／方向鍵／觸控拖動|Right drag / arrow keys / touch drag
+左鍵或按住 X|Left click or hold X
+F 查帳|F to check accounts
+E 拆解|E to defuse
+避開消費壞習慣機械人，到北面終端核對帳目，再拆解炸彈。|Avoid the spending-habit robots, check the accounts at the north terminal, then defuse the device.
+快速三輪|Quick three rounds
+任務選擇|Select mission
+3D 練習場|3D training range
+兩人合作|Two-player co-op
+無障礙不限時文字／標靶版 ↗|Accessible untimed text / target mode ↗
+先留下一輪嘅資源。|Set aside resources for the next round
+進入戰場|Enter arena
+購買|Buy
+已購買|Purchased
+手槍|Pistol
+步槍|Carbine
+狙擊|Sniper
+狙擊槍|Sniper rifle
+匕首|Knife
+火箭筒|Rocket launcher
+快速拆解工具|Fast defusal kit
+鬆開|Release
+換彈|Reload
+蹲下|Crouch
+開／關門|Open / close door
+查帳 F|Check accounts (F)
+拆解 E|Defuse (E)
+光標|Crosshair
+生命值|Health
+⚙ 設定|⚙ Settings
+開啟設定|Open settings
+調到適合你的手感。|Make the controls feel right
+滑鼠／觸控靈敏度|Mouse / touch sensitivity
+開鏡靈敏度|Aim sensitivity
+反轉垂直瞄準|Invert vertical aim
+完成 · 返回暫停|Done · Back to pause
+全螢幕 V|Fullscreen (V)
+退出全螢幕 V|Exit fullscreen (V)
+Ⅱ 暫停|Ⅱ Pause
+任務暫停|Mission paused
+繼續任務|Resume mission
+重試任務|Retry mission
+由第一輪重試|Restart from round one
+先查帳，後拆解|Check the accounts before defusing
+答錯會即時引爆裝置。|An incorrect answer will immediately trigger the device.
+返回戰場|Back to the arena
+核對完成|Verification complete
+返回調查|Back to the investigation
+下一輪|Next round
+再玩一次|Play again
+小隊|Squad
+跟隨|Follow
+守位|Hold
+掩護|Cover
+突破|Advance
+兩人合作 · 舊城街區|Two-player co-op · Old town
+名稱|Name
+建立房間|Create room
+房間碼|Room code
+加入|Join
+重新連線|Reconnect
+繼續操作|Resume controls
+準備／再戰|Ready / rematch
+離開房間|Leave room
+切換武器|Switch weapon
+換彈 R|Reload (R)
+建立房間後，將八位房間碼交畀隊友。|Create a room and share its eight-character code with your teammate.
+連線中…|Connecting…
+房間伺服器未能連線。|Could not connect to the room server.
+公開合作伺服器尚未連接。|The public co-op server is unavailable.
+離線版可玩單人；合作需要網絡。|Solo play is available offline. Co-op requires internet access.
+路線任務|Route missions
+同碼挑戰|Shared-code challenge
+（已完成）|(complete)
+P / Esc 暫停|P / Esc pause
+劇烈碰撞|Hard landing
+擋擊後解除|Ejected after impact
+旋轉閘|Rotating gate
+活塞預警|Piston warning
+定時光閘|Timed gate
+電障預警|Zapper warning
+導彈預警|Missile warning
+不必要的支出|Unnecessary spending
+想要 ≠ 需要|Want ≠ need
+一次性享樂|One-off indulgence
+限時優惠追住你|Limited-time offer
+交錯防線|Mixed hazards
+光閘、導彈同擺動活塞逐個嚟。每段留返轉向空間。|Gates, missiles and moving pistons arrive in sequence. Leave room to change height.
+保留儲備|Protect the reserve
+拾至少 12 枚金幣，保持儲備，靠一次航程飛抵終點。|Collect at least 12 coins and reach the finish in one flight without spending your reserve.
+薯仔地雷|Potato mine
+守備瓜|Squash guard
+櫻桃炸彈|Cherry bomb
+▶ 繼續|▶ Continue
+五個世界 · 五關戰役|Five worlds · Five campaign stages
+守住你嘅花園|Defend your garden
+先種陽光植物儲資源，再安排防線。|Plant sun producers first to build resources, then set up your defence.
+揀植物，再撳草地。撳陽光收集。|Choose a plant and select a tile. Tap sun to collect it.
+日間|Day
+陽光儲備|Sun reserve
+夜間|Night
+微光預算|Low-light budget
+水池|Pool
+水上花園|Water garden
+冰道|Ice
+分期壓力|Instalment pressure
+屋頂|Rooftop
+機械決戰|Mechanical showdown
+生存|Survival
+持續防守|Endless defence
+限量陽光|Limited sun
+限定植物|Restricted plants
+無割草機|No mowers
+裝甲壓力|Armour pressure
+巨人防線|Giant defence
+揀出戰植物|Choose your loadout
+植物卡庫|Plant cards
+浮葉基座|Floating platform
+地刺草|Spikeweed
+火炬木|Torchwood
+辣椒|Pepper
+本關敵人|Enemies this stage
+已選滿八張|Eight cards selected
+推薦配置|Recommended loadout
+開始守護|Start defence
+戰役選關|Campaign stages
+通關後模式|Post-campaign modes
+完成屋頂解鎖|Clear the rooftop to unlock
+波數進度|Wave progress
+月尾截數日 · 大批帳單即將來襲|Month-end billing day · A major wave is coming
+準備好|Ready
+啟動|Active
+已用完|Used
+FIRST PERSON · 原創機械人訓練|FIRST PERSON · ROBOT TRAINING
+拆解財務炸彈。|Defuse the financial device
+減少鏡頭動態|Reduce camera motion
+WASD 移動|WASD to move
+右鍵拖動／方向鍵轉向|Right drag / arrows to turn
+Esc 暫停|Esc to pause
+空白跳躍|Space to jump
+C 蹲下|C to crouch
+1–5 換武器|1–5 to equip
+R 換彈|R to reload
+E 開門／拆解|E to open doors / defuse
+E 開門／長按拆解|E to open doors / hold E to defuse
+P／Esc 暫停|P or Esc to pause
+V 全螢幕。|V for fullscreen.
+評審預覽 · 唔會改玩家紀錄|Review preview · Player records stay unchanged
+返回玩家|Back to player mode
+點做？|How to play
+雙角色合作・三座森林機關|Two-character co-op · Three forest temples
+先記住一件事|Remember
+收齊各自嘅精靈，壓板接力、拉桿配電、升降台探索，推箱墊腳、滾石壓掣，兩個角色一齊到門口。|Collect each character's spirits. Work together with plates, levers, lifts, crates and boulders, then bring both characters to their exits.
+火靈用 A／D／W，水靈用方向鍵；E 操作附近同色機關。亦可揀一人切換。每關設倒數同重試。標準模式更講時機；輕鬆模式有更多時間。|Use A/D/W for Fire and the arrow keys for Ice. Press E at a matching mechanism. Solo switching is also available. Standard mode is timed and you can retry each stage.
+神殿|Temple
+重量|Weight
+運動|Motion
+光線|Light
+輕鬆・無倒數|Relaxed · No timer
+標準・限時挑戰|Standard · Timed
+挑戰・更密更快|Challenge · Faster pace
+同你嘅拍檔改個名|Name your duo
+火仔・行動|Fire · Action
+冰仔・規劃|Ice · Planning
+最多 16 個字，只儲存喺呢部機。|Up to 16 characters, saved on this device.
+用文字版調查|Use the text version
+火仔推箱登上左邊高台，踩住上層壓板。冰仔由下路過閘，拉桿接返火仔。|Fire pushes the crate to reach the upper plate. Ice goes through the lower gate and uses the lever to let Fire follow.
+火靈 A／D 移動、W 跳；水靈 ←／→ 移動、↑ 跳。|Fire: A/D to move, W to jump. Ice: ←/→ to move, ↑ to jump.
+方向鍵行、空白跳；Q 換角色。|Arrows to move, Space to jump, Q to switch characters.
+街坊商店|Local shops
+街坊士多|Corner shop
+通勤車站|Commuter station
+沿岸橋道|Waterfront bridge
+維修工房|Maintenance yard
+隧道入口|Tunnel entrance
+舊城街區|Old Town
+倉庫迴廊|Warehouse
+花園堡壘|Garden Fortress
+北面終端|North terminal
+已核實|Verified
+依照畫面指示|Follow the on-screen prompts
+情緒課金|Emotional purchases
+湊單衝動|Impulse add-ons
+最低還款|Minimum payments
+街坊三線|Three neighbourhood lanes
+市集障礙|Market obstacles
+月台車頂|Station rooftops
+迎面班次|Oncoming service
+海旁分路|Waterfront fork
+隧道限高|Low tunnel
+車場裝備|Rail-yard equipment
+五區全線|All five districts
+在三條路線之間換線，留意散紙同安全路面。|Switch among three lanes and look for change and safe routes.
+低欄跳過，高欄滑鏟。|Jump low barriers and slide under high ones.
+踏上斜坡，沿車頂接駁位前進。|Take the ramp and follow the joins between train roofs.
+留意迎面列車燈，同車頂路徑分開。|Watch for oncoming lights and keep clear of the approaching train.
+揀地面安全線，或者用斜坡接上技術路線。|Choose the safe ground route or take a ramp onto the more technical route.
+提早留意高欄，適時滑鏟。|Spot high barriers early and time your slide.
+用 B 放滑板；拾取滑板可補回用量。|Press B to deploy your board. Board pickups restore charges.
+綜合換線、列車同道具操作。|Combine lane changes, trains and power-ups.
+冰仔先登左井，火仔將箱推上配重板。左井升、右井降；冰仔到高台拉桿，右井再升起接應。|Ice gets on the left lift. Fire moves the crate onto the counterweight plate: the left lift rises and the right one lowers. Ice uses the high lever to bring the right lift back up.
+兩翼各有精靈。火仔將石球推入中央石槽，冰仔過閘登高台，拉桿開通右上出口。|Each side has a spirit. Fire rolls the boulder into the centre socket. Ice goes through the gate and pulls the high lever to open the exit.
+左翼推箱壓板接橋，右翼推石鎖閘；兩人由各自工作區向中央集合。|On the left, push the crate onto the plate to extend the bridge. On the right, use the boulder to hold the gate. Meet in the centre.
+火仔在下月台啟動升降台；冰仔乘台上去開高層閘，兩人再搭台會合。|Fire starts the lift from below. Ice rides it up to open the upper gate, then both meet using the lift.
+火仔拉桿啟動橫橋。冰仔經安全島避開週期光閘，到對岸解除返回路線。|Fire starts the moving platform. Ice uses the safe island to avoid the timed gates and opens the return route.
+火仔在上層轉鏡，讓橫光向上照中接收器；冰仔從下層穿門，打開返回出口。|Fire rotates the upper mirror to send light up to the receiver. Ice goes through the lower gate and opens the return exit.
+先移開地面光源前的箱。冰仔喺地面轉第一塊鏡，火仔登左翼轉第二塊；接通之後到右翼開門。|Move the crate away from the light. Ice turns the first mirror at ground level and Fire climbs to turn the second. Then open the gate on the right.
+兩翼各自完成一道光路，打開對方的門。穿過兩座鏡台，喺中央上層出口會合。|Each side completes a light path to open the other's gate. Cross the mirror platforms and meet at the upper centre exit.
+西巷接收站|West alley relay
+東側貨台|East loading platform
+東北瞭望台|Northeast lookout
+核對及拆解|Verify and defuse
+雙站接力|Two-terminal relay
+守住上傳點|Hold the upload point
+去北面終端核對資料，按住 E 拆解。|Verify the information at the north terminal, then hold E to defuse.
+核實北面終端並按住 E 整理記錄，再去接收站按住 E 交接。|Verify at the north terminal and hold E to prepare the record. Then go to the relay and hold E to hand it off.
+核實北面終端，再去指定地點留喺範圍內直至上傳完成。|Verify at the north terminal, then stay in range at the designated point until the upload is complete.
+阿俊諗住借 HK$20,000 暫時還舊卡數。確認之前應該點做？|Ah Jun wants to borrow HK$20,000 to pay off old card debt. What should he do before confirming?
+暫停確認，核對總還款、到期日同手續費|Pause and verify the total repayments, due dates and fees
+先借新錢暫時還舊卡數|Borrow first and use the cash to pay off the old card debt
+暫停撳確認。核對總還款、到期日同手續費，再同阿俊一齊查清楚舊欠款。|Pause before confirming. Verify the total repayments, due dates and fees, then check the old debt with Ah Jun.
+「保證回報，先轉訂金。」而基本生活費未預留。|“Guaranteed returns. Send a deposit first.” Essential expenses are still unfunded.
+拒絕轉帳，先保基本需要|Decline the transfer and cover essentials first
+先畀訂金，之後再諗生活費|Pay the deposit and worry about living costs later
+保證回報同催促轉帳係警號。先核實資料、保住基本需要。|Guaranteed returns and pressure to transfer money are warning signs. Verify the information and protect essential funds.
+今日只有 $50；$600 人工三日後先到。|You only have $50 today. The $600 salary arrives in three days.
+當作已有 $650，今日就花|Spend today as if you already have $650
+只用現有現金，確認到帳日再排支出|Use only available cash and plan around the confirmed payday
+未到帳收入唔係今日可用現金；先安排每日需要同缺口。|Income that hasn't arrived is not available today. Plan for daily essentials and shortfalls first.
+湊單免運 $300；只買需要嘅貨連運費 $205。|Spend $300 for free shipping, or pay $205 including delivery for what you need.
+只買需要嘅貨，實付 $205|Buy only what's needed and pay $205
+多買未需要嘅嘢，為咗免運付 $300|Buy extras to get free shipping and pay $300
+比較最後總額。唔為咗免運而多花 $95。|Compare final totals. Free shipping isn't worth spending $95 more here.
+近戰|Melee
+按住 E 拆解|Hold E to defuse
+按住 E 整理|Hold E to prepare
+按住 E 交接|Hold E to hand off
+留喺範圍內上傳|Stay in range to upload
+100 生命值 · 利用掩體到北面查帳拆彈，毋須消滅所有敵人。|100 health · Reach the north terminal, check the accounts and defuse. You can leave robots active.
+生命值歸零。|Health depleted.
+生命值歸零。再安排伏擊路線。|Health depleted. Change your route and try again.
+今次未能趕及拆解。|You ran out of time to defuse.
+核實錯誤，裝置已引爆。|Incorrect verification. The device went off.
+換彈中…|Reloading…
+彈匣已空，R 換彈。|Magazine empty. Press R to reload.
+備彈用盡，請切換武器。|Out of reserve ammo. Switch weapons.
+門已開；留意門後。|Door open. Check what's beyond it.
+門已關。|Door closed.
+先離開門框，再關門。|Move clear of the doorway before closing it.
+先到北面財務炸彈旁邊，撳 F 查帳。|Go to the north terminal and press F to check the accounts.
+本機最高分|Local high score
+🔊 開啟聲音|🔊 Unmute
+⏸ 暫停|⏸ Pause
+暫停（P）|Pause (P)
+取消靜音|Unmute
+靜音|Mute
+減少動態|Reduce motion
+由頭重試|Retry from the beginning
+OPTIONAL TRAINING / 自選練習|OPTIONAL TRAINING
+Budget Defence · 睇清楚，先行動。|Budget Defence · Check first, then act
+所有點數只限呢次練習，唔會改動阿俊嘅錢或線索。|Points apply to this practice only. Ah Jun's money and clues stay unchanged.
+分|pts
+分數|Score
+散紙 ×|Change ×
+火靈|Fire spirit
+水靈|Ice spirit
+落台 ↓|Drop ↓
+機關 E|Use E
+跳起 ↑|Jump ↑
+重試呢一關|Retry this stage
+轉文字版|Switch to text mode
+結束並回顧|Finish and reflect

@@ -6,6 +6,24 @@ const path = require('node:path');
 const root = 'dist-pages';
 const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
+test('game cards ship the five actual game previews in each edition', () => {
+  const offline = read('downloads/lost-found-money-offline.html');
+  for (const output of ['dist', 'dist/client', root]) {
+    const home = fs.readFileSync(path.join(output, 'index.html'), 'utf8');
+    assert.doesNotMatch(home, /assets\/game-covers\//);
+    for (const {art} of require('../source/game-catalogue.cjs')) {
+      const image = 'assets/preview-' + art + '.png';
+      assert.ok(home.includes('src="' + image + '"'), output + ': ' + image);
+      const bytes = fs.readFileSync(path.join('source/game-previews', path.basename(image)));
+      assert.deepEqual(fs.readFileSync(path.join(output, image)), bytes);
+      assert.ok(offline.includes(bytes.toString('base64')), image + ' embedded offline');
+    }
+    for (const cover of ['garden','runner','jet','duo','defence','moss']) {
+      assert.ok(!fs.existsSync(path.join(output, 'assets/game-covers', cover + '.jpg')));
+    }
+  }
+});
+
 test('GitHub Pages build is static and describes local-only scores', () => {
   assert.ok(fs.existsSync(path.join(root, 'index.html')));
   assert.ok(fs.existsSync(path.join(root, 'downloads/lost-found-money-offline.html')));

@@ -1,102 +1,73 @@
-import {airRoute} from '../../../../source/runner-air.mjs';
-import{canSpawnObstacle}from'../../../../source/runner-rules.mjs';
+import {airCoinRows,forwardMotion} from '../../../../source/runner-air.mjs';
+import {canSpawnObstacle, ONCOMING_SPEED, ROUTE_SPACING, trainGeometry, overlapsAirCorridor} from '../../../../source/runner-rules.mjs';
+import {runnerCourse} from '../../../../source/runner-campaign.mjs';
 import { useRef, useCallback } from 'react';
-import { LANES, MAX_SPEED, CHUNK_LENGTH } from '../utils/constants';
-import type { ObstacleType, ObstacleData } from './Obstacle';
+import { LANES, MAX_SPEED, SPEED_INCREMENT } from '../utils/constants';
+import { useGameStore } from '../state/gameStore';
+import type { ObstacleData } from './Obstacle';
 import type { CoinData } from './Coin';
 
 interface SpawnerState {
   obstacles: ObstacleData[];
   coins: CoinData[];
   lastSpawnZ: number;
+  routeIndex: number;
 }
-
-const SPAWN_INTERVAL = 13.5; // Distance between spawn points
-const OBSTACLE_CHANCE = 0.76; // 60% chance for obstacle at spawn point
-const COIN_CHANCE = 0.24; // 40% chance for coins at spawn point
-const COIN_GROUP_SIZE = 3; // Coins in a row
 
 let idCounter = 0;
 const generateId = () => `item_${++idCounter}`;
-
-const OBSTACLE_TYPES: ObstacleType[] = ['jump','slide','crate','hurdle','sign','gap','block','moving'];
-
-function randomLane(): number {
-  return LANES[Math.floor(Math.random() * LANES.length)];
-}
-
-function randomObstacleType(): ObstacleType {
-  return OBSTACLE_TYPES[Math.floor(Math.random() * OBSTACLE_TYPES.length)];
-}
 
 export function useSpawner() {
   const stateRef = useRef<SpawnerState>({
     obstacles: [],
     coins: [],
-    lastSpawnZ: -50,
+    lastSpawnZ: -30, routeIndex: 0,
   });
 
-  const reserved=useRef<{near:number,far:number}|null>(null);
+  const reserved=useRef<{near:number,far:number,duration:number}|null>(null);
   const reserveAirRoute=useCallback((kind:'jetpack'|'pogo',distance:number,speed:number,start:number)=>{
     const duration=kind==='jetpack'?8:2;
-    const near=distance-10,far=distance+duration*(speed+1)+18;
-    reserved.current={near,far};
+    const near=distance-10,far=distance+forwardMotion(speed,duration+1.5,SPEED_INCREMENT,MAX_SPEED).distance;
+    const corridor={near,far,duration:duration+1.5};
+    reserved.current=corridor;
     const state=stateRef.current;
-    state.obstacles=state.obstacles.filter(o=>-o.z<near||-o.z>far+(o.type==='moving'?9*duration:0));
-    for(let t=.5;t<duration;t+=.5)for(const lane of LANES)
-      state.coins.push({id:generateId(),lane,z:-distance-speed*t,y:airRoute(kind,t,start).height+1.35});
+    state.obstacles=state.obstacles.filter(o=>!overlapsAirCorridor(o,corridor));
+    const rows=airCoinRows(kind,start,speed,SPEED_INCREMENT,MAX_SPEED);
+    const coins=rows.flatMap(row=>LANES.map(lane=>({
+      id:generateId(),lane,z:-distance-row.ahead,y:row.y
+    })));
+    state.coins=state.coins.concat(coins);
+    return {coins:state.coins,obstacles:state.obstacles};
   },[]);
-  const spawn = useCallback((currentZ: number) => {
-    const state = stateRef.current;
-    const spawnAheadDistance = Math.max(CHUNK_LENGTH*3,MAX_SPEED*6);
-    const despawnBehindDistance = 10;
-
-    // Spawn new items ahead
-    while (state.lastSpawnZ > currentZ - spawnAheadDistance) {
-      state.lastSpawnZ -= SPAWN_INTERVAL;
-      
-      // Decide what to spawn
-      const roll = Math.random();
-      
-      if (roll < OBSTACLE_CHANCE) {
-        // Spawn obstacle
-        const lane = randomLane();
-        const type = randomObstacleType();
-        
-        const candidate={id:generateId(),lane,type,z:state.lastSpawnZ};const corridor=reserved.current;
-        const reservedHere=corridor&&-candidate.z>=corridor.near&&-candidate.z<=corridor.far+(type==='moving'?72:0);
-        if(!reservedHere&&canSpawnObstacle(state.obstacles,candidate))state.obstacles.push(candidate);
-        
-        // Maybe spawn coins in other lanes
-        if (Math.random() < 0.5) {
-          const otherLanes = LANES.filter(l => l !== lane);
-          const coinLane = otherLanes[Math.floor(Math.random() * otherLanes.length)];
-          for (let i = 0; i < COIN_GROUP_SIZE; i++) {
-            state.coins.push({
-              id: generateId(),
-              lane: coinLane,
-              z: state.lastSpawnZ - i * 2,
-              y: 1,
-            });
-          }
-        }
-      } else if (roll < OBSTACLE_CHANCE + COIN_CHANCE) {
-        // Spawn coin group
-        const lane = randomLane();
-        for (let i = 0; i < COIN_GROUP_SIZE; i++) {
-          state.coins.push({
-            id: generateId(),
-            lane,
-            z: state.lastSpawnZ - i * 2,
-            y: 1,
-          });
+  const spawn = useCallback((currentZ: number,speed: number,delta: number) => {
+    const state=stateRef.current;
+    for(const o of state.obstacles)if(o.type==='moving')o.z+=ONCOMING_SPEED*delta;
+    const spawnAheadDistance=110;
+    const despawnBehindDistance=12;
+    while(state.lastSpawnZ>currentZ-spawnAheadDistance){
+      const anchor=state.lastSpawnZ;
+      const row=runnerCourse(useGameStore.getState().launch,state.routeIndex++,anchor,currentZ,speed);
+      state.lastSpawnZ-=ROUTE_SPACING;
+      const corridor=reserved.current;
+      for(const data of row){
+        const obstacle={...data,id:generateId()} as ObstacleData;
+        const entersAirRoute=corridor&&overlapsAirCorridor(obstacle,corridor);
+        if(entersAirRoute||!canSpawnObstacle(state.obstacles,obstacle,currentZ,speed))continue;
+        state.obstacles.push(obstacle);
+        if(obstacle.type==='block'){
+          const g=trainGeometry(data.type,data.variant);
+          for(const dz of [0,-4])state.coins.push({id:generateId(),lane:obstacle.lane,z:obstacle.z+dz,y:g.roofHeight+1.25});
         }
       }
+      const clearLane=LANES.find(lane=>row.every(o=>o.lane!==lane));
+      if(clearLane!==undefined)for(const offset of [1,5,9,13])state.coins.push({id:generateId(),lane:clearLane,z:anchor-offset,y:1.25});
     }
-
     // Despawn items behind player
-    state.obstacles = state.obstacles.filter(o => o.z < currentZ + despawnBehindDistance);
-    state.coins = state.coins.filter(c => c.z < currentZ + despawnBehindDistance);
+    // Keep the same arrays unless membership changes. Movement uses object transforms.
+    if(state.obstacles.some(o=>o.z-8 >= currentZ + despawnBehindDistance))
+      state.obstacles = state.obstacles.filter(o=>o.z-8 < currentZ + despawnBehindDistance);
+    if(state.coins.some(c=>c.z >= currentZ + despawnBehindDistance))
+      state.coins = state.coins.filter(c=>c.z < currentZ + despawnBehindDistance);
 
     return {
       obstacles: state.obstacles,
@@ -109,16 +80,22 @@ export function useSpawner() {
   }, []);
 
   const removeCoin = useCallback((id: string) => {
-    const before=stateRef.current.coins.length;stateRef.current.coins=stateRef.current.coins.filter(c=>c.id!==id);return before!==stateRef.current.coins.length;
+    const coins=stateRef.current.coins;
+    const index=coins.findIndex(c=>c.id===id);
+    if(index<0)return false;
+    coins.splice(index,1);
+    return true;
   }, []);
 
   const reset = useCallback(() => {
+    idCounter = 0;
     stateRef.current = {
       obstacles: [],
-      coins: [],
-      lastSpawnZ: -50,
+      // The opening collects before the first route fork and teaches the reward sound.
+      coins: [5, 9, 13].map(ahead => ({ id: generateId(), lane: 0, z: -ahead, y: 1.25 })),
+      lastSpawnZ: -30, routeIndex: 0,
     };
-    reserved.current=null;idCounter = 0;
+    reserved.current = null;
   }, []);
 
   return { spawn,reserveAirRoute, removeObstacle, removeCoin, reset };

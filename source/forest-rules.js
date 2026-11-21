@@ -120,7 +120,36 @@ function onPlate(p,plate){return !plate.kind&&p.grounded&&Math.abs(p.y+(p.h??34)
 function update(map,players){traceLight(map);if(map.id){const state=signals(map,players);for(const d of map.doors)d.open=d.requires.every(id=>state[id])&&(!d.any.length||d.any.some(id=>state[id]));return map.doors}for(const d of map.doors){if(d.mode==='relay'){d.open=map.levers[1].on||players.some(p=>p.type===0&&Math.hypot(p.x+14-map.levers[0].x,p.y+17-map.levers[0].y)<55);map.levers[0].on=d.open;continue}d.open=d.mode==='lever'?d.requires.every(id=>map.levers.find(l=>l.id===id)?.on):d.plates.some(a=>platePressed(map,players,a));if(d.weight)d.open=d.open&&map.bodies.some(b=>b.locked);if(d.light)d.open=d.open&&map.light.lit}return map.doors}
 function checkpoint(map,players){if(map.id){if(!players.every(p=>p.grounded))return;for(const d of map.doors){if(d.roomReady||!d.open)continue;const passed=players.some((p,i)=>map.spawns[i].x<d.x?p.x>d.x+d.w+3:p.x+p.w<d.x-3);if(passed){d.roomReady=true;for(const p of players)p.checkpoint=p.x}}return}for(const d of map.doors){if(!d.roomReady&&players.every(p=>p.x>d.x+d.w+3)){d.roomReady=true;for(const p of players){let x=(d.plates[1]?.x??d.x+52)+24+p.type*8;p.checkpoint=Math.min(910,x)}}}}
 function doorCollision(p,doors,oldX){for(const d of doors){if(d.open||p.y+p.h<=d.y||p.y>=d.y+d.h)continue;if(p.x+p.w>d.x&&p.x<d.x+d.w){p.x=oldX+p.w/2<d.x+d.w/2?d.x-p.w:d.x+d.w;p.vx=0}}}
-function lever(map,p){const mirror=(map.lights??(map.light?[map.light]:[])).flatMap(l=>l.mirrors).find(m=>m.type===p.type&&Math.hypot(p.x+14-m.x,p.y+17-m.y)<42);if(mirror){mirror.turned=!mirror.turned;traceLight(map);return true}const l=map.levers?.find(l=>l.type===p.type&&Math.hypot(p.x+14-l.x,p.y+17-l.y)<55);if(!l||(map.id&&l.id==='bridge'))return false;l.on=!l.on;return true}
+function nearbyLever(map,p,touch=false){
+ let result=null;
+ for(const lever of map.levers||[]){
+  if(lever.type!==p.type||(map.id&&lever.id==='bridge'))continue;
+  const dx=Math.abs(p.x+14-lever.x),dy=Math.abs(p.y+17-lever.y);
+  const distance=Math.hypot(dx,dy);
+  if(touch?(dx>34||dy>38):distance>=55)continue;
+  if(!result||distance<result.distance)result={kind:'lever',object:lever,distance};
+ }
+ return result;
+}
+function nearbyControl(map,p){
+ let result=nearbyLever(map,p);
+ for(const light of map.lights??(map.light?[map.light]:[])){
+  for(const mirror of light.mirrors){
+   if(mirror.type!==p.type)continue;
+   const distance=Math.hypot(p.x+14-mirror.x,p.y+17-mirror.y);
+   if(distance<42&&(!result||distance<result.distance))result={kind:'mirror',object:mirror,distance};
+  }
+ }
+ return result;
+}
+function lever(map,p,control=nearbyControl(map,p)){
+ if(!control)return false;
+ if(control.kind==='mirror'){
+  control.object.turned=!control.object.turned;
+  traceLight(map);
+ }else control.object.on=!control.object.on;
+ return true;
+}
 // Movable objects are authoritative map state. No DOM or wall-clock dependencies.
 function body(id,kind,x,y,w,h){return {id,kind,x,y,w,h,startX:x,startY:y,vx:0,vy:0,angle:0,locked:false,dock:null}}
 const overlap=(a,b)=>a.x<b.x+b.w-.001&&a.x+a.w>b.x+.001&&a.y<b.y+b.h-.001&&a.y+a.h>b.y+.001;
@@ -132,5 +161,5 @@ function pushPlayer(map,p,oldX,players,dt){const dx=p.x-oldX;for(const b of map.
 function stepBodies(map,players,dt){for(const b of map.bodies||[]){if(b.locked)continue;const oldX=b.x,oldY=b.y,standing=players.filter(p=>p.grounded&&Math.abs(p.y+p.h-b.y)<2&&p.x+p.w>b.x&&p.x<b.x+b.w);const dx=moveBody(map,b,b.vx*dt,players);b.vx=Math.abs(dx)<.0001?0:b.vx*Math.exp(-7*dt);b.vy=Math.min(700,b.vy+1280*dt);b.y+=b.vy*dt;for(const o of [...map.platforms,...map.bodies.filter(o=>o!==b)]){if(b.vy>=0&&oldY+b.h<=o.y+.5&&b.y+b.h>=o.y&&b.x+b.w>o.x+.1&&b.x<o.x+o.w-.1){b.y=o.y-b.h;b.vy=0;break}}for(const p of standing){p.x+=b.x-oldX;p.y+=b.y-oldY}if(b.y>600){b.x=b.startX;b.y=b.startY;b.vx=b.vy=0;b.angle=0}dockBody(map,b,oldX)}}
 function landOnBodies(map,p,oldY){for(const b of map.bodies||[]){if(p.x+p.w<=b.x+.1||p.x>=b.x+b.w-.1)continue;if(p.vy>=0&&oldY+p.h<=b.y+1&&p.y+p.h>=b.y){p.y=b.y-p.h;p.vy=0;p.grounded=true;p.support=b.id;break}if(p.vy<0&&oldY>=b.y+b.h-.5&&p.y<b.y+b.h){p.y=b.y+b.h;p.vy=0}}}
 function playerNames(raw){const defaults=['火仔','冰仔'];return defaults.map((d,i)=>{const value=Array.isArray(raw)&&typeof raw[i]==='string'?raw[i]:'';return Array.from(value.replace(/[<>\x00-\x1f\x7f]/g,'').trim()).slice(0,16).join('')||d})}
-return {stepPlatforms,playerNames,level,temple,temples,traceLight,savePoint,onPlate,onWeight,platePressed,update,checkpoint,doorCollision,lever,moveBody,pushPlayer,stepBodies,landOnBodies,dockBody};
+return {stepPlatforms,playerNames,level,temple,temples,traceLight,savePoint,onPlate,onWeight,platePressed,update,checkpoint,doorCollision,nearbyLever,nearbyControl,lever,moveBody,pushPlayer,stepBodies,landOnBodies,dockBody};
 });

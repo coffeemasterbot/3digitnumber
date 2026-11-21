@@ -1,21 +1,157 @@
 'use strict';
-const labels={story:'人生失物認領處 ／ 主線故事',plan:'我的七日行動',...Object.fromEntries(window.gameCatalogue.map(game=>[game.key,game.title+' ／ '+game.genre.split(' / ').pop()]))};
-const $=id=>document.getElementById(id);let active=null,originFocus=null;
+const labels={story:'失物認領處',legacy:'人生失物認領處 · 舊版',plan:'我的七日行動',...Object.fromEntries(window.gameCatalogue.map(game=>[game.key,game.title+' ／ '+game.genre.split(' / ').pop()]))};
+const $=id=>document.getElementById(id);let active=null,originFocus=null,caseRun=null;
 function read(key,fallback){try{const value=JSON.parse(localStorage.getItem(key));return value&&typeof value==='object'&&!Array.isArray(value)?value:fallback}catch{return fallback}}
-function launch(kind,habitSuggestion='',testTarget=null){if(!labels[kind])return;originFocus=document.activeElement;active=kind;$('landing').hidden=true;$('play-panel').hidden=false;document.querySelector('footer').hidden=true;$('player-title').textContent=labels[kind];const frame=document.createElement('iframe');frame.title=labels[kind];frame.id='game-frame';if(testTarget)frame.name='arcade-test-v1/'+kind+'/'+testTarget;frame.allow='autoplay; fullscreen';if(kind==='plan'&&habitSuggestion)frame.dataset.habit=habitSuggestion.slice(0,120);frame.src=({defence:'games/budget-defence/index.html',coins:'games/runner/index.html',shipping:'games/jet/index.html',instalments:'games/garden/index.html'}[kind])||'story/index.html'+(kind==='story'?'':kind==='plan'?'?plan=1':'?arcade='+encodeURIComponent(kind));$('frame-host').replaceChildren(frame);history.replaceState(null,'',testTarget?'#dev-tools':'#play-'+kind);window.scrollTo({top:0,behavior:'instant'})}
-function home(){const f=$('game-frame');if(f)f.remove();active=null;$('play-panel').hidden=true;$('landing').hidden=false;document.querySelector('footer').hidden=false;history.replaceState(null,'','#arcade');document.getElementById('arcade').scrollIntoView();if(originFocus?.isConnected)originFocus.focus({preventScroll:true})}
-document.querySelectorAll('[data-play]').forEach(b=>b.addEventListener('click',()=>launch(b.dataset.play,b.id==='lab-action'?document.getElementById('lab-habit').value:'')));$('back-home').onclick=home;$('player-reload').onclick=()=>{const f=$('game-frame');if(f)f.src=f.src};
-document.querySelectorAll('.site-header a[href^="#"]').forEach(a=>a.addEventListener('click',()=>{if(active){$('game-frame')?.remove();active=null;$('play-panel').hidden=true;$('landing').hidden=false;document.querySelector('footer').hidden=false}}));
+function caseProgress(){
+  try{return window.AnnaCase.load(localStorage).state}catch{return null}
+}
+function setPlayerTitle(label,back='返回網站'){
+  $('player-title').textContent=label;
+  $('back-home').textContent=back;
+}
+function flushFrame(frame){
+  try{frame?.contentWindow?.flushArcadeResult?.()}catch{}
+}
+function makeFrame(kind,name=''){
+  const frame=document.createElement('iframe');
+  frame.title=labels[kind];
+  frame.id='game-frame';
+  frame.allow='autoplay; fullscreen';
+  if(name)frame.name=name;
+  return frame;
+}
+function mountFrame(frame,kind){
+  if(window.offlineMount)window.offlineMount(frame,kind);
+  else frame.src=({
+    story:'story/anna.html',legacy:'story/index.html',plan:'story/index.html?plan=1',
+    defence:'games/budget-defence/index.html',coins:'games/runner/index.html',shipping:'games/jet/index.html',instalments:'games/garden/index.html',
+  }[kind])||'story/index.html?arcade='+encodeURIComponent(kind);
+}
+function launch(kind,habitSuggestion='',testTarget=null){
+  if(!Object.hasOwn(labels,kind))return;
+  if(caseRun)leaveCaseGame();
+  if(!active)originFocus=document.activeElement;
+  flushFrame($('game-frame'));
+  active=kind;
+  $('landing').hidden=true;
+  $('play-panel').hidden=false;
+  document.querySelector('footer').hidden=true;
+  setPlayerTitle(labels[kind]);
+  const frame=makeFrame(kind,testTarget?'arcade-test-v1/'+kind+'/'+testTarget:'');
+  if(kind==='plan'&&habitSuggestion)frame.dataset.habit=habitSuggestion.slice(0,120);
+  const loading=document.createElement('p');
+  if(kind==='plan'){
+    loading.className='plan-loading';
+    loading.setAttribute('role','status');
+    loading.textContent='載入中…';
+    frame.addEventListener('load',()=>loading.remove(),{once:true});
+  }
+  mountFrame(frame,kind);
+  $('frame-host').replaceChildren(...(kind==='plan'?[loading,frame]:[frame]));
+  history.replaceState(null,'',testTarget?'#dev-tools':'#play-'+kind);
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function startCaseGame(message,storyFrame){
+  const quest=window.AnnaCase.CHALLENGES[message.id];
+  if(active!=='story'||caseRun||!Object.hasOwn(window.AnnaCase.CHALLENGES,message.id)||typeof message.runId!=='string'||!/^[a-z0-9-]{12,80}$/i.test(message.runId))return;
+  caseRun={id:message.id,runId:message.runId,completed:false};
+  storyFrame.id='case-frame';
+  storyFrame.hidden=true;
+  active=quest.game;
+  setPlayerTitle(quest.title,'返回案情');
+  const frame=makeFrame(quest.game,'arcade-story-v1/'+caseRun.id+'/'+caseRun.runId);
+  mountFrame(frame,quest.game);
+  $('frame-host').append(frame);
+}
+function leaveCaseGame(){
+  const result=caseRun,storyFrame=$('case-frame');
+  if(!result||!storyFrame)return;
+  $('game-frame')?.remove();
+  caseRun=null;
+  active='story';
+  storyFrame.id='game-frame';
+  storyFrame.hidden=false;
+  setPlayerTitle(labels.story);
+  storyFrame.focus();
+  storyFrame.contentWindow.postMessage({type:'case-game-return',...result},window.offlineMount?'*':location.origin);
+}
+function leavePlay(){
+  if(caseRun)leaveCaseGame();
+  const frame=$('game-frame');
+  flushFrame(frame);
+  frame?.remove();
+  document.querySelector('.plan-loading')?.remove();
+  active=null;
+  $('play-panel').hidden=true;
+  $('landing').hidden=false;
+  document.querySelector('footer').hidden=false;
+  window.dispatchEvent(new Event('arcade-records-change'));
+}
+function home(){
+  if(caseRun){leaveCaseGame();return;}
+  const backAnchor=active==='story'||active==='legacy'||active==='plan'?'story':'arcade';
+  leavePlay();
+  history.replaceState(null,'','#'+backAnchor);
+  $(backAnchor).scrollIntoView();
+  if(originFocus?.isConnected)originFocus.focus({preventScroll:true});
+}
+document.querySelectorAll('[data-play]').forEach(b=>b.addEventListener('click',()=>launch(b.dataset.play,b.id==='lab-action'?$('lab-habit').value:'')));
+$('back-home').onclick=home;
+$('player-reload').onclick=()=>{
+  const frame=$('game-frame');
+  if(!frame)return;
+  flushFrame(frame);
+  if(window.offlineMount)window.offlineMount(frame,frame.dataset.offlineKey);
+  else frame.src=frame.src;
+};
+document.querySelectorAll('.site-header a[href^="#"]').forEach(a=>a.addEventListener('click',event=>{
+  if(event.metaKey||event.ctrlKey||event.altKey||event.shiftKey)return;
+  const id=a.hash.slice(1),target=$(id);
+  if(!target)return;
+  event.preventDefault();
+  if(active)leavePlay();
+  if(location.hash!==a.hash)history.pushState(null,'',a.hash);
+  target.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth',block:'start'});
+}));
 function showInfo(html){$('info-body').innerHTML=html;$('info-dialog').showModal()};$('info-close').onclick=()=>$('info-dialog').close();
-document.querySelector('[data-progress]').onclick=()=>{const s=read('life-lost-found-guided-v5',{}),free=read('website-v1-arcade',{});const clueCount=Array.isArray(s.clues)?s.clues.length:0;const days=Array.isArray(s.stamps)?s.stamps.filter(Boolean).length:0;showInfo(`<div class="eyebrow">只存喺呢個瀏覽器</div><h2>你嘅旅程，留喺度。</h2><div class="progress-row">主線故事 <span class="progress-value">${s.started?'第 '+Math.min(4,Math.max(1,Number(s.stage)||1))+' 幕':'未開始'}</span></div><div class="progress-row">失物線索 <span class="progress-value">${clueCount} / 4</span></div><div class="progress-row">獨立小遊戲 <span class="progress-value">${Object.keys(free).length} / 5</span></div><div class="progress-row">七日行動 <span class="progress-value">${days} / 7 日${(Array.isArray(s.stamps)&&s.stamps.some(x=>x?.demo))?'（含示範）':''}</span></div><p>換裝置或清除瀏覽器資料，進度唔會跟住轉移。故事內可以下載文字行動卡。</p><button class="primary" id="resume-progress">繼續主線故事 ↗</button>`);$('resume-progress').onclick=()=>{$('info-dialog').close();launch('story')}};
+document.querySelector('[data-progress]').onclick=()=>{
+  const current=caseProgress(),action=read('lost-found-action-v1',read('life-lost-found-guided-v5',{})),free=read('website-v1-arcade',{});
+  const progress=current?.completed?'已結案':current?.act?'第 '+current.act+' 幕':'未開始';
+  const days=Array.isArray(action.stamps)?action.stamps.filter(stamp=>stamp&&!stamp.demo).length:0;
+  showInfo(`<h2>我的旅程</h2><div class="progress-row">Anna 版主線 <span class="progress-value">${progress}</span></div><div class="progress-row">已查看證物 <span class="progress-value">${current?.clues.length||0}</span></div><div class="progress-row">有紀錄嘅遊戲 <span class="progress-value">${Object.keys(free).length} / 5</span></div><div class="progress-row">七日行動 <span class="progress-value">${days} / 7 日</span></div><p>進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。</p><div class="buttons"><button class="primary" id="resume-progress">${current?.act?'繼續調查':'開始調查'}</button><button id="legacy-progress">打開舊版故事</button></div>`);
+  for(const [id,kind] of [['resume-progress','story'],['legacy-progress','legacy']])$(id).onclick=()=>{$('info-dialog').close();launch(kind);};
+};
+function refreshCaseLabel(){
+  const current=caseProgress();
+  const start=document.querySelector('#story [data-play="story"]');
+  if(start)start.textContent=current?.completed?'重看結案':current?.act?'繼續調查':'開始調查';
+}
+refreshCaseLabel();
+window.addEventListener('arcade-records-change',refreshCaseLabel);
 $('privacy-open').onclick=()=>showInfo('<div class="eyebrow">私隱說明</div><h2>你嘅記錄，喺你手上。</h2><p>主線進度、遊戲回顧同七日行動存在瀏覽器 localStorage。主線毋須登入。跑酷及飛行的線上排行榜會儲存及公開每局暱稱、分數、距離、難度及遊玩時間，並使用匿名識別 cookie 防止重複提交；不會上傳阿俊的故事存檔。</p><p>請勿喺行動卡填寫戶口、收入或欠款等敏感資料。下載嘅行動卡會保存在你裝置。清除網站資料會移除本機進度。</p><p>外部官方連結按其服務條款及私隱政策運作。網站託管服務本身亦可能處理基本連線記錄。</p>');
-window.addEventListener('message',e=>{const f=$('game-frame');if(e.source!==f?.contentWindow||e.origin!==location.origin)return;if(e.data?.type==='website-v1-back')home();else if(e.data?.type==='website-v1-play'&&labels[e.data.key])launch(e.data.key)});
+window.addEventListener('message',e=>{
+  const f=$('game-frame');
+  if(e.source!==f?.contentWindow||e.origin!==location.origin&&!(window.offlineMount&&e.origin==='null'))return;
+  if(e.data?.type==='case-game-launch'){startCaseGame(e.data,f);return;}
+  if(e.data?.type==='case-game-result'&&caseRun&&e.data.id===caseRun.id&&e.data.runId===caseRun.runId&&e.data.completed===true){
+    caseRun.completed=true;
+    setPlayerTitle('挑戰完成 · '+window.AnnaCase.CHALLENGES[caseRun.id].title,'完成挑戰，返回案情');
+    return;
+  }
+  if(e.data?.type==='website-v1-back')home();
+  else if(e.data?.type==='website-v1-play')launch(e.data.key);
+  else if(e.data?.type==='arcade-records-change'&&!$('landing').hidden)window.dispatchEvent(new Event('arcade-records-change'));
+});
 const start=location.hash.replace('#play-','');if(location.hash.startsWith('#play-')&&labels[start])launch(start);
 // Keep the iframe in sync when browser Back/Forward crosses an anchor navigation.
-window.addEventListener('popstate',()=>{const key=location.hash.replace('#play-','');if(location.hash.startsWith('#play-')&&labels[key]){if(active!==key)launch(key)}else if(active){$('game-frame')?.remove();active=null;$('play-panel').hidden=true;$('landing').hidden=false;document.querySelector('footer').hidden=false;document.getElementById(location.hash.slice(1))?.scrollIntoView()}});
+window.addEventListener('popstate',()=>{const key=location.hash.replace('#play-','');if(location.hash.startsWith('#play-')&&Object.hasOwn(labels,key)){if(active!==key)launch(key)}else{if(active)leavePlay();$(location.hash.slice(1))?.scrollIntoView()}});
 
+// Read the actual URL so ?dev=1 also works in the self-contained offline edition.
+const devPanel=document.getElementById('dev-tools');
+const devEnabled=new URL(window.location.href).searchParams.get('dev')==='1';
+if(devPanel)devPanel.hidden=!devEnabled;
 const devGame=document.getElementById('dev-game'),devTarget=document.getElementById('dev-target');
-if(devGame){
+if(devGame&&devEnabled){
  for(const game of window.gameCatalogue)devGame.add(new Option(game.title,game.key));
  const options=()=>devTarget.replaceChildren(...window.arcadeDevTargets[devGame.value].map(id=>new Option(id,id)));
  devGame.onchange=options;options();

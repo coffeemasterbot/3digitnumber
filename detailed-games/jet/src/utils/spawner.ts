@@ -3,12 +3,13 @@
 //  and power-ups procedurally
 // ─────────────────────────────────────────────
 
+import {coinMotif,motifIndex} from './coin-patterns';
 import { Missile, Coin, PowerUpItem, MissileType, PowerUpType } from '@/types/game';
 import {
   CANVAS_WIDTH, CANVAS_HEIGHT,
   GROUND_Y, CEILING_Y,
   MISSILE_WIDTH, MISSILE_HEIGHT,
-  COIN_SIZE, POWERUP_SIZE,
+  POWERUP_SIZE,
 } from './constants';
 
 // ── helpers ────────────────────────────────────
@@ -57,59 +58,17 @@ export function spawnMissile(speed: number, score: number): Missile {
 }
 
 // ── Coins ──────────────────────────────────────
-/** Spawn a small cluster / arc / line of coins */
-export function spawnCoinPattern(speed: number): Coin[] {
-  const patterns = ['line', 'arc', 'zigzag', 'cluster'];
-  const pattern = patterns[randInt(0, patterns.length - 1)];
-  const coins: Coin[] = [];
-  const baseY = rand(CEILING_Y + 40, GROUND_Y - 40);
-  const startX = CANVAS_WIDTH + 20;
-
-  const makeCoin = (x: number, y: number): Coin => ({
-    x,
-    y,
-    width: COIN_SIZE,
-    height: COIN_SIZE,
-    collected: false,
-    collectedTimer: 0,
-    attracting: false,
-    active: true,
-  });
-
-  if (pattern === 'line') {
-    const count = randInt(5, 10);
-    for (let i = 0; i < count; i++) {
-      coins.push(makeCoin(startX + i * (COIN_SIZE + 12), baseY));
-    }
-  } else if (pattern === 'arc') {
-    const count = randInt(7, 12);
-    const radius = rand(50, 90);
-    for (let i = 0; i < count; i++) {
-      const t = (i / (count - 1)) * Math.PI;
-      coins.push(makeCoin(
-        startX + i * (COIN_SIZE + 10),
-        baseY - Math.sin(t) * radius
-      ));
-    }
-  } else if (pattern === 'zigzag') {
-    const count = randInt(6, 10);
-    for (let i = 0; i < count; i++) {
-      const y = baseY + (i % 2 === 0 ? -30 : 30);
-      coins.push(makeCoin(startX + i * (COIN_SIZE + 16), y));
-    }
-  } else {
-    const count = randInt(4, 7);
-    for (let i = 0; i < count; i++) {
-      coins.push(makeCoin(
-        startX + rand(0, 120),
-        rand(CEILING_Y + 40, GROUND_Y - 40)
-      ));
-    }
-  }
-
-  return coins;
+export function spawnCoinPattern(index: number, hazards: Missile[]): Coin[] {
+  const pattern = motifIndex(index);
+  const heights = [133,244,344];
+  const available = heights.map(height => coinMotif(pattern,height,8));
+  const preferred = index % available.length;
+  const risk = (coins: Coin[]) => coins.filter(coin => hazards.some(hazard =>
+    hazard.active && Math.abs(hazard.x - coin.x) < 145 &&
+    hazard.y < coin.y + coin.height + 18 && hazard.y + hazard.height > coin.y - 18)).length;
+  return available.map((coins,i) => ({coins,risk:risk(coins),order:(i-preferred+available.length)%available.length}))
+    .sort((a,b) => a.risk-b.risk || a.order-b.order)[0].coins;
 }
-
 // ── Power-ups ──────────────────────────────────
 export function spawnPowerUp(): PowerUpItem {
   const types: PowerUpType[] = ['shield', 'magnet', 'boost'];

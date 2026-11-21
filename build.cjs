@@ -53,6 +53,7 @@ fs.writeFileSync(path.join(dist,'story','index.html'),h);
 h=h.replace('</body>','<script src="journey-repairs.js"></script></body>').replace('</head>','<link rel="stylesheet" href="journey-repairs.css"><link rel="icon" href="../assets/site-icon.svg" type="image/svg+xml"></head>');
 fs.writeFileSync(path.join(dist,'story','index.html'),h);
 for(const file of ['journey-core.js','journey-repairs.js','journey-repairs.css'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,'story',file));
+for(const file of ['anna.html','anna.css','anna-case.js','anna.js'])fs.copyFileSync(path.join(root,'source','anna',file),path.join(dist,'story',file));
 fs.mkdirSync(path.join(dist,'games','budget-defence'),{recursive:true});
 for(const file of ['model.js','game.js','style.css'])fs.copyFileSync(path.join(root,'source','budget-defence',file),path.join(dist,'games','budget-defence',file));
 fs.copyFileSync(path.join(root,'source','budget-defence','index.html'),path.join(dist,'games','budget-defence','range.html'));
@@ -65,7 +66,7 @@ for(const game of require('./source/game-catalogue.cjs')){
 fs.copyFileSync(path.join(root,'source','site-icon.svg'),path.join(dist,'assets','site-icon.svg'));
 fs.copyFileSync(path.join(root,'garden-duo.css'),path.join(dist,'garden-duo.css'));
 if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missing talk poster asset');
-const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v1');
+const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v2');
 
 fs.copyFileSync(path.join(root,'source/cashflow-lab.js'),path.join(dist,'cashflow-lab.js'));
 fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'presentation.js'));require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
@@ -74,13 +75,32 @@ if(!process.argv.includes('--preserve-arcade'))require('node:child_process').exe
 
 const audioDir=path.join(root,'source/game-audio');
 const audioManifest=JSON.parse(fs.readFileSync(path.join(audioDir,'manifest.json'),'utf8'));
-fs.cpSync(path.join(root,'source/game-covers'),path.join(dist,'assets/game-covers'),{recursive:true});
+// Incremental builds may still contain retired illustration exports.
+for(const base of [dist,path.join(dist,'client')]){
+ const folder=path.join(base,'assets','game-covers');
+ for(const name of ['garden','runner','jet','duo','defence','moss']){
+  fs.rmSync(path.join(folder,name+'.jpg'),{force:true});
+ }
+ if(fs.existsSync(folder)&&fs.readdirSync(folder).length===0)fs.rmdirSync(folder);
+}
 fs.mkdirSync(path.join(dist,'assets/game-audio'),{recursive:true});
 for(const f of Object.values(audioManifest))fs.copyFileSync(path.join(audioDir,f),path.join(dist,'assets/game-audio',f));
 const devScript=fs.readFileSync(path.join(root,'source/garden-rules.js'),'utf8')+'\n'+fs.readFileSync(path.join(root,'source/dev-session.js'),'utf8');
-for(const rel of ['index.html','story/index.html',...['budget-defence','runner','jet','garden'].map(game=>'games/'+game+'/index.html')]){
+const caseChallenge=fs.readFileSync(path.join(root,'source/anna/arcade-challenge.js'),'utf8');
+const localizer=fs.readFileSync(path.join(root,'source/site-i18n.js'),'utf8');
+const locales=Object.fromEntries(['home','story','games'].map(group=>[group,fs.readFileSync(path.join(root,'source/i18n',group+'.txt'),'utf8')]));
+for(const rel of ['index.html','story/index.html','story/anna.html','games/budget-defence/range.html',...['budget-defence','runner','jet','garden'].map(game=>'games/'+game+'/index.html')]){
  const target=path.join(dist,rel),page=fs.readFileSync(target,'utf8');
- fs.writeFileSync(target,page.replace('<head>',()=>{let scripts='<script>'+devScript+'</script>';if(rel!=='index.html'){const base=rel.startsWith('story')?'../':'../../';const sources=Object.fromEntries(Object.entries(audioManifest).map(([k,v])=>[k,base+'assets/game-audio/'+v]));scripts+='<script>'+fs.readFileSync(path.join(audioDir,'player.js'),'utf8')+';window.gameAudio=createGameAudio('+JSON.stringify(sources)+');</script>'}return '<head>'+scripts}));
+ const messages=rel.startsWith('story/')?locales:{home:locales.home,games:locales.games};
+ const scripts=['window.siteMessages='+JSON.stringify(messages)+';\n'+localizer];
+ if(rel==='index.html')scripts.push(devScript);
+ else if(!['story/anna.html','games/budget-defence/range.html'].includes(rel)){
+  scripts.push(caseChallenge,devScript);
+  const base=rel.startsWith('story')?'../':'../../';
+  const sources=Object.fromEntries(Object.entries(audioManifest).map(([key,file])=>[key,base+'assets/game-audio/'+file]));
+  scripts.push(fs.readFileSync(path.join(audioDir,'player.js'),'utf8')+';window.gameAudio=createGameAudio('+JSON.stringify(sources)+');');
+ }
+ fs.writeFileSync(target,require('./build-head-scripts.cjs')(page,scripts));
 }
 require('./build-offline.cjs');
 require('./build-server.cjs');

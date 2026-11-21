@@ -1,13 +1,240 @@
-import{forwardRef,useImperativeHandle,useRef}from'react';import{useFrame}from'@react-three/fiber';import{useGameStore}from'../state/gameStore';import{extras}from'./extras';import{LANES}from'../utils/constants';import type{Group}from'three';
-export interface PlayerHandle{lane:number;isJumping:boolean;isSliding:boolean;position:{y:number};setSurface:(height:number)=>void;moveLeft:()=>void;moveRight:()=>void;jump:()=>void;slide:()=>void;checkCollision:(o:unknown[])=>boolean}
-export const Player=forwardRef<PlayerHandle,any>((props,ref)=>{const root=useRef<Group>(null),rig=useRef<Group>(null),legs=useRef<Group[]>([]),arms=useRef<Group>(null),board=useRef<Group>(null),boots=useRef<Group>(null),jumpRings=useRef<Group>(null),bootRays=useRef<Group>(null),last=useRef(0),st=useRef({lane:1,jump:0,duration:.72,slide:0,y:.9,vy:0,surface:0,launch:-20});
-const flightPack=useRef<Group>(null),pogo=useRef<Group>(null);
-const sync=()=>{if(extras.time<last.current){st.current.lane=1;st.current.jump=0;st.current.slide=0;st.current.y=.9;st.current.vy=0;st.current.surface=0;st.current.launch=-20;if(root.current)root.current.position.x=0}last.current=extras.time};
-useImperativeHandle(ref,()=>({setSurface(height){st.current.surface=height},get lane(){return st.current.lane},get isJumping(){return st.current.jump>0},get isSliding(){return st.current.slide>0},get position(){return{y:st.current.y}},moveLeft(){sync();st.current.lane=Math.max(0,st.current.lane-1)},moveRight(){sync();st.current.lane=Math.min(2,st.current.lane+1)},jump(){if(extras.airKind)return;sync();const s=st.current;if(!s.jump){s.slide=0;s.duration=extras.shoes>extras.time?1.6:1;s.vy=extras.shoes>extras.time?12:7.4;s.launch=extras.shoes>extras.time?extras.time:-20;s.jump=s.duration}},slide(){if(extras.airKind)return;sync();st.current.jump=0;st.current.vy=-8;st.current.slide=.8},checkCollision:()=>false}),[]);
-useFrame((_,dt)=>{if(!root.current)return;sync();const s=st.current;if(useGameStore.getState().gameState==='playing'){const d=Math.min(dt,.05);if(extras.airKind){s.slide=0;s.jump=.01;s.y=.9+extras.airHeight;s.vy=0}else{s.slide=Math.max(0,s.slide-d);s.vy-=15*d;s.y+=s.vy*d;const floor=.9+s.surface;if(s.y<=floor&&s.vy<=0){s.y=floor;s.vy=0;s.jump=0}else s.jump=Math.max(.01,s.jump-d)}}if(flightPack.current)flightPack.current.visible=extras.airKind==="jetpack";if(flightPack.current){flightPack.current.rotation.x=extras.flightPhase==='takeoff'?-.22:extras.flightPhase==='landing'?.2:0}
-if(pogo.current){pogo.current.visible=extras.airKind==='pogo';pogo.current.scale.y=extras.pogoPhase==='rise'?1.16:.82}const jumping=s.jump>0,sliding=s.slide>0,onBoard=extras.board>extras.time,boost=extras.shoes>extras.time;root.current.position.x+=(LANES[s.lane]-root.current.position.x)*.26;root.current.position.y=(sliding?.38+s.surface:s.y)+(onBoard?.15:0);if(rig.current){rig.current.rotation.x+=((sliding?-1.35:jumping?(s.vy>0?.18:-.09):0)-rig.current.rotation.x)*.3;rig.current.rotation.z=(LANES[s.lane]-root.current.position.x)*-.15;rig.current.scale.y+=((sliding?.55:1)-rig.current.scale.y)*.3}const stride=sliding?1.15:jumping?(s.vy>0?-1.05:-.45):onBoard?.12:Math.sin(extras.time*17)*.8;legs.current.forEach((l,i)=>{if(l)l.rotation.x=i?stride:-stride});if(arms.current)arms.current.rotation.x=sliding?-1.2:jumping?-1:-stride*.5;if(board.current){board.current.visible=onBoard;board.current.rotation.z=Math.sin(extras.time*5)*.07}if(boots.current){boots.current.visible=boost;boots.current.children.forEach((shoe,i)=>{const theta=i?stride:-stride;shoe.position.y=-.25-.48*Math.cos(theta);shoe.position.z=-.48*Math.sin(theta)-.12;shoe.rotation.x=theta;shoe.scale.y=jumping?1.12:.94+Math.abs(Math.sin(extras.time*17))*.08})}const quiet=matchMedia('(prefers-reduced-motion:reduce)').matches,age=extras.time-s.launch;if(jumpRings.current){jumpRings.current.visible=boost&&!quiet&&age>=0&&age<.65;jumpRings.current.position.y=-s.y+.12+s.surface;jumpRings.current.scale.setScalar(1+Math.min(.65,age)*2.4)}if(bootRays.current){bootRays.current.visible=boost&&jumping&&!quiet;bootRays.current.scale.y=.7+Math.sin(extras.time*24)*.2}const dead=useGameStore.getState().gameState==='dying';root.current.position.z=dead?extras.deathTime*.6:0;if(dead&&rig.current){const t=extras.deathTime;rig.current.rotation.z=(extras.deathKind==='jump'?1:-1)*Math.min(1.45,t*2);rig.current.rotation.x=-Math.min(.8,t);root.current.position.y=Math.max(.28,s.y-t*1.4)}else if(extras.impact>0&&rig.current)rig.current.rotation.z=Math.sin(extras.impact*35)*.2});
-return <group ref={root} position={[0,.9,0]}><group ref={rig}><group ref={flightPack} visible={false}>{[-1,1].map(side=><group key={side} position={[side*.28,.12,.35]}><mesh><capsuleGeometry args={[.13,.33,4,8]}/><meshStandardMaterial color="#e6a343"/></mesh><mesh position={[0,-.32,0]} rotation={[0,0,Math.PI]}><coneGeometry args={[.1,.25,8]}/><meshBasicMaterial color="#7fe6ee"/></mesh></group>)}</group><group ref={pogo} visible={false} position={[0,-.78,.03]}><mesh><cylinderGeometry args={[.065,.075,.56,8]}/><meshStandardMaterial color="#e9ae4f"/></mesh><mesh position={[0,-.3,0]}><boxGeometry args={[.46,.09,.24]}/><meshStandardMaterial color="#354d57"/></mesh></group>
-<mesh position={[0,.48,.08]} rotation={[.25,0,0]}><torusGeometry args={[.26,.09,8,16]}/><meshStandardMaterial color="#f6d59b"/></mesh>
-<mesh position={[0,.15,.418]}><boxGeometry args={[.32,.22,.04]}/><meshStandardMaterial color="#edac45"/></mesh>
-{[-1,1].map(side=><mesh key={side} position={[side*.19,.22,.405]}><boxGeometry args={[.045,.44,.035]}/><meshStandardMaterial color="#214e62"/></mesh>)}
-<mesh position={[0,.15,0]}><capsuleGeometry args={[.32,.42,4,10]}/><meshStandardMaterial color="#e65b38"/></mesh><mesh position={[0,.85,0]}><sphereGeometry args={[.32,16,12]}/><meshStandardMaterial color="#efba86"/></mesh><mesh position={[0,1.08,.01]}><sphereGeometry args={[.34,16,8,0,Math.PI*2,0,Math.PI/2]}/><meshStandardMaterial color="#bc3030"/></mesh><mesh position={[0,1.06,-.27]}><boxGeometry args={[.48,.07,.35]}/><meshStandardMaterial color="#ef5650"/></mesh><mesh position={[0,.18,.29]}><boxGeometry args={[.46,.57,.22]}/><meshStandardMaterial color="#51a2ae"/></mesh>{[-1,1].map((x,i)=><group key={i} ref={r=>{if(r)legs.current[i]=r}} position={[x*.2,-.25,0]}><mesh position={[0,-.2,0]}><boxGeometry args={[.25,.55,.27]}/><meshStandardMaterial color="#3c668d"/></mesh><mesh position={[0,-.48,-.12]}><boxGeometry args={[.33,.2,.6]}/><meshStandardMaterial color="#fbf3ce"/></mesh></group>)}<group ref={arms}>{[-1,1].map(x=><mesh key={x} position={[x*.46,.15,0]} rotation={[0,0,x*.12]}><capsuleGeometry args={[.1,.5,4,8]}/><meshStandardMaterial color="#efba86"/></mesh>)}</group></group><group ref={board} position={[0,-.83,0]} visible={false}><mesh rotation={[0,0,Math.PI/2]}><capsuleGeometry args={[.25,1.15,4,12]}/><meshStandardMaterial color="#ffaf28" emissive="#eb6e11" emissiveIntensity={.5}/></mesh><mesh position={[0,-.2,.1]}><boxGeometry args={[1.6,.07,.65]}/><meshBasicMaterial color="#53ecf3" transparent opacity={.7}/></mesh></group><group ref={boots} visible={false}>{[-.2,.2].map(x=><group key={x} position={[x,-.79,-.14]}><mesh><boxGeometry args={[.4,.26,.68]}/><meshStandardMaterial color="#ffe571" emissive="#da9524" emissiveIntensity={.65}/></mesh><mesh position={[0,-.16,0]}><boxGeometry args={[.44,.08,.75]}/><meshStandardMaterial color="#fff3b2" emissive="#efb72e" emissiveIntensity={.8}/></mesh>{[-.08,0,.08].map(y=><mesh key={y} position={[0,y,.13]} rotation={[Math.PI/2,0,0]}><torusGeometry args={[.17,.025,5,12]}/><meshStandardMaterial color="#b78f38" metalness={.55}/></mesh>)}<mesh position={[0,.18,.09]}><boxGeometry args={[.31,.18,.31]}/><meshStandardMaterial color="#c89932"/></mesh><mesh position={[x<0?-.23:.23,.06,0]} rotation={[0,0,x<0?-.4:.4]}><boxGeometry args={[.11,.3,.28]}/><meshStandardMaterial color="#fff0a1" emissive="#eebc3f" emissiveIntensity={.9}/></mesh></group>)}</group><group ref={jumpRings} visible={false}>{[0,1,2].map(i=><mesh key={i} position={[0,i*.04,0]} rotation={[-Math.PI/2,0,0]}><torusGeometry args={[.4+i*.17,.02,5,22]}/><meshBasicMaterial color="#ffe38a" transparent opacity={.7-i*.17}/></mesh>)}</group><group ref={bootRays} visible={false} position={[0,-1.08,0]}>{[-.2,.2].map(x=><mesh key={x} position={[x,-.18,.02]}><coneGeometry args={[.14,.65,6]}/><meshBasicMaterial color="#ffd75d" transparent opacity={.45}/></mesh>)}</group></group>});Player.displayName='Player';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
+import { MeshStandardMaterial, type Group, type Mesh } from 'three';
+import { useGameStore } from '../state/gameStore';
+import { extras } from './extras';
+import { LANES } from '../utils/constants';
+import { runnerCharacter } from './runner-character';
+
+const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion:reduce)').matches;
+const freshPose = () => ({lane:1, jump:0, duration:.72, slide:0, y:.9, vy:0, surface:0, launch:-20});
+
+export interface PlayerHandle {
+  lane: number;
+  isJumping: boolean;
+  isSliding: boolean;
+  position: {x:number; y:number};
+  setSurface: (height: number) => void;
+  moveLeft: () => void;
+  moveRight: () => void;
+  jump: () => void;
+  slide: () => void;
+  checkCollision: (o: unknown[]) => boolean;
+}
+
+export const Player = forwardRef<PlayerHandle>((_, ref) => {
+  const root = useRef<Group>(null);
+  const rig = useRef<Group>(null);
+  const legs = useRef<Group[]>([]);
+  const shins = useRef<Group[]>([]);
+  const feet = useRef<Group[]>([]);
+  const arms = useRef<Group[]>([]);
+  const elbows = useRef<Group[]>([]);
+  const board = useRef<Group>(null);
+  const shadow = useRef<Mesh>(null);
+  const flightPack = useRef<Group>(null);
+  const pogo = useRef<Group>(null);
+  const jumpRings = useRef<Group>(null);
+  const movement = useRef(freshPose());
+  const last = useRef(0);
+  const landing = useRef(0);
+
+  const art = useMemo(runnerCharacter, []);
+  const material = useMemo(() => new MeshStandardMaterial({vertexColors:true, roughness:.76}), []);
+  useEffect(() => () => {
+    Object.values(art).forEach(mesh => mesh.dispose());
+    material.dispose();
+  }, [art, material]);
+
+  function sync() {
+    if (extras.time < last.current) {
+      movement.current = freshPose();
+      landing.current = 0;
+      if (root.current) root.current.position.x = 0;
+    }
+    last.current = extras.time;
+  }
+
+  useImperativeHandle(ref, () => ({
+    setSurface(height) { movement.current.surface = height; },
+    get lane() { return movement.current.lane; },
+    get isJumping() { return movement.current.jump > 0; },
+    get isSliding() { return movement.current.slide > 0; },
+    get position() {
+      return {x:root.current?.position.x ?? LANES[movement.current.lane], y:movement.current.y};
+    },
+    moveLeft() { sync(); movement.current.lane = Math.max(0, movement.current.lane - 1); },
+    moveRight() { sync(); movement.current.lane = Math.min(2, movement.current.lane + 1); },
+    jump() {
+      if (extras.airKind) return;
+      sync();
+      const s = movement.current;
+      if (s.jump) return;
+      const boosted = extras.shoes > extras.time;
+      s.slide = 0;
+      s.duration = boosted ? 1.6 : 1;
+      s.vy = boosted ? 12 : 7.4;
+      s.launch = boosted ? extras.time : -20;
+      s.jump = s.duration;
+    },
+    slide() {
+      if (extras.airKind) return;
+      sync();
+      movement.current.jump = 0;
+      movement.current.vy = -8;
+      movement.current.slide = .8;
+    },
+    checkCollision: () => false,
+  }), []);
+
+  useFrame((_, delta) => {
+    const actor = root.current;
+    const frame = rig.current;
+    if (!actor || !frame) return;
+    sync();
+    const s = movement.current;
+    const state = useGameStore.getState();
+    const dt = Math.min(delta, .05);
+    if (state.gameState === 'playing') {
+      if (extras.airKind) {
+        s.slide = 0;
+        s.jump = .01;
+        s.y = .9 + extras.airHeight;
+        s.vy = 0;
+      } else {
+        s.slide = Math.max(0, s.slide - dt);
+        s.vy -= 15 * dt;
+        s.y += s.vy * dt;
+        const floor = .9 + s.surface;
+        if (s.y <= floor && s.vy <= 0) {
+          if (s.jump && s.vy < -2) landing.current = .19;
+          s.y = floor;
+          s.vy = 0;
+          s.jump = 0;
+        } else {
+          s.jump = Math.max(.01, s.jump - dt);
+        }
+      }
+      landing.current = Math.max(0, landing.current - dt);
+      actor.position.x += (LANES[s.lane] - actor.position.x) * (1 - Math.pow(.74, dt * 60));
+    }
+
+    const inAir = s.jump > 0;
+    const sliding = s.slide > 0;
+    const riding = extras.board > extras.time;
+    const boosted = extras.shoes > extras.time;
+    const lift = 1 - Math.pow(.7, dt * 60);
+    const swing = extras.distance * 1.21;
+    const compression = landing.current ? Math.sin(Math.PI * landing.current / .19) * .11 : 0;
+    const bounce = !inAir && !sliding && !riding && !reducedMotion ? .035 * Math.abs(Math.sin(swing)) : 0;
+    actor.position.y = (sliding ? .38 + s.surface : s.y) + (riding ? .13 : 0) + bounce - compression;
+    const lean = sliding ? -1.21 : inAir ? (s.vy > 0 ? .21 : -.16) : .08;
+    frame.rotation.x += (lean - frame.rotation.x) * lift;
+    frame.rotation.z = (LANES[s.lane] - actor.position.x) * -.18;
+
+    for (let i = 0; i < 2; i++) {
+      const step = i ? swing + Math.PI : swing;
+      const run = Math.sin(step);
+      const leg = legs.current[i], shin = shins.current[i], foot = feet.current[i];
+      if (leg && shin && foot) {
+        const thigh = sliding ? 1.46 : inAir ? .56 + i * .48 : riding ? .24 : run * .7;
+        const knee = sliding ? -.26 : inAir ? -.78 : riding ? -.4 : -Math.max(0, -run) * 1.09;
+        leg.rotation.x += (thigh - leg.rotation.x) * lift;
+        shin.rotation.x += (knee - shin.rotation.x) * lift;
+        foot.rotation.x = sliding ? -.37 : riding ? .16 : -.22 * leg.rotation.x;
+        foot.children[0].visible = !boosted;
+        foot.children[1].visible = boosted;
+      }
+      const arm = arms.current[i], elbow = elbows.current[i];
+      if (arm && elbow) {
+        const armPose = sliding ? -.78 : inAir ? .82 + i * .26 : riding ? .33 : -.62 * run;
+        arm.rotation.x += (armPose - arm.rotation.x) * lift;
+        elbow.rotation.x = sliding ? .25 : .82 + .22 * Math.abs(run);
+      }
+    }
+
+    if (flightPack.current) {
+      flightPack.current.visible = extras.airKind === 'jetpack';
+      flightPack.current.rotation.x = extras.flightPhase === 'takeoff' ? -.20 : extras.flightPhase === 'landing' ? .2 : 0;
+    }
+    if (pogo.current) {
+      pogo.current.visible = extras.airKind === 'pogo';
+      pogo.current.scale.y = extras.pogoPhase === 'rise' ? 1.08 : .8;
+    }
+    if (board.current) {
+      board.current.visible = riding;
+      board.current.rotation.z = reducedMotion ? 0 : Math.sin(extras.time * 5) * .06;
+    }
+    if (shadow.current) {
+      shadow.current.position.y = -actor.position.y + s.surface + .027;
+      shadow.current.scale.setScalar(1 / (1 + Math.max(0, s.y - s.surface - .9) * .08));
+    }
+    const age = extras.time - s.launch;
+    if (jumpRings.current) {
+      jumpRings.current.visible = boosted && !reducedMotion && age >= 0 && age < .65;
+      jumpRings.current.position.y = -actor.position.y + s.surface + .08;
+      jumpRings.current.scale.setScalar(1 + Math.max(0, Math.min(.65, age)) * 2.4);
+    }
+
+    const dead = state.gameState === 'dying';
+    actor.position.z = dead ? extras.deathTime * .6 : 0;
+    if (dead) {
+      const t = extras.deathTime;
+      frame.rotation.z = (extras.deathKind === 'jump' ? 1 : -1) * Math.min(1.45, t * 2);
+      frame.rotation.x = -Math.min(.8, t);
+      actor.position.y = Math.max(.28, s.y - t * 1.4);
+    } else if (extras.impact > 0 && !reducedMotion) {
+      frame.rotation.z += Math.sin(extras.impact * 35) * .2;
+    }
+  });
+
+  return <group ref={root} position={[0, .9, 0]}>
+    <mesh ref={shadow} rotation={[-Math.PI / 2, 0, 0]} position={[0, -.87, .05]}>
+      <circleGeometry args={[.49, 22]}/>
+      <meshBasicMaterial color="#233f3c" transparent opacity={.26} depthWrite={false}/>
+    </mesh>
+    <group ref={rig} dispose={null}>
+      <mesh geometry={art.body} material={material}/>
+      <mesh geometry={art.head} material={material}/>
+      <mesh geometry={art.pack} material={material}/>
+      {[-1, 1].map((side, index) => <group key={side} ref={value => {if (value) arms.current[index] = value;}}
+        position={[side * .335, .382, .003]} rotation={[0, 0, side * .19]}>
+        <mesh geometry={art.sleeve} material={material}/>
+        <group ref={value => {if (value) elbows.current[index] = value;}} position={[0, -.26, 0]}>
+          <mesh geometry={art.forearm} material={material}/>
+        </group>
+      </group>)}
+      {[-1, 1].map((side, index) => <group key={side} ref={value => {if (value) legs.current[index] = value;}}
+        position={[side * .151, -.22, 0]}>
+        <mesh geometry={art.thigh} material={material}/>
+        <group ref={value => {if (value) shins.current[index] = value;}} position={[0, -.325, .009]}>
+          <mesh geometry={art.calf} material={material}/>
+          <group ref={value => {if (value) feet.current[index] = value;}} position={[0, -.258, .003]}>
+            <mesh geometry={art.shoe} material={material}/>
+            <mesh geometry={art.boot} material={material} visible={false}/>
+          </group>
+        </group>
+      </group>)}
+      <group ref={flightPack} visible={false}>
+        <mesh geometry={art.flight} material={material}/>
+        {[-.255, .255].map(x => <mesh key={x} position={[x, -.242, .354]}>
+          <coneGeometry args={[.082, .201, 9]}/>
+          <meshBasicMaterial color="#99eee1"/>
+        </mesh>)}
+      </group>
+      <group ref={pogo} visible={false} position={[0, -.7, .02]}>
+        <mesh geometry={art.pogo} material={material}/>
+      </group>
+    </group>
+    <group ref={board} position={[0, -.87, 0]} visible={false} dispose={null}>
+      <mesh geometry={art.board} material={material}/>
+    </group>
+    <group ref={jumpRings} visible={false}>
+      {[0, 1].map(i => <mesh key={i} position={[0, i * .04, 0]} rotation={[-Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[.39 + i * .2, .025, 5, 22]}/>
+        <meshBasicMaterial color="#f6d589" transparent opacity={.68 - i * .17}/>
+      </mesh>)}
+    </group>
+  </group>;
+});
+Player.displayName = 'Player';

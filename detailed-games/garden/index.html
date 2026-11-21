@@ -878,7 +878,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
         </div>
         
         <div id="wave">
-            <div>波數：<span id="waveCount">1</span>/5</div>
+            <div>波數：<span id="waveCount">1</span><span id="waveLimit">/5</span></div>
             <div class="damage-bonus">攻擊加成：+<span id="damageBonus">0</span>%</div>
         </div>
         
@@ -2078,12 +2078,12 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
         function startGameLoop() {
             function gameLoop() {
                 const now = Date.now();
-                const deltaTime = now - gameState.lastUpdate;
+                const deltaTime = Math.min(100, Math.max(0, now - gameState.lastUpdate));
                 gameState.lastUpdate = now;
                 
                 if (!gameState.isPaused && !gameState.isGameOver) {
-                    gameState.activeClock=(gameState.activeClock||0)+Math.min(100,Math.max(0,deltaTime))*gameState.gameSpeed;
-                    window.gardenActiveStep?.(Math.min(100,Math.max(0,deltaTime))*gameState.gameSpeed);
+                    gameState.activeClock=(gameState.activeClock||0)+deltaTime * gameState.gameSpeed;
+                    window.gardenActiveStep?.(deltaTime * gameState.gameSpeed);
                     moveZombies(deltaTime);
                     moveProjectiles(deltaTime);
                     
@@ -2094,10 +2094,12 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                         if (plantType.produces === 'sun') {
                             const interval = plantType.interval / gameState.gameSpeed;
                             if (SunflowerRules.advance(plant, deltaTime, interval)) produceSun(plant);
-                            const charge = Math.min(100, plant.productionCharge / interval * 100);
-                            plant.element.style.setProperty('--charge', charge + '%');
-                            const meter = plant.element.querySelector('.sun-charge');
-                            if(meter){meter.setAttribute('aria-valuenow',String(Math.floor(charge)));meter.title='吸收陽光 '+Math.floor(charge)+'%';}
+                            const charge = Math.min(100, Math.floor(plant.productionCharge / interval * 20) * 5);
+                            if (charge !== plant.paintedCharge && plant.sunMeter) {
+                                plant.paintedCharge = charge;
+                                plant.element.style.setProperty('--charge', charge + '%');
+                                plant.sunMeter.setAttribute('aria-valuenow', String(charge));
+                            }
                         }
                         
                         if (plantType.shoots) {

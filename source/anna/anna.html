@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#17352d">
+  <title>失物認領處｜戶口三位數</title>
+  <link rel="icon" href="../assets/site-icon.svg">
+  <link rel="stylesheet" href="anna.css">
+</head>
+<body>
+  <header class="case-header">
+    <a class="case-brand" href="../">戶口三位數</a>
+    <nav aria-label="調查工具">
+      <button type="button" id="dossier">案情簿</button>
+      <button type="button" id="help">專家提示</button>
+      <button type="button" id="save-menu">存檔</button>
+    </nav>
+  </header>
+  <aside id="save-warning" role="status" hidden></aside>
+  <main id="case-main" class="case-main"></main>
+  <dialog id="case-dialog" aria-labelledby="dialog-title">
+    <header><h2 id="dialog-title"></h2><button type="button" id="dialog-close" aria-label="關閉證物">關閉</button></header>
+    <div id="dialog-body"></div>
+  </dialog>
+  <p id="case-status" class="sr-only" role="status"></p>
+  <script src="anna-case.js"></script>
+  <script src="anna.js"></script>
+</body>
+</html>

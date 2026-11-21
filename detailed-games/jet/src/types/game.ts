@@ -28,7 +28,7 @@ export interface Player extends Rect {
   shieldFrames?: number;
   dashFrames?: number;
   invertedGravity?: boolean;
-  teleportPreview?: {targets:{id:string,y:number,safe:boolean}[],nextId:string|null};
+  teleportPreview?: {y:number,safe:boolean};
   vehicleVisualState?: {gravity:'up'|'down', airborne:boolean, active:PowerUpType, velocityY:number};
   expiredType?: PowerUpType;
   expiredTimer?: number;
@@ -41,7 +41,9 @@ export interface Player extends Rect {
 }
 
 export interface Missile extends Rect {
-  warningFrames?:number; hazard?:'missile'|'zapper';
+  warningFrames?:number; hazard?:'missile'|'zapper'|'rotor'|'piston'|'gate';
+  originY?:number;
+  travel?:number;
   velocityX: number;
   velocityY: number;
   angle: number;
@@ -104,4 +106,5 @@ export interface UIState {
   lives: number;
   difficulty: Difficulty;
   soundEnabled: boolean;
+  course?: { title:string;remaining:number;target:number;passed:boolean;seed?:string };
 }

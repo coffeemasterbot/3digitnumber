@@ -20,6 +20,19 @@ body[data-aim-required=true] #aim-gate{display:grid!important;z-index:80;backgro
 
 .control-guide{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
 .control-guide span{padding:8px;background:#e5e4ca;border-radius:6px}.control-guide b{display:block;color:#285345}
+
+#menu,#settings-dialog::backdrop{backdrop-filter:none}
+#menu{background:#14262ce8}
+.match-feedback{position:absolute;z-index:20;inset:auto 0 58px;display:grid;gap:6px;justify-items:center;pointer-events:none}
+.match-feedback #notice,.match-feedback #defuse{position:static;transform:none;margin:0}
+.match-feedback #notice{width:max-content;max-width:min(52vw,620px)}
+.match-feedback #notice:empty{display:none}
+.match-feedback #defuse{display:block;width:min(340px,46vw);order:-1;background:#173d35f5}
+#interaction-hint{top:calc(50% + 34px);bottom:auto;max-width:80vw;text-align:center}
+@media(pointer:fine){#touch{display:none}}
+@media(any-pointer:coarse){body[data-phase=playing] #touch{display:flex}}
+@media(max-height:520px){.match-feedback{bottom:48px;gap:4px}.match-feedback #defuse{padding:5px 12px}.match-feedback #defuse progress{height:12px;margin-top:3px}}
+@media(pointer:coarse) and (max-height:500px){.match-feedback #notice{font-size:10px;max-width:40vw}.match-feedback #defuse{width:min(238px,35vw)}#touch{bottom:14px}.touch-actions{grid-template-columns:repeat(2,minmax(50px,70px))}#touch button{min-height:36px}}
 summary{cursor:pointer;font-weight:bold;padding:6px 0}button:focus-visible,summary:focus-visible,select:focus-visible{outline:3px solid #cc9136;outline-offset:2px}
 button:hover:not(:disabled){filter:brightness(1.12)}button:disabled{opacity:.65}#settings-dialog small{display:block;margin:8px 0}
 #view-status:not(:empty){position:absolute;z-index:85;top:var(--hud-bottom);left:50%;transform:translateX(-50%);width:max-content;max-width:95%;background:#fff2cf;color:#284638;padding:6px 12px;border-radius:6px;pointer-events:none}
@@ -35,7 +48,28 @@ body[data-phase=playing] #weapon-bar{left:50%;bottom:44px;transform:translateX(-
 @media(pointer:coarse){#touch{bottom:88px}.touch-actions{grid-template-columns:repeat(3,minmax(40px,56px))}#notice{top:calc(var(--hud-bottom) + 90px);bottom:auto}#defuse{top:calc(var(--hud-bottom) + 42px);bottom:auto}#touch #look{display:none}}
 @media(max-height:520px) and (pointer:coarse){.touch-actions{grid-template-columns:repeat(4,52px)}}
 
-#hud {background:linear-gradient(105deg,#14292beb,#1b3435f5);border-radius:4px;border-left:4px solid #e1ab58;box-shadow:0 3px 12px #05171355}
+#hud {background:#162c30f2;border:1px solid #638682;border-radius:7px;box-shadow:0 3px 12px #05171355}
 #hud #timer,#hud #ammo,#hud #money {font-variant-numeric:tabular-nums}
 #hud button {border-radius:4px}
 #world {background:radial-gradient(ellipse at 55% 42%,#859b93,#263e41)}
+body[data-court="1"]{--court-accent:#e8ba79}
+body[data-court="2"]{--court-accent:#9ccbd0}
+body[data-court="3"]{--court-accent:#c3ce9b}
+#hud #round{color:var(--court-accent,#e8ba79)}
+#objective{border:1px solid #638682;background:#203639f4;padding:.42em .72em}
+#interaction-hint{border-color:#b08c54;border-radius:7px}
+.match-feedback{bottom:104px}
+@media(max-height:520px){
+ .match-feedback{bottom:89px}
+}
+@media(pointer:coarse){
+ .match-feedback{top:calc(var(--hud-bottom) + 44px);bottom:auto}
+}
+#squad-control{position:fixed;top:calc(var(--hud-bottom,60px) + 35px);right:16px;z-index:5;display:flex;align-items:center;gap:7px;padding:6px 8px;border:1px solid #86a197;border-radius:6px;background:#163c36;color:#f7eed8;font-size:13px}
+#squad-control[hidden]{display:none}
+#squad-control select{min-height:32px;border:1px solid #99a8a0;border-radius:4px;padding:3px 6px;color:#1d3d32;background:#f4ebd7;font:inherit}
+@media(max-width:840px){#squad-control{right:8px;top:calc(var(--hud-bottom,48px) + 30px);padding:3px 5px}}
+#control-hint{display:none}
+body[data-phase=playing]:not([data-terminal=true]) #control-hint{display:block;position:fixed;left:8px;bottom:46px;margin:0;padding:5px 8px;border-radius:5px;background:#213b37;color:#fff6df;font-size:12px;pointer-events:none}
+
+@media(any-pointer:coarse){body[data-phase=playing]:not([data-terminal=true]) #control-hint{display:none}}
