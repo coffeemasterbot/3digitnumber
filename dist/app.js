@@ -93,8 +93,7 @@ document.querySelector('[data-progress]').onclick=()=>{
   const current=caseProgress(),action=read('lost-found-action-v1',read('life-lost-found-guided-v5',{})),free=read('website-v1-arcade',{});
   const progress=current?.completed?'已結案':current?.act?'第 '+current.act+' 幕':'未開始';
   const days=Array.isArray(action.stamps)?action.stamps.filter(stamp=>stamp&&!stamp.demo).length:0;
-  showInfo(`<h2>我的旅程</h2><div class="progress-row">主線故事 <span class="progress-value">${progress}</span></div><div class="progress-row">已查看證物 <span class="progress-value">${current?.clues.length||0}</span></div><div class="progress-row">有紀錄嘅遊戲 <span class="progress-value">${Object.keys(free).length} / 5</span></div><div class="progress-row">十四日行動 <span class="progress-value">${days} / 14 日</span></div><p>進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。</p><div class="buttons"><button class="primary" id="resume-progress">${current?.act?'繼續調查':'開始調查'}</button><button id="open-action-plan">我的十四日行動</button></div>`);
-  $('open-action-plan').onclick=()=>{$('info-dialog').close();launch('plan');};
+  showInfo(`<h2>我的旅程</h2><div class="progress-row">主線故事 <span class="progress-value">${progress}</span></div><div class="progress-row">已查看證物 <span class="progress-value">${current?.clues.length||0}</span></div><div class="progress-row">有紀錄嘅遊戲 <span class="progress-value">${Object.keys(free).length} / 5</span></div><div class="progress-row">十四日行動 <span class="progress-value">${days} / 14 日</span></div><p>進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。</p><div class="buttons"><button class="primary" id="resume-progress">${current?.act?'繼續調查':'開始調查'}</button></div>`);
   $('resume-progress').onclick=()=>{$('info-dialog').close();launch('story');};
 };
 function refreshCaseLabel(){
@@ -114,7 +113,7 @@ window.addEventListener('message',e=>{
 });
 function syncPlayerRoute(){
   const hash=location.hash;
-  if(hash==='#play-plan'||hash==='#habit-section'){
+  if(hash==='#play-plan'){
     if(active)leavePlay();
     history.replaceState(null,'',location.pathname+location.search);
     window.scrollTo({top:0,behavior:'instant'});
