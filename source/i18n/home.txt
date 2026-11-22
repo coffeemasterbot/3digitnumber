@@ -113,6 +113,16 @@ Academic Building · 1103 室|Academic Building · Room 1103
 請輸入種子代碼。|Enter a challenge seed.
 種子代碼|Seed code
 固定種子挑戰|Seeded challenge
+活動回顧|Activities
+活動|Activities
+已發布|Published
+理財短片|Financial education reels
+睇 Instagram Reels ↗|Watch Instagram Reels ↗
+即將舉行|Coming soon
+失物認領處 TRPG|Lost & Found TRPG
+科大生活 · 現金流試算|HKUST campus life · Cash flow planner
+實習糧未到，飯錢同車費要照畀。改一改到帳日，睇下邊日會唔夠用。|Internship pay is pending. Change the payday to see when food and travel expenses cause a shortfall.
+揀一款遊戲，即刻開始。|Pick a game and start playing.
 90 秒練習|90-second practice
 無盡跑酷|Endless run
 無盡飛行|Endless flight
@@ -241,12 +251,11 @@ B 結餘|B balance
 已取消匯入。|Import cancelled.
 已結案|Case closed
 未開始|Not started
-Anna 版主線|Anna investigation
+主線故事|Main story
 已查看證物|Evidence examined
 有紀錄嘅遊戲|Games with records
 七日行動|Seven-day action
 進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。|Progress is kept in this browser. Download backups from the investigation or arcade.
-打開舊版故事|Open classic story
 已複製 / Link copied|Link copied
 請複製已選取的網址 / Copy the selected URL|Copy the selected URL
 可複製已選取網址 / URL selected|URL selected

@@ -34,8 +34,8 @@ test('GitHub Pages build is static and describes local-only scores', () => {
   assert.match(read('presentation.js'), /Runner and flight best scores stay in this browser/);
   assert.match(read('presentation.js'), /跑酷與飛行的最佳分數只保存在本機/);
   const jet = read('games/jet/app.js').replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-  assert.match(jet, /成績只保存在本機/);
-  assert.match(jet, /本機最佳分數會保存在此瀏覽器/);
+  assert.match(jet, /本機保存最佳紀錄/);
+  assert.doesNotMatch(jet,/每局成績可見於共同排行榜|共同排行榜會記錄每一局/);
 });
 
 test('GitHub Pages game bundles make no leaderboard API requests', () => {

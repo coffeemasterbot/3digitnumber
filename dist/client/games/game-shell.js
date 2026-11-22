@@ -47,8 +47,6 @@ window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
   const recordsKey = 'website-v1-records';
   const progressKey = 'website-v1-arcade';
   const parentOrigin = location.origin === 'null' ? '*' : location.origin;
-  let muted = false;
-  try { muted = localStorage.getItem('arcade-music-muted') === 'true'; } catch {}
   const bar = document.createElement('div');
   bar.className = 'shell-controls';
   bar.innerHTML = '<button id="shell-sound" type="button">音樂</button><span id="shell-timer"></span><button id="shell-full" type="button">全螢幕 ↗</button><button id="shell-back" type="button">遊戲選單</button>';
@@ -58,19 +56,10 @@ window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
   const timer = document.getElementById('shell-timer');
   const full = document.getElementById('shell-full');
   const back = document.getElementById('shell-back');
-  sound.hidden = kind === 'jet';
   timer.hidden = kind !== 'garden';
-  function labelSound() {
-    sound.textContent = muted ? '音樂：關' : '音樂：開';
-    sound.setAttribute('aria-pressed', String(!muted));
-  }
-  labelSound();
-  sound.onclick = () => {
-    muted = !muted;
-    try { localStorage.setItem('arcade-music-muted', String(muted)); } catch {}
-    labelSound();
-    update();
-  };
+  if (kind==='jet') sound.remove();
+  else if(window.PFAPAudio)sound.replaceWith(window.PFAPAudio.controls());
+  if(kind==='garden')document.querySelector('#pauseMenu h2')?.after(window.PFAPAudio.controls());
 
   full.onclick = async () => {
     try {
@@ -158,9 +147,10 @@ window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
     const audio = window.gameAudio;
     if (!audio || kind === 'jet') return;
     const picker = kind === 'garden' && document.getElementById('garden-intro');
-    const track = document.hidden || muted || (!picker && snapshot.state !== 'playing')
+    const track = document.hidden || (!picker && snapshot.state !== 'playing')
       ? null : kind === 'runner' ? 'runner' : picker ? 'garden-picker'
         : gameState.boss ? 'garden-boss' : 'garden-' + gardenLevel();
+    if (!track && snapshot.state === "paused") window.PFAPAudio?.stopEffects();
     if (track === activeTrack) return;
     activeTrack = track;
     if (track) {
@@ -169,8 +159,14 @@ window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
     } else audio.pause();
   }
   if (kind === 'runner') {
+    let previousTime = -Infinity, previousRun, pitch = 0;
     window.addEventListener('runner-coin', event => {
-      if (!muted) window.gameAudio?.effect('coin', event.detail);
+      const run = event.detail.split(':')[0];
+      const now = performance.now();
+      pitch = run === previousRun && now-previousTime < 1200 ? Math.min(12,pitch+1) : 0;
+      previousTime = now;
+      previousRun = run;
+      window.PFAPAudio?.play('coin_pickup',pitch);
     });
   }
   window.addEventListener('arcade-game-state', update);
@@ -178,7 +174,7 @@ window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
   // The older Garden loop may change state without emitting an event.
   const uiTimer = setInterval(update, 500);
   window.addEventListener('pagehide', () => { window.flushArcadeResult(); clearInterval(uiTimer); });
-  window.detailedMusicStatus = () => ({kind, muted, running:!!activeTrack, state:state().state});
+  window.detailedMusicStatus = () => ({kind, muted:!window.PFAPAudio?.enabled("bgm"), running:!!activeTrack, state:state().state});
 
   if (kind === 'garden') {
     window.detailedGameSnapshot = () => ({

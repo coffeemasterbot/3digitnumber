@@ -49,7 +49,7 @@ export const MAGNET_RADIUS = 160;
 export const MISSILE_WIDTH = 64;
 export const MISSILE_HEIGHT = 22;
 export const COIN_SIZE = 18;
-export const POWERUP_SIZE = 32;
+export const POWERUP_SIZE = 46;
 
 // ── Lives ──────────────────────────────────────
 export const MAX_LIVES = 1;

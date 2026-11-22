@@ -27,7 +27,7 @@ import {
   drawMissile, drawCoin, drawPowerUp, drawCoinPop,
 } from '@/utils/renderer';
 import {getTeleportPreview,nextTeleportHeight,TELEPORT_PREVIEW_TICKS} from '@/utils/teleport';
-import { useSound } from './useSound';
+import { useSound, audio } from './useSound';
 
 const thrustKeys = ['Space', 'ArrowUp', 'KeyW'];
 function updateParticles(particles: Particle[], steps = 1) {
@@ -42,10 +42,12 @@ function updateParticles(particles: Particle[], steps = 1) {
 }
 
 const vehicles: PowerUpType[]=['mecha','glider','drill','gravity','blink','dragon'];
-export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode:string,vehicle:string,mission:number,seed:string,tools:readonly Tool[]) {
+export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,mission:number,seed:string,tools:readonly Tool[]) {
   const canvasRef  = useRef<HTMLCanvasElement | null>(null);
   const rafRef     = useRef<number>(0);
   const frameRef   = useRef(0);
+  const countdown = useRef(0);
+  const warned = useRef(new WeakSet<Missile>());
 
   const lastDraw = useRef<GameState | null>(null);
   const frameCallback = useRef<FrameRequestCallback | null>(null);
@@ -69,7 +71,6 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
   const scrollRef     = useRef(0);
   const tappedRef=useRef(false);
   const thrustingRef  = useRef(false);
-  const thrustTickRef = useRef(0); // throttle sound
 
   // ── Spawn timers ─────────────────────────────
   const missileTimerRef = useRef(MISSILE_SPAWN_BASE);
@@ -98,11 +99,10 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     powerUpTimeLeft: 0,
     lives: MAX_LIVES,
     difficulty,
-    soundEnabled,
+
   });
 
-  const { play, stopBGM } = useSound(soundEnabled);
-  useEffect(()=>{if(soundEnabled&&gameStateRef.current==='playing')play('bgm');else stopBGM();syncUI()},[soundEnabled,play,stopBGM]);
+  const { play, stopBGM } = useSound();
 
   // ── Sync high score from localStorage ────────
   useEffect(() => {
@@ -155,7 +155,6 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     spent.current=0;powerUpTimerRef.current = 180;vehicleCycle.current=0;blastRef.current=0;
     passed.current=false;encounter.current=0;deposit.current=0;
     tappedRef.current=false;thrustingRef.current=false;
-    thrustTickRef.current = 0;
     keyboardThrust.current.clear();
     pointerThrust.current = false;
     lastClock.current = 0;
@@ -164,7 +163,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
 
   // ── Start / restart game ──────────────────────
   const startGame = useCallback(() => {
-    if (gameStateRef.current === 'playing' || performance.now() - finishedAt.current < 400) return;
+    if (['playing','countdown'].includes(gameStateRef.current) || performance.now() - finishedAt.current < 400) return;
     resetGame();
     route.current=mode==='mission'?(COURSES[mission]??COURSES[0]):mode==='seed'?seededCourse(seed):null;
     equipped.current=new Set(tools.slice(0,2));
@@ -173,12 +172,12 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     if(equipped.current.has('magnet'))playerRef.current.magnetFrames=MAGNET_DURATION;
     if(equipped.current.has('shield'))playerRef.current.shieldFrames=5400;
     if(mode==="trial"&&vehicles.includes(vehicle as PowerUpType)){playerRef.current.powerUp=vehicle as PowerUpType;playerRef.current.powerUpTimer=0}
-    gameStateRef.current = 'playing';
+    gameStateRef.current = 'countdown';
+    countdown.current = 1.5;
     const board = mode === 'mission' ? 'mission-' + route.current?.id
       : mode === 'seed' ? 'seed-' + route.current?.id : mode;
     (window as any).arcadeRun?.start('jet', board, difficulty);
     play('start');
-    play('bgm');
     syncUI();
   }, [resetGame, play,mode,vehicle,mission,seed,tools,difficulty]);
 
@@ -188,6 +187,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     tappedRef.current = false;
     thrustingRef.current = false;
     playerRef.current.isThrusting = false;
+    audio()?.stopEffects();
   }
 
   // ── Pause / resume ────────────────────────────
@@ -197,7 +197,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       releaseThrust();
       stopBGM();
       syncUI();
-  }, [stopBGM, difficulty, mode, soundEnabled]);
+  }, [stopBGM, difficulty, mode]);
 
   const togglePause = useCallback(() => {
     if (gameStateRef.current === 'playing') pauseGame();
@@ -208,7 +208,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       play('bgm');
       syncUI();
     }
-  }, [play, pauseGame, difficulty, mode, soundEnabled]);
+  }, [play, pauseGame, difficulty, mode]);
 
   function showStart() {
     releaseThrust();
@@ -224,6 +224,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     if(value&&!thrustingRef.current&&gameStateRef.current==='playing')tappedRef.current=true;
     thrustingRef.current = value;
     playerRef.current.isThrusting = value;
+    audio()?.setThrust(value);
   }, []);
 
   const setThrusting = useCallback((value: boolean) => {
@@ -305,6 +306,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     const effectFrames = activePowerUp === 'shield' ? p.shieldFrames : activePowerUp === 'magnet' ? p.magnetFrames : p.powerUpTimer;
     setUIState({
       gameState: gameStateRef.current,
+      countdown: Math.ceil(countdown.current * 2),
       score: Math.floor(scoreRef.current),
       highScore: highScoreRef.current, // ← ref, always current
       distance: Math.floor(distanceRef.current),
@@ -313,7 +315,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       powerUpTimeLeft: Math.min(1, (effectFrames || 0) / getPowerUpDuration(activePowerUp)),
       lives: livesRef.current,
       difficulty,
-      soundEnabled,
+
       course:route.current?{title:route.current.title,remaining:Math.max(0,Math.ceil(route.current.seconds-frameRef.current/60)),target:route.current.coins,passed:passed.current,seed:mode==='seed'?route.current.id:undefined}:undefined,
     });
   }
@@ -344,6 +346,17 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     lastDraw.current = gs;
     const delta = lastClock.current ? Math.min(.05, Math.max(0, (clockNow - lastClock.current) / 1000)) : 0;
     lastClock.current = clockNow;
+    if (gs === 'countdown') {
+      const previous = Math.ceil(countdown.current * 2);
+      if (!document.hidden) countdown.current = Math.max(0, countdown.current - delta);
+      if (countdown.current === 0) {
+        gameStateRef.current = 'playing';
+        play('bgm');
+      }
+      if (previous !== Math.ceil(countdown.current * 2)) syncUI();
+      renderFrame(ctx);
+      return;
+    }
     if (gs === 'dying') {
       deathFrames.current += delta * 60;
       const player=playerRef.current;
@@ -389,7 +402,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     const tapped=tappedRef.current;tappedRef.current=false;
     if(p.powerUp==='drill'||p.powerUp==='glider'){
       const canJump=p.powerUp==='glider'||p.y+p.height>=GROUND_Y-1;
-      p.velocity=tapped&&canJump?-8:Math.min(MAX_FALL_SPEED,p.velocity+GRAVITY);
+      p.velocity=tapped&&canJump?(p.powerUp==='drill'?-9.2:-8):Math.min(MAX_FALL_SPEED,p.velocity+GRAVITY);
     }else if(p.powerUp==='gravity'){
       if(tapped)p.invertedGravity=!p.invertedGravity;
       p.velocity=Math.max(-7,Math.min(7,p.velocity+(p.invertedGravity?-GRAVITY:GRAVITY)));
@@ -417,9 +430,6 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
           color: ['#ff6600', '#ff9900', '#ffdd00', '#fff0aa'][Math.floor(Math.random() * 4)],
         });
       }
-      // Thrust sound (throttled)
-      thrustTickRef.current++;
-      if (thrustTickRef.current % 6 === 0) play('thrust');
     } else {
       p.velocity = Math.min(p.velocity + GRAVITY, MAX_FALL_SPEED);
     }
@@ -487,7 +497,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       const barrier = spawnMissile(speed, scoreRef.current);
       barrier.warningFrames = equipped.current.has('forecast') ? 96 : 72;
       barrier.warningAlpha = barrier.warningFrames;
-      barrier.hazard = hazardCount.current++ % 2 === 0 ? 'zapper' : 'missile';
+      barrier.hazard = hazardCount.current++ % 3 !== 2 ? 'zapper' : 'missile';
       if (barrier.hazard === 'zapper') {
         barrier.width = 28;
         barrier.height = 95;
@@ -515,6 +525,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
         if (!m.active) return false;
         if (m.warningFrames && m.warningFrames > 0) {
           m.x = CANVAS_WIDTH - m.width;
+          if (!warned.current.has(m)) { warned.current.add(m); play("warning_beep"); }
           m.warningFrames--;
           return true;
         }
@@ -559,6 +570,11 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       for (const m of missilesRef.current) {
         if (!m.active || (m.warningFrames || 0) > 0) continue;
         if (courseHazardHits(p, m)) {
+          if (p.powerUp==='drill' && m.hazard && m.hazard!=='missile' && m.x+m.width*.5>=p.x+p.width*.55) {
+            m.active=false;
+            play('hit');
+            continue;
+          }
           if ((p.shieldFrames||0)>0||vehicles.includes(p.powerUp)) {
             // Shield absorbs hit
             if(!vehicles.includes(p.powerUp)){p.shieldFrames=0;m.active=false;p.invincible=true;p.invincibleTimer=60;break}
@@ -605,7 +621,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
           vehicles.includes(pu.type)?0:pu.type === 'shield' ? SHIELD_DURATION :
           pu.type === 'magnet' ? MAGNET_DURATION :
           BOOST_DURATION;
-        play('powerup');
+        play('vehicle_chord');
       }
     }
 
@@ -621,7 +637,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     }
     // ── Draw ────────────────────────────────────
     if (steps || sceneChanged) renderFrame(ctx);
-  }, [difficulty, play, stopBGM, mode, bestKey, soundEnabled]);
+  }, [difficulty, play, stopBGM, mode, bestKey]);
 
   function renderFrame(ctx: CanvasRenderingContext2D) {
     const frame = frameRef.current;
@@ -679,7 +695,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       rafRef.current = 0;
       if (document.hidden) return;
       gameLoop(ctx, clock);
-      if (gameStateRef.current === 'playing' || gameStateRef.current === 'dying') scheduleFrame();
+      if (['countdown','playing','dying'].includes(gameStateRef.current)) scheduleFrame();
     };
     scheduleFrame();
     return () => {

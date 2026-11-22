@@ -1,6 +1,6 @@
 'use strict';
-const labels={story:'失物認領處',legacy:'人生失物認領處 · 舊版',plan:'我的七日行動',...Object.fromEntries(window.gameCatalogue.map(game=>[game.key,game.title+' ／ '+game.genre.split(' / ').pop()]))};
-const $=id=>document.getElementById(id);let active=null,originFocus=null,caseRun=null;
+const labels={story:'失物認領處',plan:'我的七日行動',...Object.fromEntries(window.gameCatalogue.map(game=>[game.key,game.title+' ／ '+game.genre.split(' / ').pop()]))};
+const $=id=>document.getElementById(id);let active=null,originFocus=null;
 function read(key,fallback){try{const value=JSON.parse(localStorage.getItem(key));return value&&typeof value==='object'&&!Array.isArray(value)?value:fallback}catch{return fallback}}
 function caseProgress(){
   try{return window.AnnaCase.load(localStorage).state}catch{return null}
@@ -23,13 +23,12 @@ function makeFrame(kind,name=''){
 function mountFrame(frame,kind){
   if(window.offlineMount)window.offlineMount(frame,kind);
   else frame.src=({
-    story:'story/anna.html',legacy:'story/index.html',plan:'story/index.html?plan=1',
+    story:'story/anna.html',plan:'story/index.html?plan=1',
     defence:'games/budget-defence/index.html',coins:'games/runner/index.html',shipping:'games/jet/index.html',instalments:'games/garden/index.html',
   }[kind])||'story/index.html?arcade='+encodeURIComponent(kind);
 }
 function launch(kind,habitSuggestion='',testTarget=null){
   if(!Object.hasOwn(labels,kind))return;
-  if(caseRun)leaveCaseGame();
   if(!active)originFocus=document.activeElement;
   flushFrame($('game-frame'));
   active=kind;
@@ -52,33 +51,7 @@ function launch(kind,habitSuggestion='',testTarget=null){
   history.replaceState(null,'',testTarget?'#dev-tools':'#play-'+kind);
   window.scrollTo({top:0,behavior:'instant'});
 }
-function startCaseGame(message,storyFrame){
-  const quest=window.AnnaCase.CHALLENGES[message.id];
-  if(active!=='story'||caseRun||!Object.hasOwn(window.AnnaCase.CHALLENGES,message.id)||typeof message.runId!=='string'||!/^[a-z0-9-]{12,80}$/i.test(message.runId))return;
-  caseRun={id:message.id,runId:message.runId,completed:false};
-  storyFrame.id='case-frame';
-  storyFrame.hidden=true;
-  active=quest.game;
-  window.trackEvent?.('game-launch-'+quest.game);
-  setPlayerTitle(quest.title,'返回案情');
-  const frame=makeFrame(quest.game,'arcade-story-v1/'+caseRun.id+'/'+caseRun.runId);
-  mountFrame(frame,quest.game);
-  $('frame-host').append(frame);
-}
-function leaveCaseGame(){
-  const result=caseRun,storyFrame=$('case-frame');
-  if(!result||!storyFrame)return;
-  $('game-frame')?.remove();
-  caseRun=null;
-  active='story';
-  storyFrame.id='game-frame';
-  storyFrame.hidden=false;
-  setPlayerTitle(labels.story);
-  storyFrame.focus();
-  storyFrame.contentWindow.postMessage({type:'case-game-return',...result},window.offlineMount?'*':location.origin);
-}
 function leavePlay(){
-  if(caseRun)leaveCaseGame();
   const frame=$('game-frame');
   flushFrame(frame);
   frame?.remove();
@@ -90,8 +63,7 @@ function leavePlay(){
   window.dispatchEvent(new Event('arcade-records-change'));
 }
 function home(){
-  if(caseRun){leaveCaseGame();return;}
-  const backAnchor=active==='story'||active==='legacy'||active==='plan'?'story':'arcade';
+  const backAnchor=active==='story'||active==='plan'?'story':'arcade';
   leavePlay();
   history.replaceState(null,'','#'+backAnchor);
   $(backAnchor).scrollIntoView();
@@ -120,8 +92,8 @@ document.querySelector('[data-progress]').onclick=()=>{
   const current=caseProgress(),action=read('lost-found-action-v1',read('life-lost-found-guided-v5',{})),free=read('website-v1-arcade',{});
   const progress=current?.completed?'已結案':current?.act?'第 '+current.act+' 幕':'未開始';
   const days=Array.isArray(action.stamps)?action.stamps.filter(stamp=>stamp&&!stamp.demo).length:0;
-  showInfo(`<h2>我的旅程</h2><div class="progress-row">Anna 版主線 <span class="progress-value">${progress}</span></div><div class="progress-row">已查看證物 <span class="progress-value">${current?.clues.length||0}</span></div><div class="progress-row">有紀錄嘅遊戲 <span class="progress-value">${Object.keys(free).length} / 5</span></div><div class="progress-row">七日行動 <span class="progress-value">${days} / 7 日</span></div><p>進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。</p><div class="buttons"><button class="primary" id="resume-progress">${current?.act?'繼續調查':'開始調查'}</button><button id="legacy-progress">打開舊版故事</button></div>`);
-  for(const [id,kind] of [['resume-progress','story'],['legacy-progress','legacy']])$(id).onclick=()=>{$('info-dialog').close();launch(kind);};
+  showInfo(`<h2>我的旅程</h2><div class="progress-row">主線故事 <span class="progress-value">${progress}</span></div><div class="progress-row">已查看證物 <span class="progress-value">${current?.clues.length||0}</span></div><div class="progress-row">有紀錄嘅遊戲 <span class="progress-value">${Object.keys(free).length} / 5</span></div><div class="progress-row">七日行動 <span class="progress-value">${days} / 7 日</span></div><p>進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。</p><div class="buttons"><button class="primary" id="resume-progress">${current?.act?'繼續調查':'開始調查'}</button></div>`);
+  $('resume-progress').onclick=()=>{$('info-dialog').close();launch('story');};
 };
 function refreshCaseLabel(){
   const current=caseProgress();
@@ -134,12 +106,6 @@ $('privacy-open').onclick=()=>showInfo('<div class="eyebrow">私隱說明</div><
 window.addEventListener('message',e=>{
   const f=$('game-frame');
   if(e.source!==f?.contentWindow||e.origin!==location.origin&&!(window.offlineMount&&e.origin==='null'))return;
-  if(e.data?.type==='case-game-launch'){startCaseGame(e.data,f);return;}
-  if(e.data?.type==='case-game-result'&&caseRun&&e.data.id===caseRun.id&&e.data.runId===caseRun.runId&&e.data.completed===true){
-    caseRun.completed=true;
-    setPlayerTitle('挑戰完成 · '+window.AnnaCase.CHALLENGES[caseRun.id].title,'完成挑戰，返回案情');
-    return;
-  }
   if(e.data?.type==='website-v1-back')home();
   else if(e.data?.type==='website-v1-play')launch(e.data.key);
   else if(e.data?.type==='arcade-records-change'&&!$('landing').hidden)window.dispatchEvent(new Event('arcade-records-change'));

@@ -13,8 +13,7 @@ interface Props {
   maxLives: number;
   activePowerUp: PowerUpType;
   powerUpTimeLeft: number; // 0-1
-  soundEnabled: boolean;
-  onSoundToggle: () => void;
+
   onPause: () => void;
   course?: UIState['course'];
 }
@@ -42,7 +41,7 @@ function Heart({ filled }: { filled: boolean }) {
 
 export default function HUD({
   score, highScore, distance, coins, lives, maxLives,
-  activePowerUp, powerUpTimeLeft, soundEnabled, onSoundToggle, onPause, course,
+  activePowerUp, powerUpTimeLeft, onPause, course,
 }: Props) {
   const pwCfg = POWERUP_CONFIG[activePowerUp];
 
@@ -75,8 +74,11 @@ export default function HUD({
           <div className="flex items-center gap-1">
             <span className="font-mono text-xs text-yellow-500 font-bold">{coins}</span>
             <span className="text-sm">🪙</span>
+            <div className="ml-3 flex gap-0.5" aria-label={`生命 ${lives} / ${maxLives}`}>
+              {Array.from({ length: maxLives }, (_, i) => <Heart key={i} filled={i < lives} />)}
+            </div>
             {/* Sound */}
-            <SoundButton enabled={soundEnabled} onToggle={onSoundToggle}/>
+            <SoundButton/>
             {/* Pause */}
             <button
               type="button"
@@ -89,12 +91,6 @@ export default function HUD({
             </button>
           </div>
 
-          {/* Lives */}
-          <div className="flex gap-0.5">
-            {Array.from({ length: maxLives }).map((_, i) => (
-              <Heart key={i} filled={i < lives} />
-            ))}
-          </div>
         </div>
       </div>
 

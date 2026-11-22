@@ -858,11 +858,6 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                     <div class="cost">250</div>
                     <div class="name">烈焰苗</div>
                 </div>
-                <div class="plantCard" role="button" tabindex="0" data-plant="cactus" data-cost="125">
-                    <div class="emoji">🌵</div>
-                    <div class="cost">125</div>
-                    <div class="name">穿刺苗</div>
-                </div>
             </div>
             
             <div id="controlButtons"><button id="open-guide" class="controlBtn">植物圖鑑</button>
@@ -872,7 +867,6 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 </div>
                 <div class="controlRow">
                     <button class="controlBtn" id="leaderBtn">🏆 Top 10</button>
-                    <button class="controlBtn" id="fullscreenBtn">🔳 Full</button>
                 </div>
             </div>
         </div>
@@ -1420,7 +1414,6 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
 
             document.getElementById('leaderBtn').addEventListener('click', showLeaderboard);
 
-            document.getElementById('fullscreenBtn').addEventListener('click', toggleFullscreen);
 
             window.addEventListener('resize', updateBoardDimensions);
             
@@ -1492,6 +1485,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 plant.healthFill = healthFill;
                 
                 gameState.plants.push(plant);
+                window.PFAPAudio?.play('plant_place');
                 
                 gameState.selectedPlant = null;
                 document.querySelectorAll('.plantCard').forEach(c => c.classList.remove('selected'));
@@ -1818,14 +1812,14 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             healthBar.appendChild(healthFill);
             zombie.appendChild(healthBar);
             
-            const startX = gameState.boardRect.width;
             const yPosition = gameState.boardRect.top + row * gameState.cellSize.height + gameState.cellSize.height / 2 - 20;
             
             zombie.style.position = 'fixed';
-            zombie.style.left = (gameState.boardRect.left + startX) + 'px';
             zombie.style.top = yPosition + 'px';
             
             document.getElementById('gameContainer').appendChild(zombie);
+            const startX = Math.max(0, gameState.boardRect.width - Math.max(gameState.cellSize.width,zombie.offsetWidth));
+            zombie.style.left = (gameState.boardRect.left + startX) + 'px';
             
             const zombieObj = {
                 element: zombie,
@@ -2021,9 +2015,10 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
 
         // Collect Sun
         function collectSun(sunElement, value) {
-            if (!sunElement.parentElement) return;
+            if (!sunElement.parentElement || sunElement.classList.contains('collect-effect')) return;
             
             sunElement.classList.add('collect-effect');
+            window.PFAPAudio?.play('sun_collect');
             gameState.sun += value;
             updateSunDisplay();
             

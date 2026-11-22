@@ -3,13 +3,20 @@ import {createRocketVisuals} from './rocket-visuals.mjs';
 import {buildArenaArt,buildRobotArt,buildEquipmentArt} from './fps-scene-art.mjs';
 import * as THREE from 'three';
 import {createMap,OFFERS,WEAPONS,rocketDescription} from '../source/fps/rules.mjs';
-export function openCoop(onRocketImpact,onShot=()=>{}){
+export function openCoop(onRocketImpact,onShot=()=>{},mode='coop'){
+ const duel=mode==='duel';
  const local=['localhost','127.0.0.1'].includes(location.hostname);
  const endpoint=local?'ws://127.0.0.1:8791/rooms':document.querySelector('meta[name=coop-endpoint]')?.content;
  const dialog=document.createElement('dialog');dialog.style.cssText='width:min(960px,96vw);max-height:96dvh;background:#173a32;color:#fff6da;padding:12px;overflow:auto';
  dialog.innerHTML='<h2>兩人合作 · 舊城街區</h2><p role="status"></p><div class="room-controls"><label>名稱 <input maxlength="20" value="玩家"></label> <button data-create>建立房間</button> <label>房間碼 <input maxlength="8"></label> <button data-join>加入</button> <button data-resume hidden>重新連線</button></div><button data-match-resume hidden>繼續操作</button><button data-ready hidden>準備／再戰</button> <button data-exit>離開房間</button><div data-field hidden><canvas tabindex="0" style="display:block;width:100%;height:min(52vh,450px);touch-action:none"></canvas><p>WASD 移動 · 左鍵／X 射擊 · 右鍵拖動／←／→ 轉向 · Q 瞄準 · R 換彈 · E 開門／長按拆解 · F 查帳</p><button data-buy-rocket>購買火箭筒 · 350</button><button data-reload>換彈 R</button><button data-equip>切換武器</button><div data-offer hidden></div></div>';
  dialog.querySelector('[data-buy-rocket]').title=rocketDescription();
- dialog.querySelector('[data-buy-rocket]').insertAdjacentText('afterend',' '+rocketDescription()+' ');
+ if(!duel)dialog.querySelector('[data-buy-rocket]').insertAdjacentText('afterend',' '+rocketDescription()+' ');
+ if(duel){
+  dialog.querySelector('h2').textContent='1 對 1 · 舊城街區';
+  dialog.querySelector('[data-field] p').textContent='先贏三回合勝出。WASD 移動 · 左鍵／X 射擊 · 右鍵拖動轉向 · R 換彈 · E 開門';
+  for(const selector of ['[data-buy-rocket]','[data-equip]'])dialog.querySelector(selector).hidden=true;
+ }
+ dialog.append(window.PFAPAudio?.controls()??document.createElement('span'));
  document.body.append(dialog);dialog.showModal();
  const q=selector=>dialog.querySelector(selector),status=q('[role=status]'),canvas=q('canvas'),inputs=dialog.querySelectorAll('input'),abort=new AbortController();
  const on=(el,event,fn)=>el.addEventListener(event,fn,{signal:abort.signal});let socket,id,code,token,seq=0,state,renderer,scene,camera,raf,timer,fire=false,aiming=false,fireUntil=0,yaw=0,pitch=0,ref=null,suspended=false,leaving=false;
@@ -88,7 +95,7 @@ export function openCoop(onRocketImpact,onShot=()=>{}){
    const terminalColor=state.verified?0x80d4aa:state.time<10?0xf38a70:0xedb663;
    arena.strip.material.color.setHex(terminalColor);arena.lamp.material.color.setHex(terminalColor);
    for(const b of state.bots)drawActor('b'+b.id,b.x,b.z,b.id,b.hp>0,null,false);
-   for(const p of state.players)drawActor(p.id,p.x,p.z,1,p.id!==eye.id&&p.hp>0,p.yaw,true);
+   for(const p of state.players)drawActor(p.id,p.x,p.z,1,p.id!==eye.id&&p.hp>0,p.yaw,!duel);
    if(me?.weapon!==shownWeapon){
     if(viewmodel){camera.remove(viewmodel);viewmodel.traverse(o=>{o.geometry?.dispose();o.material?.dispose()})}
     shownWeapon=me?.weapon;viewmodel=new THREE.Group();viewmodel.position.set(.34,-.33,-.65);viewmodel.scale.setScalar(.74);camera.add(viewmodel);buildEquipmentArt(viewmodel,shownWeapon||'pistol');
@@ -100,13 +107,14 @@ export function openCoop(onRocketImpact,onShot=()=>{}){
  function show(){
   const me=state.players.find(p=>p.id===id);if(!me)return;
   status.textContent='房間 '+code+' · '+state.players.map(p=>p.name+' '+p.hp+' HP'+(!p.online?'（離線）':p.ready?'（已準備）':'')).join(' ／ ')+' · '+(state.phase==='playing'?Math.ceil(state.time)+' 秒 · 彈匣 '+me.ammo+' / 備彈 '+me.reserve+(me.reload?' · 換彈 '+me.reload.toFixed(1)+'s':'')+' · '+(state.verified?'已核實':'到北面查帳')+' · 拆解 '+state.progress.toFixed(1)+'/5 秒'+(suspended?' · 選單開啟，合作對局繼續':''):state.result||'等候兩人準備');
+  if(duel)status.textContent='房間 '+code+' · '+state.players.map(p=>p.name+' '+(state.wins?.[p.id]||0)+' 勝 · '+p.hp+' HP').join(' ／ ')+' · '+(state.phase==='playing'?Math.ceil(state.time)+' 秒 · 彈匣 '+me.ammo+' / '+me.reserve:state.result||'等候兩人準備');
   q('[data-buy-rocket]').disabled=!me.hp||me.launcher||me.credits<350;
   q('[data-reload]').disabled=!me.hp||me.reload>0||!me.reserve||me.ammo>=WEAPONS[me.weapon].mag;
   q('[data-equip]').disabled=!me.hp||!me.launcher;
-  if(state.phase==='playing')status.textContent+=' · 裝備點 '+me.credits+' · '+(me.weapon==='bazooka'?'火箭筒':'手槍');
+  if(!duel&&state.phase==='playing')status.textContent+=' · 裝備點 '+me.credits+' · '+(me.weapon==='bazooka'?'火箭筒':'手槍');
   q('[data-match-resume]').hidden=state.phase!=='playing'||!suspended;
   q('[data-ready]').hidden=state.phase==='playing';q('[data-ready]').disabled=me.ready;
-  q('[data-field]').hidden=state.phase!=='playing';q('[data-offer]').hidden=!(state.phase==='playing'&&me.hp&&me.checked&&!state.verified&&Math.hypot(me.x,me.z+13)<2.7);
+  q('[data-field]').hidden=state.phase!=='playing';q('[data-offer]').hidden=duel||!(state.phase==='playing'&&me.hp&&me.checked&&!state.verified&&Math.hypot(me.x,me.z+13)<2.7);
   if(state.phase==='playing'&&!renderer)setup();
  }
  function connect(type){
@@ -114,7 +122,7 @@ export function openCoop(onRocketImpact,onShot=()=>{}){
   let session;try{session=JSON.parse(sessionStorage.getItem('coop-room-session'))}catch{}
   const url=new URL(endpoint);url.searchParams.set('action',type);if(type!=='create')url.searchParams.set('code',type==='reconnect'?session?.code:inputs[1].value.trim().toUpperCase());
   socket=new WebSocket(local?endpoint:url);status.textContent='連線中…';
-  socket.onopen=()=>send({type,code:type==='reconnect'?session?.code:inputs[1].value.trim().toUpperCase(),token:type==='reconnect'?session?.token:undefined,name:inputs[0].value});
+  socket.onopen=()=>send({type,mode,code:type==='reconnect'?session?.code:inputs[1].value.trim().toUpperCase(),token:type==='reconnect'?session?.token:undefined,name:inputs[0].value});
   socket.onmessage=e=>{const m=JSON.parse(e.data);if(m.v!==3){status.textContent='合作版本不同，請更新遊戲同房間伺服器。';socket.close();return}if(m.type==='joined'){({id,code,token}=m);try{sessionStorage.setItem('coop-room-session',JSON.stringify({code,token}))}catch{}q('.room-controls').hidden=true;return}
    if(m.type==='state'){
     const fresh=state?.round!==m.round;
@@ -130,7 +138,9 @@ export function openCoop(onRocketImpact,onShot=()=>{}){
     previousProjectiles=new Map((fresh?[]:state.projectiles).map(r=>[r.id,r]));
     if(fresh||m.phase!=='playing'){rocketVisuals?.dispose();rocketVisuals=null;pendingImpacts=[]}
     const wasActive=controlsActive();
-    state=m;snapshotTime=performance.now();show();
+    state=m;
+    if(fresh&&m.phase==='playing'){yaw=duel&&m.players.find(p=>p.id===id)?.z<0?Math.PI:0;pitch=0;ref=null;pistolKick=0;}
+    snapshotTime=performance.now();show();
     if(wasActive&&!controlsActive())clear();
     if(state.phase==='playing'){
      rocketVisuals??=createRocketVisuals(scene,{reducedMotion:matchMedia('(prefers-reduced-motion: reduce)').matches,onImpact:onRocketImpact});
@@ -144,7 +154,7 @@ export function openCoop(onRocketImpact,onShot=()=>{}){
  q('[data-exit]').onclick=close;
  q('[data-match-resume]').onclick=()=>{suspended=false;clear();if(state)show();canvas.focus()};
  on(dialog,'cancel',e=>{e.preventDefault();suspended=true;clear();if(state)show()});on(window,'pagehide',close);
- if(window.offlineEdition||!endpoint){q('.room-controls').hidden=true;status.textContent=window.offlineEdition?'離線版可玩單人；合作需要網絡。':'公開合作伺服器尚未連接。';return}
+ if(window.offlineEdition||!endpoint){q('.room-controls').hidden=true;status.textContent=window.offlineEdition?'離線版可玩單人；1 對 1 需要網絡。':'公開房間伺服器尚未連接。';return}
  try{q('[data-resume]').hidden=!sessionStorage.getItem('coop-room-session')}catch{}
  q('[data-create]').onclick=()=>connect('create');q('[data-join]').onclick=()=>connect('join');q('[data-resume]').onclick=()=>connect('reconnect');q('[data-ready]').onclick=()=>send({type:'ready'});
  q('[data-buy-rocket]').onclick=()=>{send({type:'buy',item:'bazooka'});send({type:'equip',weapon:'bazooka'});canvas.focus()};

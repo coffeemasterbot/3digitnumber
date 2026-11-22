@@ -179,6 +179,7 @@ export function Game({ onReady }: { onReady?: () => void }) {
       extras.impact = .4;
       if (extras.board > extras.time) {
         extras.board = 0;
+        (window as any).PFAPAudio?.play('shield_break');
         obstacles.splice(obstacles.indexOf(hit), 1);
       } else {
         extras.deathKind = hit.type;

@@ -118,6 +118,8 @@ body:has(#play-panel:not([hidden]))>.site-header{display:none}
 #dev-password-dialog { max-width:27rem }
 #dev-password-error { color:#87311e }
 #dev-picker { margin-top:.75rem }
+.board-actions button { background:#fff8ed; color:#2b211b; border:1.5px solid #2b211b; }
+.board-actions button:hover, .board-actions button:focus-visible, .board-actions button[aria-pressed="true"] { background:#1e3a2f; color:#fff8ed; outline:2px solid #fff8ed; outline-offset:2px; }
 #pfap-scores .board-close { float:inline-end }
 #pfap-scores [aria-pressed="true"] { background:#183f36; color:#fff8e9 }
 #score-entries li { padding:.4rem 0; border-bottom:1px solid #d9d2c5 }

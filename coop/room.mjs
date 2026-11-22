@@ -4,12 +4,13 @@ const gun=WEAPONS.pistol;
 const neutral=()=>({f:0,r:0,fire:false,use:false,yaw:0,pitch:0});
 const near=p=>Math.hypot(p.x,p.z+13)<2.7;
 export class Room {
- constructor(code){this.code=code;this.players=[];this.reset()}
+ constructor(code,mode='coop'){this.code=code;this.mode=mode;this.players=[];this.wins={};this.reset()}
  reset(){
   this.phase='waiting';this.time=95;this.progress=0;this.verified=false;this.result='';
   const map=createMap(1);this.doors=map.doors;this.walls=map.walls;this.projectiles=[];this.impacts=[];this.round=(this.round||0)+1;
   this.bots=[[-11,5],[12,0],[-11,-11],[11,-13]].map(([x,z],i)=>({id:i,x,z,hp:72,origin:x,t:i,fireIn:2+i}));
-  this.players.forEach((p,i)=>Object.assign(p,{ready:false,x:i?1:-1,z:14,hp:100,weapon:"pistol",credits:350,launcher:false,...weaponStores(['pistol']),ammo:gun.mag,cool:0,reload:0,checked:false,input:neutral()}));
+  if(this.mode==='duel')this.bots=[];
+  this.players.forEach((p,i)=>Object.assign(p,{ready:false,recoil:0,x:this.mode==='duel'?0:i?1:-1,z:this.mode==='duel'&&i?-15:14,hp:100,weapon:"pistol",credits:350,launcher:false,...weaponStores(['pistol']),ammo:gun.mag,cool:0,reload:0,checked:false,input:neutral()}));
  }
  attach(send,{token,name},now){
   let p=token&&this.players.find(p=>p.token===token&&!p.send&&p.until>now);
@@ -27,21 +28,21 @@ export class Room {
   if(!p.send||!m||m.v!==3||!Number.isSafeInteger(m.seq)||m.seq<=p.seq)return;
   if(now-p.window>=1000){p.window=now;p.burst=0}if(++p.burst>60)return;
   p.seq=m.seq;
-  if(m.type==='ready'&&this.phase!=='playing'){p.ready=true;if(this.players.length===2&&this.players.every(p=>p.ready&&p.send)){this.reset();this.phase='playing'}return}
+  if(m.type==='ready'&&this.phase!=='playing'){p.ready=true;if(this.players.length===2&&this.players.every(p=>p.ready&&p.send)){if(Object.values(this.wins).some(wins=>wins>=3))this.wins={};this.reset();this.phase='playing'}return}
   if(this.phase!=='playing'||!p.hp)return;
   if(m.type==='input'){
    if(![m.f,m.r,m.yaw,m.pitch].every(Number.isFinite)||Math.abs(m.f)>1||Math.abs(m.r)>1)return;
    p.input={f:m.f,r:m.r,yaw:m.yaw%(2*Math.PI),pitch:Math.max(-1.2,Math.min(1.2,m.pitch)),fire:m.fire===true,use:m.use===true};p.last=now;return;
   }
-  if(m.type==='buy'&&m.item==='bazooka'&&!p.launcher&&p.credits>=GEAR.bazooka.cost){
+  if(this.mode!=='duel'&&m.type==='buy'&&m.item==='bazooka'&&!p.launcher&&p.credits>=GEAR.bazooka.cost){
    p.credits-=GEAR.bazooka.cost;p.launcher=true;p.magazines.bazooka=WEAPONS.bazooka.mag;p.reserves.bazooka=WEAPONS.bazooka.reserve;
   }
-  if(m.type==='equip'&&['pistol','bazooka'].includes(m.weapon)&&m.weapon!==p.weapon&&(m.weapon==='pistol'||p.launcher)){
+  if(this.mode!=='duel'&&m.type==='equip'&&['pistol','bazooka'].includes(m.weapon)&&m.weapon!==p.weapon&&(m.weapon==='pistol'||p.launcher)){
    changeMagazine(p,m.weapon);
   }
   if(m.type==='reload')startReload(p);
-  if(m.type==='check'&&near(p))p.checked=true;
-  if(m.type==='answer'&&p.checked&&near(p)&&!this.verified&&Number.isInteger(m.answer)&&m.answer>=0&&m.answer<OFFERS[0].answers.length){if(m.answer===OFFERS[0].right)this.verified=true;else this.finish('核實錯誤，裝置已引爆')}
+  if(this.mode!=='duel'&&m.type==='check'&&near(p))p.checked=true;
+  if(this.mode!=='duel'&&m.type==='answer'&&p.checked&&near(p)&&!this.verified&&Number.isInteger(m.answer)&&m.answer>=0&&m.answer<OFFERS[0].answers.length){if(m.answer===OFFERS[0].right)this.verified=true;else this.finish('核實錯誤，裝置已引爆')}
   if(m.type==='door'){const i=interaction({...p,phase:'playing',verified:this.verified},this.doors);if(i?.type==='door'){const d=this.doors.find(d=>d.id===i.id);if(!this.players.some(a=>Math.abs(a.x-d.x)<d.w/2+.34&&Math.abs(a.z-d.z)<d.d/2+.34))d.open=!d.open}}
  }
  step(dt,now){
@@ -62,7 +63,8 @@ export class Room {
      const horizontal=Math.cos(i.pitch);
      this.projectiles.push(launchRocket(p.id,{x:p.x,y:1.55,z:p.z},{x:-s*horizontal,y:Math.sin(i.pitch),z:-c*horizontal},now/1000));
     }else{
-    const target=this.bots.filter(b=>{const dx=b.x-p.x,dz=b.z-p.z,d=Math.hypot(dx,dz);
+    const targets=this.mode==='duel'?this.players.filter(other=>other!==p&&other.send):this.bots;
+    const target=targets.filter(b=>{const dx=b.x-p.x,dz=b.z-p.z,d=Math.hypot(dx,dz);
      return b.hp&&d<gun.range&&-dx*s-dz*c>0&&Math.abs(dx*c-dz*s)<.65&&Math.abs(Math.tan(i.pitch+p.recoil)*d)<1&&!blocked(p.x,p.z,b.x,b.z,this.doors)
     }).sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0];
     p.recoil=Math.min(.19,p.recoil+.043);
@@ -71,6 +73,12 @@ export class Room {
    }
    if(needsAutoReload(p))startReload(p);
    using||=i.use&&near(p)&&this.verified;
+  }
+  if(this.mode==='duel'){
+   const alive=this.players.filter(p=>p.hp>0);
+   if(alive.length===1)this.winDuelRound(alive[0]);
+   else if(!this.time){const [a,b]=alive;this.winDuelRound(a&&b&&a.hp!==b.hp?(a.hp>b.hp?a:b):null)}
+   return;
   }
   const solids=[...this.walls,...this.doors.filter(d=>!d.open)];
   for(const rocket of this.projectiles){
@@ -93,7 +101,12 @@ export class Room {
   this.progress=using?Math.min(5,this.progress+dt):0;
   if(this.progress>=5)this.finish('合作拆解成功');else if(!this.time||this.players.every(p=>!p.hp))this.finish('任務失敗');
  }
- broadcast(){const snapshot={v:3,type:'state',phase:this.phase,result:this.result,round:this.round,time:this.time,progress:this.progress,verified:this.verified,
+ winDuelRound(winner){
+  if(!winner)return this.finish('和局 · 再戰');
+  const wins=this.wins[winner.id]=(this.wins[winner.id]||0)+1;
+  this.finish(winner.name+(wins>=3?' 贏咗成場！':' 贏咗呢回合'));
+ }
+ broadcast(){const snapshot={v:3,type:'state',mode:this.mode,wins:this.wins,phase:this.phase,result:this.result,round:this.round,time:this.time,progress:this.progress,verified:this.verified,
   players:this.players.map(({id,name,x,z,hp,ammo,weapon,credits,launcher,reserves,reload,ready,send,checked,input,shot,shotWeapon})=>({id,name,x,z,hp,ammo,weapon,credits,launcher,reserve:reserves[weapon],reload,shot,shotWeapon,ready,online:!!send,checked,yaw:input.yaw})),
   projectiles:this.projectiles.map(r=>({...r})),impacts:this.impacts.slice(),bots:this.bots.map(({id,x,z,hp})=>({id,x,z,hp})),doors:this.doors};
   this.players.forEach(p=>p.send?.(snapshot));this.impacts=[];

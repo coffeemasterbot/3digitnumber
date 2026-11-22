@@ -8,7 +8,7 @@ const extra=()=>GardenRules.EXTRAS[mode];
 window.gardenMode=()=>mode;
 const beginRankedBattle=()=>window.arcadeRun?.start('garden',mode==='campaign'?'stage-'+campaign.level:mode);
 const restartBattle=restartGame;
-restartGame=function(){restartBattle();beginRankedBattle()};
+restartGame=function(){restartBattle();beginRankedBattle();window.PFAPAudio?.play('wave_horn')};
 window.gardenSeedRestriction=()=>extra()?.seeds;
 function extrasRecord(){
  try{const raw=JSON.parse(storage.getItem(extrasKey));return raw?.version===1?raw:{version:1,unlocked:false,scores:{}}}catch{return {version:1,unlocked:false,scores:{}}}
@@ -27,15 +27,9 @@ const saveCampaignScore=saveToLeaderboard;
 saveToLeaderboard=function(...args){if(mode==='campaign'&&!window.arcadeStory)saveCampaignScore(...args)};
 window.addEventListener('load',()=>{
  const start=document.getElementById('garden-start');if(!start)return;
- start.addEventListener('click',beginRankedBattle);
+ start.addEventListener('click',()=>{beginRankedBattle();window.PFAPAudio?.play('wave_horn')});
  const select=stageSelect=document.createElement('select');select.setAttribute('aria-label','戰役選關');
  GardenRules.STAGES.forEach((stage,i)=>{const option=new Option('第 '+stage.world+' 關 · '+stage.title,stage.world);option.disabled=!dev&&i+1>campaign.unlocked;select.add(option)});
- if(!dev&&!window.arcadeStory){
-  const unlocked=extrasRecord().unlocked;
-  const group=document.createElement('optgroup');group.label=unlocked?'通關後模式':'通關後模式 · 完成屋頂解鎖';
-  for(const [id,rules] of Object.entries(GardenRules.EXTRAS)){const option=new Option(rules.title,id);option.disabled=!unlocked;group.append(option)}
-  select.append(group);
- }
  select.value=campaign.level;start.before(select);
  select.onchange=()=>{
   const target=select.value,id=Number(target);
@@ -62,6 +56,7 @@ function renderMowers(){
  for(const m of gameState.mowers||[]){
   const el=m.element;
   if(el.dataset.state!==m.state){
+   if(m.state==='active')window.PFAPAudio?.play('mower_go');
    el.dataset.state=m.state;
    el.setAttribute('aria-label','第'+(m.row+1)+'列割草機，'+({ready:'準備好',active:'啟動',spent:'已用完'})[m.state]);
   }
@@ -101,6 +96,7 @@ const previous=window.gardenActiveStep;window.gardenActiveStep=dt=>{previous?.(d
    spawnZombie(type,e.row);
   }
   if(e.type==='next'){
+   window.PFAPAudio?.play('wave_horn');
    gameState.wave++;
    if(mode==='campaign'&&GardenRules.STAGES[campaign.level-1].id==='roof'&&gameState.wave===5)GardenBoss.start();
    gameState.zombieDamageMultiplier=Math.min(2,1+(gameState.wave-1)*.02);

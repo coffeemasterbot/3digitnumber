@@ -6,7 +6,7 @@
   const money = cents => currency.format(cents/100);
   let session;
   try { session = C.load(localStorage); } catch { session = {status:'temporary',state:C.fresh()}; }
-  let state = session.state, focusOrigin, activeTrial = null;
+  let state = session.state, focusOrigin;
   const boxNote = '這些是我不要的，如果我不在了，請幫我扔掉。';
   const voiceText = '為什麼？為什麼我又變回窮光蛋了？明天怎麼面對大家……';
   const pageNames = ['失物箱','城市地圖','儲物櫃','結案'];
@@ -85,9 +85,8 @@
     if(!C.questReady(state,id))return '';
     const task=tasks[id], done=state.challenges[id];
     return '<section class="case-task" data-case-task="'+id+'" tabindex="-1"><div><h3>'+C.CHALLENGES[id].title+'</h3><p>'+task.intro+'</p></div>'+
-      (done?'<p class="resolved">已完成'+(done==='game'?'遊戲挑戰':'證物推理')+'</p>':
-      '<div class="case-actions">'+button('玩挑戰','data-trial="'+id+'"','secondary')+
-      (questions[id]?button('用證物推理','data-reason="'+id+'"','secondary'):'')+'</div>')+'</section>';
+      (done?'<p class="resolved">已完成證物核對</p>':
+      '<div class="case-actions">'+(questions[id]?button('用證物推理','data-reason="'+id+'"','secondary'):'')+'</div>')+'</section>';
   }
   const nextButton = label => button(label,'data-action="advance" '+(C.mayAdvance(state)?'':'disabled'),'primary');
   const trail = () => '<ol class="case-trail" aria-label="四幕調查">'+pageNames.map((name,i)=>'<li'+(state.act===i+1?' aria-current="step"':'')+'><span>'+String(i+1).padStart(2,'0')+'</span>'+name+'</li>').join('')+'</ol>';
@@ -211,8 +210,8 @@
       '<div class="case-actions">'+button('下載目前進度','data-action="export"','secondary')+
       (session.raw?button('下載損壞原檔','data-action="export-raw"','secondary'):'')+'</div>'+
       '<label>選擇備份檔 <input id="case-import" type="file" accept=".json,application/json"></label><p id="import-feedback" class="feedback" role="status"></p>'+
-      button('確認匯入','id="accept-import" hidden','primary')+'<details><summary>重新調查</summary><p>會清除本機 Anna 調查進度。</p>'+
-      button('確認重設 Anna 調查','data-action="reset"','secondary')+'</details>');
+      button('確認匯入','id="accept-import" hidden','primary')+'<details><summary>重新調查</summary><p>會清除本機主線故事進度。</p>'+
+      button('確認重設主線故事','data-action="reset"','secondary')+'</details>');
   }
   function download(text,name) {
     const url=URL.createObjectURL(new Blob([text],{type:'application/json;charset=utf-8'}));
@@ -224,12 +223,6 @@
     if(!C.identified(state,'desk'))return open('碎屏舊手機','<p>手機仍然鎖住。去電腦枱睇下有冇六位數相關嘅線索。</p>');
     open('輸入手機密碼','<form id="pin-form"><label for="pin">六位數密碼</label><input id="pin" name="pin" inputmode="numeric" maxlength="6" pattern="[0-9]{6}" autocomplete="off" required><button class="primary">解鎖</button><p class="feedback" role="status" id="pin-feedback"></p></form>');
     $('pin').focus();
-  }
-  function challenge(id) {
-    if(!C.questReady(state,id)||state.challenges[id])return;
-    open(C.CHALLENGES[id].title,'<p>'+tasks[id].game+'</p><div class="case-actions">'+
-      (parent!==window?button('進入挑戰','data-start-trial="'+id+'"','primary'):'<a href="../#play-story">由網站繼續調查，進入挑戰</a>')+
-      (questions[id]?button('改用證物推理','data-reason="'+id+'"','secondary'):'')+'</div>');
   }
   function reason(id) {
     const q=questions[id];
@@ -273,14 +266,8 @@
     if(data.clue)showClue(data.clue);
     else if(data.place==='home'){$('floor-title').scrollIntoView({block:'nearest'});$('floor-title').focus({preventScroll:true});}
     else if(Object.hasOwn(mapNotes,data.place))open(...mapNotes[data.place]);
-    else if(data.trial)challenge(data.trial);
     else if(data.reason)reason(data.reason);
-    else if(data.startTrial && parent!==window && !activeTrial && C.questReady(state,data.startTrial) && !state.challenges[data.startTrial]){
-      const runId=globalThis.crypto?.randomUUID?.()||Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
-      activeTrial={id:data.startTrial,runId};
-      dialog.close();
-      parentMessage({type:'case-game-launch',...activeTrial});
-    } else if(Object.hasOwn(actions,data.action))actions[data.action]();
+    else if(Object.hasOwn(actions,data.action))actions[data.action]();
   });
   const mapNotes={
     station:['警局','<p>陳警長同你喺呢度攤開地圖。失物箱同證物紀錄喺案情簿。</p>'],
@@ -318,21 +305,8 @@
       accept.hidden=false;
       accept.onclick=()=>{state=pending;session={status:'ready'};save();dialog.close();render(true);announce('已匯入調查進度。');};
     } catch {
-      if(label.isConnected)label.textContent='讀唔到備份，請揀有效嘅 Anna 調查存檔。';
+      if(label.isConnected)label.textContent='讀唔到備份，請揀有效嘅主線故事存檔。';
     }
-  });
-  window.addEventListener('message',event=>{
-    const message=event.data;
-    if(event.source!==parent || event.origin!==location.origin&&!window.offlineEdition
-      || !activeTrial || message?.type!=='case-game-return' || message.runId!==activeTrial.runId || message.id!==activeTrial.id)return;
-    const {id}=activeTrial;
-    activeTrial=null;
-    const completed=message.completed&&commit('resolve',{id,via:'game'},{paint:false});
-    render();
-    const task=document.querySelector('[data-case-task="'+id+'"]');
-    task?.scrollIntoView({block:'center'});
-    (task??$('act-title')).focus({preventScroll:true});
-    announce(completed?'已完成遊戲挑戰。':'已返回調查。');
   });
   render();
 })();

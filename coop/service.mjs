@@ -4,8 +4,8 @@ export function connect(socket,registry,hello,assignedCode){
  let code=hello.code,room;
  if(hello.type==='create'){
   if(assignedCode){code=assignedCode;if(registry.has(code))throw Error('房間碼重複，請再建立')}else do{code=crypto.randomUUID().slice(0,8).toUpperCase()}while(registry.has(code));
-  room=new Room(code);registry.set(code,room);
- }else{room=registry.get(code);if(!room)throw Error('搵唔到房間')}
+  room=new Room(code,hello.mode==='duel'?'duel':'coop');registry.set(code,room);
+ }else{room=registry.get(code);if(!room||(hello.mode==='duel'&&room.mode!=='duel'))throw Error('搵唔到房間')}
  const p=room.attach(data=>{if(socket.readyState===1)socket.send(JSON.stringify(data))},{name:hello.name,token:hello.type==='reconnect'?hello.token:null},performance.now());
  if(hello.type==='create'){drive(room);const timer=setInterval(()=>{if(!room.players.length){registry.delete(code);clearInterval(timer)}},5000)}
  return {message(m){room.input(p,m,performance.now())},close(){room.detach(p,performance.now())}};

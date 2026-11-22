@@ -513,6 +513,13 @@ V 全螢幕。|V for fullscreen.
 門已關。|Door closed.
 先離開門框，再關門。|Move clear of the doorway before closing it.
 先到北面財務炸彈旁邊，撳 F 查帳。|Go to the north terminal and press F to check the accounts.
+🎵 音樂|🎵 Music
+🔊 音效|🔊 SFX
+起飛倒數|Takeoff countdown
+本機保存最佳紀錄。|Your best score is saved on this device.
+單人三輪|Single player · three rounds
+EX 關 · 機械人圍攻|EX stage · Robot swarm
+1 對 1|1 vs 1
 本機最高分|Local high score
 🔊 開啟聲音|🔊 Unmute
 ⏸ 暫停|⏸ Pause

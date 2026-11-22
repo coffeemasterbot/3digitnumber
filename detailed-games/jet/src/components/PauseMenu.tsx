@@ -7,11 +7,10 @@ interface Props {
   onResume: () => void;
   onRestart: () => void;
   onMenu: () => void;
-  soundEnabled: boolean;
-  onSoundToggle: () => void;
+
 }
 
-export default function PauseMenu({ onResume, onRestart, onMenu, soundEnabled, onSoundToggle }: Props) {
+export default function PauseMenu({ onResume, onRestart, onMenu }: Props) {
   return (
     <div className="absolute inset-0 flex items-center justify-center z-10 bg-black/50 backdrop-blur-sm">
       <motion.div
@@ -52,7 +51,7 @@ export default function PauseMenu({ onResume, onRestart, onMenu, soundEnabled, o
         </div>
 
         {/* Sound toggle */}
-        <SoundButton enabled={soundEnabled} onToggle={onSoundToggle}/>
+        <SoundButton/>
 
         <div className="text-xs font-mono text-cyan-900 uppercase tracking-widest">
           按住空白鍵、W、↑ 或觸控上升，放開下降。

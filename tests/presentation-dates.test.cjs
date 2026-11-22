@@ -15,7 +15,9 @@ test('presentation links to the team Instagram in a new tab', () => {
 
 test('completed talks appear in both languages and built editions', () => {
   for (const page of [landing,built,offline]) {
-    assert.match(page,/十一月講座回顧/);
+    assert.match(page,/活動回顧/);
+    assert.match(page,/Instagram Reels/);
+    assert.match(page,/失物認領處 TRPG/);
     assert.match(page,/<span>09\/11<\/span>.*?1104 室.*?<span>16\/11<\/span>.*?1103 室/s);
   }
   for (const page of [slides,builtSlides,offline]) {

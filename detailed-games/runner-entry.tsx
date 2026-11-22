@@ -191,7 +191,7 @@ function App() {
   const [sceneReady, setSceneReady] = useState(false);
   const [renderProblem, setRenderProblem] = useState<'lost' | 'failed' | null>(null);
   const demoMission = /^mission-([1-8])$/.exec(runnerWindow.arcadeTest?.target ?? '');
-  const [mode, setMode] = useState<RunnerMode>(demoMission ? 'mission' : 'practice');
+  const [mode, setMode] = useState<RunnerMode>(demoMission ? 'mission' : 'endless');
   const [mission, setMission] = useState(demoMission ? Number(demoMission[1]) - 1 : expeditions.unlocked);
   const [code, setCode] = useState('');
   const [copyStatus, setCopyStatus] = useState('');
@@ -325,10 +325,10 @@ function App() {
         </> : paused ? <p>距離 {Math.floor(store.distance)} m · {runStatus(store.launch,store.distance)}</p> : <>
           <p>低欄跳過、高欄滑鏟。見斜坡可以跑上靜止列車。</p>
           <div className="runner-modes">
-            <label htmlFor="runner-mode">遊玩模式</label>
+            {demoMission && <><label htmlFor="runner-mode">遊玩模式</label>
             <select id="runner-mode" value={mode} onChange={event => setMode(event.currentTarget.value as RunnerMode)}>
-              {Object.entries(modeLabels).map(([id,label]) => <option key={id} value={id}>{label}</option>)}
-            </select>
+              {Object.entries(modeLabels).filter(([id])=>id==='endless'||(demoMission&&id==='mission')).map(([id,label]) => <option key={id} value={id}>{label}</option>)}
+            </select></>}
             {mode === 'mission' && <>
               <label htmlFor="runner-mission">揀路線</label>
               <select id="runner-mission" value={mission} onChange={event => setMission(Number(event.currentTarget.value))}>
@@ -351,6 +351,7 @@ function App() {
           <p className="runner-controls-copy">← → 換線、↑／空白跳、↓ 滑鏟、B 放滑板。手機可用畫面控制。</p>
           {mode === 'practice' && practiceBest > 0 && <p>最佳紀錄 <b>{practiceBest} 分</b></p>}
         </>}
+        {paused && <span data-pfap-audio-slot ref={node=>{if(node&&!node.firstChild)node.append((window as any).PFAPAudio.controls());}}/>}
         {paused && <p className="runner-controls-copy">← → 換線、↑／空白跳、↓ 滑鏟、B 放滑板。手機可用畫面控制。</p>}
         <button type="button" className="start" disabled={phase === 'menu' && mode === 'seeded' && !normalizeSeed(code)}
           onClick={() => {
@@ -363,7 +364,7 @@ function App() {
         {results && <button type="button" onClick={() => {
           if (store.launch.mode === 'mission') setMission(expeditions.unlocked);
           store.resetGame();
-        }}>揀另一條路線</button>}
+        }}>返回準備畫面</button>}
         <button type="button" onClick={leaveGame}>返回遊戲選單</button>
       </section>
     </div>}

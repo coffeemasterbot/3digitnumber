@@ -1,8 +1,8 @@
 <section class="wrap lab" id="cashflow">
-<header><h2>現金流實驗室</h2><p>兩個方案可以有一樣嘅期末結餘，但中途有機會唔夠錢。試下改到帳日，比較七日內最緊嘅一日。</p></header>
+<header><h2>科大生活 · 現金流試算</h2><p>實習糧未到，飯錢同車費要照畀。改一改到帳日，睇下邊日會唔夠用。</p></header>
 <fieldset id="quick-fields"><legend>調整方案 A 嘅收入（港元）</legend></fieldset>
-<p id="lab-scenarios"></p>
-<h3>兩個方案差喺邊？</h3>
+<p id="lab-scenarios" aria-live="polite"></p>
+
 <dl class="lab-metrics" id="lab-summary" aria-live="polite">
   <div><dt>第七日結餘</dt><dd id="lab-closing"></dd></div>
   <div><dt>方案 B 首次唔夠錢</dt><dd id="lab-first-gap"></dd></div>
@@ -10,7 +10,7 @@
 </dl>
 <figure class="lab-trend"><figcaption>每日結餘比較（HK$）</figcaption><div id="balance-days"></div></figure>
 <details id="lab-ledger"><summary>查看每日收支明細</summary>
-<p>每日先計預計收入，再計支出。同一日嘅實際扣款時間可能有差異。</p>
+
 <div id="lab-table" tabindex="0" role="region" aria-label="每日收支明細，可橫向捲動"></div></details>
 <details id="lab-detail"><summary>調整兩個方案同管理紀錄</summary>
 <fieldset class="lab-tabs"><legend>選擇要編輯嘅方案</legend><label><input type="radio" name="lab-tab" value="A" checked> 方案 A</label> <label><input type="radio" name="lab-tab" value="B"> 方案 B</label></fieldset>

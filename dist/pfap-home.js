@@ -45,12 +45,10 @@
   const numberStages = (total, prefix='stage', label='第 ') => Array.from(
     {length:total}, (_, i) => [prefix+'-'+(i+1), label+(i+1)+(label==='任務 '? '' : ' 關')]);
   const difficultyLabels = {standard:'標準', relaxed:'輕鬆', hard:'挑戰'};
-  const courses = ['basics','warning','rotor','piston','gravity','blink','mix','reserve'];
-  const extras = [['survival','生存模式'], ['limited','有限陽光'], ['seeds','限定植物'], ['mowers','無割草機'], ['armour','裝甲壓力'], ['giants','巨人防線']];
   const boards = {
-    runner:[['practice','90 秒練習'], ['endless','無盡跑酷'], ...numberStages(8,'mission','任務 '), ['seed','固定種子挑戰']],
-    jet:[['practice','90 秒練習'], ['endless','無盡飛行'], ['trial','載具試駕'], ...courses.map((course,i)=>['mission-'+course,'任務 '+(i+1)]), ['seed','固定種子挑戰']],
-    garden:[...numberStages(5), ...extras],
+    runner:[['endless','無盡跑酷']],
+    jet:[['endless','無盡飛行']],
+    garden:numberStages(5),
     forest:Object.entries(difficultyLabels).flatMap(([key,title]) => numberStages(9,'relay-'+key+'-stage').map(([board,label])=>[board,title+' · '+label])),
     defence:[['quick','快速三輪'], ...[1,2,3].flatMap(round => [
       [round+'-verify','地圖 '+round+' · 核對帳目'], [round+'-dispatch','地圖 '+round+' · 上傳資料'], [round+'-hold','地圖 '+round+' · 雙目標演習']])],

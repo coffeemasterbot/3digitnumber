@@ -2,7 +2,7 @@
 //  Core game types for Jetpack Joyride
 // ─────────────────────────────────────────────
 
-export type GameState = 'start' | 'playing' | 'paused' | 'dying' | 'revive' | 'gameover';
+export type GameState = 'start' | 'countdown' | 'playing' | 'paused' | 'dying' | 'revive' | 'gameover';
 export type PowerUpType = 'shield' | 'magnet' | 'boost' | 'mecha' | 'glider' | 'drill' | 'gravity' | 'blink' | 'dragon' | 'none';
 export type Difficulty = 'easy' | 'medium' | 'hard';
 export type MissileType = 'horizontal' | 'diagonal-up' | 'diagonal-down' | 'homing';
@@ -96,6 +96,7 @@ export interface BackgroundBuilding {
 
 // ── High-level game state (for React UI) ──────
 export interface UIState {
+  countdown?: number;
   gameState: GameState;
   score: number;
   highScore: number;
@@ -105,6 +106,5 @@ export interface UIState {
   powerUpTimeLeft: number; // 0-1 ratio
   lives: number;
   difficulty: Difficulty;
-  soundEnabled: boolean;
   course?: { title:string;remaining:number;target:number;passed:boolean;seed?:string };
 }

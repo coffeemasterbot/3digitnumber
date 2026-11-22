@@ -13,7 +13,6 @@ const replaceRequired=(value,from,to,label)=>{
   if(!value.includes(from))throw new Error('Expected '+label+' text was not found.');
   return value.replaceAll(from,to);
 };
-const jsString=value=>value.replace(/[^\x00-\x7F]/g,char=>'\\u'+char.charCodeAt(0).toString(16).padStart(4,'0').toUpperCase());
 
 let home=fs.readFileSync(path.join(output,'index.html'),'utf8');
 home=replaceRequired(home,
@@ -47,10 +46,6 @@ for(const game of ['runner','jet']){
   fs.writeFileSync(htmlFile,html);
   const jsFile=path.join(output,'games',game,'app.js');
   let bundle=fs.readFileSync(jsFile,'utf8');
-  if(game==='jet'){
-    bundle=replaceRequired(bundle,jsString('每局成績可見於共同排行榜'),jsString('成績只保存在本機'),'Jet start-screen score copy');
-    bundle=replaceRequired(bundle,jsString('共同排行榜會記錄每一局。選擇另一條路線，再試一次。'),jsString('本機最佳分數會保存在此瀏覽器。選擇另一條路線，再試一次。'),'Jet results score copy');
-  }
   if(/fetch\(["'`]\/api\/(?:leaderboard|runs\/)/.test(bundle))throw new Error('Unexpected leaderboard API request in '+game+' bundle.');
   fs.writeFileSync(jsFile,bundle);
 }

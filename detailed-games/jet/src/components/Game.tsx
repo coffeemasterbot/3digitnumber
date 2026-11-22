@@ -1,11 +1,11 @@
 'use client';
 
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { Difficulty } from '@/types/game';
 import { CANVAS_WIDTH, CANVAS_HEIGHT, MAX_LIVES } from '@/utils/constants';
 import { useGameEngine } from '@/hooks/useGameEngine';
-import { completedCourses, type Tool } from '@/utils/courses';
+import type { Tool } from '@/utils/courses';
 import StartScreen from './StartScreen';
 import GameOverScreen from './GameOverScreen';
 import PauseMenu from './PauseMenu';
@@ -13,17 +13,18 @@ import HUD from './HUD';
 import { ReviveCard } from './ReviveCard';
 import MobileControls from './MobileControls';
 
+const tools: readonly Tool[] = [];
+
 export default function Game() {
   // ── User preferences ──────────────────────────
   const demoTarget = (window as any).arcadeTest?.target;
   const demoMission = /^mission-([1-8])$/.exec(demoTarget ?? '');
-  const [mode,setMode]=useState(demoMission?'mission':demoTarget?'trial':'endless');
-  const [vehicle,setVehicle]=useState(!demoMission&&demoTarget||'mecha');
-  const [mission,setMission]=useState(demoMission ? Number(demoMission[1]) - 1 : 0);
-  const [seed,setSeed]=useState('HARBOR');
-  const [tools,setTools]=useState<Tool[]>([]);
+  const mode=demoMission?'mission':demoTarget?'trial':'endless';
+  const vehicle=!demoMission&&demoTarget||'mecha';
+  const mission=demoMission?Number(demoMission[1])-1:0;
+  const seed='HARBOR';
   const difficulty:Difficulty='medium';
-  const [soundEnabled, setSoundEnabled] = useState(()=>{try{return localStorage.getItem('jet-sound-enabled')==='true'}catch{return false}});
+
 
   const {
     canvasRef,
@@ -31,9 +32,7 @@ export default function Game() {
     startGame,showStart,revive,settle,
     togglePause,
     setThrusting,
-  } = useGameEngine(difficulty, soundEnabled,mode,vehicle,mission,seed,tools);
-  let completed:string[]=[];
-  try{completed=completedCourses(localStorage)}catch{}
+  } = useGameEngine(difficulty,mode,vehicle,mission,seed,tools);
 
   (window as any).detailedUIState=uiState;
 
@@ -44,9 +43,6 @@ export default function Game() {
     uiState.score >= uiState.highScore &&
     uiState.highScore > 0;
 
-  const toggleSound = useCallback(() => {
-    setSoundEnabled(prev => {const next=!prev;try{localStorage.setItem('jet-sound-enabled',String(next))}catch{}return next});
-  }, []);
 
   useEffect(() => {
     if (uiState.gameState === 'playing') canvasRef.current?.focus({ preventScroll: true });
@@ -113,13 +109,10 @@ export default function Game() {
         <AnimatePresence>
           {uiState.gameState === 'start' && (
             <StartScreen
-              key="start" mode={mode} vehicle={vehicle} setMode={setMode} setVehicle={setVehicle}
-              mission={mission} setMission={setMission} seed={seed} setSeed={setSeed}
-              tools={tools} setTools={setTools} completed={completed}
+              key="start"
               onStart={startGame}
               highScore={uiState.highScore}
-              soundEnabled={soundEnabled}
-              onSoundToggle={toggleSound}
+
             />
           )}
 
@@ -132,12 +125,10 @@ export default function Game() {
               distance={uiState.distance}
               coins={uiState.coins}
               isNewHighScore={isNewHighScore}
-              soundEnabled={soundEnabled}
-              onSoundToggle={toggleSound}
+
               onRestart={startGame}
               onMenu={showStart}
               course={uiState.course}
-              practice={mode==='practice'}
             />
           )}
 
@@ -147,11 +138,12 @@ export default function Game() {
               onResume={togglePause}
               onRestart={startGame}
               onMenu={showStart}
-              soundEnabled={soundEnabled}
-              onSoundToggle={toggleSound}
+
             />
           )}
         </AnimatePresence>
+
+        {uiState.gameState === 'countdown' && <div className="absolute inset-0 z-20 grid place-items-center pointer-events-none" role="status" aria-label="起飛倒數"><b className="rounded-xl bg-black/70 px-6 py-3 text-5xl text-amber-100">{uiState.countdown}</b></div>}
 
         {/* ── HUD (shown during play + pause) ─── */}
         {uiState.gameState === 'playing' && (
@@ -164,8 +156,7 @@ export default function Game() {
             maxLives={MAX_LIVES}
             activePowerUp={uiState.activePowerUp}
             powerUpTimeLeft={uiState.powerUpTimeLeft}
-            soundEnabled={soundEnabled}
-            onSoundToggle={toggleSound}
+
             onPause={togglePause}
             course={uiState.course}
           />

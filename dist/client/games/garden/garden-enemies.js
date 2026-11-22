@@ -29,7 +29,9 @@ const GardenEnemies=(()=>{
      const absorbed=Math.min(damage,z.armor);z.armor-=absorbed;damage-=absorbed;
      if(z.armor===0&&z.type==='paper')z.roar=550;
    }
+   const previous=z.health;
    z.health=Math.max(0,z.health-damage);updateZombieHealth(z);
+   if(z.health<previous)globalThis.PFAPAudio?.play('hit_thud');
    if(z.health>0)return;
    const points=zombieTypes[z.type].points*(source==='chomp'?2:1);
    showPointsPopup(z.element,points);createParticleEffect(z.element,source==='mower'?'✦':'💀');

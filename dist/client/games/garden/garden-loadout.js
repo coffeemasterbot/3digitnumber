@@ -4,13 +4,13 @@ function configureGardenSeeds(stageControl,startButton) {
   const host=document.createElement('div');
   stageControl.after(host);
   startButton.hidden=true;
-  const unlock=id=>GardenAbilities.cards[id]?.[2]||1;
-  const available=id=>unlock(id)<=gardenLevel()&&(id!=='repeater'||gardenRepeaterAvailable())&&(window.gardenSeedRestriction?.()?.includes(id)??true);
+  const unlock=GardenAbilities.unlockStage;
+  const available=id=>(id==='repeater'?gardenRepeaterAvailable():unlock(id)<=gardenLevel())&&(window.gardenSeedRestriction?.()?.includes(id)??true);
   function plants(){
     return cards.map(card=>{
       const id=card.dataset.plant,world=unlock(id);
       return {id,name:card.querySelector('.name').textContent,cost:Number(card.dataset.cost),
-        art:card.querySelector('.emoji'),locked:!available(id),unlockText:id==='repeater'?'第 2 關開放':'世界 '+world+' 開放'};
+        art:card.querySelector('.emoji'),locked:!available(id),unlockText:'第 '+world+' 關開放'};
     });
   }
   function enemies(){

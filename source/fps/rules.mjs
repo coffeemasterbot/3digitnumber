@@ -4,7 +4,8 @@ const waveBoost = Object.freeze([
   Object.freeze({movement:1.15,projectile:1.15,health:1.15}),
   Object.freeze({movement:1.25,projectile:1.25,health:1.30}),
 ]);
-export const soloWaveBoost = round => waveBoost[round-1] ?? waveBoost[0];
+const exWave = Object.freeze({movement:1.4,projectile:1.4,health:1.38});
+export const soloWaveBoost = round => round===4?exWave:waveBoost[round-1] ?? waveBoost[0];
 export const needsAutoReload = state => state.ammo===0 && !state.reload &&
   WEAPONS[state.weapon].reload>0 && state.reserves[state.weapon]>0;
 const OLD_CITY=[
