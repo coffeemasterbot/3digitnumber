@@ -1,7 +1,7 @@
-戶口三位數|Lost & Found
-戶口三位數首頁|Lost & Found home
-戶口三位數｜website v2|Lost & Found · Money Journey
-戶口三位數｜離線遊戲版|Lost & Found · Offline edition
+戶口三位數|poor_guysssss
+戶口三位數首頁|poor_guysssss home
+戶口三位數｜website v2|poor_guysssss · website v2
+戶口三位數｜離線遊戲版|poor_guysssss · Offline edition
 跳至主要內容|Skip to main content
 主要導航|Main navigation
 主線故事|Story
@@ -79,7 +79,58 @@ Academic Building · 1103 室|Academic Building · Room 1103
 簡報語言|Presentation language
 互動簡報，方向鍵切換|Interactive presentation. Use the arrow keys to move between slides.
 邀請朋友，一齊試玩。|Invite friends to play
-公開遊戲連結，不需要登入。此分享版本不設線上排行榜。|Share the public play link. This edition requires no sign-in and has no online leaderboard.
+打開網址就可以直接遊玩，毋須登入或下載。|Play directly in your browser. No sign-in or download required.
+打開網址就可以直接遊玩。共用排行榜設喺完整網站。|Play directly in your browser. Visit the full website for shared leaderboards.
+戶口三位數係香港科技大學理財企劃。走入阿俊嘅故事，試玩五款理財遊戲，再為自己留低七日行動。|poor_guysssss is an HKUST financial education project. Explore Ah Jun’s story, try five money games and plan your next seven days.
+香港科技大學理財企劃 · 戶口三位數|HKUST Financial Education · poor_guysssss
+共 5 關 · 挑戰解鎖|5 Stages · Unlock as You Play
+共 9 關 · 挑戰解鎖|9 Stages · Unlock as You Play
+最後衝刺！3 分鐘填寫第二階段理財問卷（11月27日截止）|Final Push: 3-Min Phase 2 Financial Survey (Closes Nov 27)
+填寫問卷 ↗|Take the survey ↗
+聖雅各福群會青年服務|St. James’ Settlement Youth Services
+香港青年協會「關心一線」|HKFYG Youthline
+明愛向晴軒 24 小時危機熱線|Caritas 24-hour crisis hotline
+開發者密碼|Developer passcode
+解鎖開發者模式|Unlock developer mode
+解鎖|Unlock
+取消|Cancel
+密碼不正確，請再試。|Incorrect passcode. Try again.
+瀏覽器未能驗證或保存開發者工作階段。|The browser could not verify or save the developer session.
+瀏覽器未能保存開發者工作階段。|The browser could not save the developer session.
+解鎖全部關卡|All Stages
+鎖定並退出開發者模式|Lock and exit developer mode
+我的成績|My scores
+公開排行榜|Public leaderboard
+最新成績|Latest scores
+模式|Mode
+網上版本用匿名瀏覽器識別碼統計訪問同正式開局，成效報表只向獲授權嘅團隊成員開放。|The online edition uses an anonymous browser identifier to count visits and game starts. Only approved team members can see the totals.
+本機最佳|Local best
+公開我嘅成績|Publish my scores
+公開暱稱|Public nickname
+開啟後，新成績會以暱稱公開。請勿填寫真名或私人資料。|While enabled, new scores appear under your nickname. Please leave out your real name and private information.
+此版本只保留本機成績。|This edition keeps scores on this device.
+前往完整網站睇公開排行榜 ↗|See the public leaderboard on the full website ↗
+請輸入種子代碼。|Enter a challenge seed.
+種子代碼|Seed code
+固定種子挑戰|Seeded challenge
+90 秒練習|90-second practice
+無盡跑酷|Endless run
+無盡飛行|Endless flight
+載具試駕|Vehicle trial
+有限陽光|Limited sun
+限定植物|Restricted plants
+無割草機|No mowers
+裝甲壓力|Armoured wave
+巨人防線|Giant defence
+快速三輪|Quick three-round mode
+核對帳目|Verify the accounts
+上傳資料|Upload data
+雙目標演習|Dual-objective drill
+暫時未有成績。|No scores yet.
+暫時未能連上排行榜，本機成績仍可查看。|The leaderboard is temporarily unavailable. Your local scores are still available.
+確認刪除|Confirm deletion
+已保留本機成績，未能上傳。|Your score was kept on this device. The upload failed.
+最新一局已加入公開排行榜。|Your latest score is on the public leaderboard.
 公開試玩網址|Public playtest link
 複製試玩連結|Copy playtest link
 下載連結 .txt ↓|Download link (.txt) ↓
@@ -98,7 +149,7 @@ Academic Building · 1103 室|Academic Building · Room 1103
 重新載入|Reload
 載入中…|Loading…
 個人理財大使計劃 2026–2027|Personal Finance Ambassador Programme 2026–2027
-由「戶口三位數」學生團隊策劃|Created by the Lost & Found student team
+由「戶口三位數」學生團隊策劃|Created by the poor_guysssss student team
 了解官方計劃 ↗|Learn about the programme ↗
 合辦機構|Co-organisers
 資助機構|Funded by
@@ -149,7 +200,7 @@ Academic Building · 1103 室|Academic Building · Room 1103
 OUR PROJECT · 中 / EN|OUR PROJECT
 DOWNLOAD & PLAY · 離線遊戲版|DOWNLOAD & PLAY · OFFLINE EDITION
 OFFLINE EDITION · 離線遊戲包|OFFLINE EDITION
-© 2026 戶口三位數|© 2026 Lost & Found
+© 2026 戶口三位數|© 2026 poor_guysssss
 每日餐費|Daily meals
 每日交通|Daily transport
 頭兩日每張飯券面值|Value of each meal voucher for the first two days

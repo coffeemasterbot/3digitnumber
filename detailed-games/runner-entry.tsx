@@ -17,7 +17,8 @@ const BEST_KEY = 'runner-detailed-best';
 const runnerWindow = window as Window & {
   orientationPause?: () => void;
   flushArcadeResult?: () => void;
-  arcadeTest?: object;
+  arcadeTest?: {target:string};
+  arcadeRun?: {start(game:string,board:string,difficulty:string):void;finish(score:number,duration:number,distance:number):void};
   arcadeStory?: object;
   gameAudio?: {pause(): void};
 };
@@ -33,8 +34,17 @@ let expeditions = (() => {
   catch { return readExpeditions(undefined); }
 })();
 useGameStore.subscribe((state, previous) => {
+  if (state.runNumber !== previous.runNumber) {
+    const launch = state.launch;
+    const board = launch.mode === 'mission' ? 'mission-' + (launch.mission + 1)
+      : launch.mode === 'seeded' ? 'seed-' + launch.seed : launch.mode;
+    runnerWindow.arcadeRun?.start('runner', board, 'standard');
+  }
   if (state.gameState === previous.gameState) return;
-  if (state.gameState === 'gameOver') persistRunnerBest(state);
+  if (state.gameState === 'gameOver') {
+    persistRunnerBest(state);
+    runnerWindow.arcadeRun?.finish(state.score, extras.time, state.distance);
+  }
   window.dispatchEvent(new CustomEvent('arcade-game-state', {
     detail: {state:state.gameState, mode:state.launch.mode, completed:state.completed, runNumber:state.runNumber},
   }));
@@ -109,6 +119,18 @@ function RunHud({ onPause }: { onPause: () => void }) {
   const launch = useGameStore(s => s.launch);
   const charges = useGameStore(s => s.boardCharges);
   const remaining = runStatus(launch,distance);
+  const [pickup,setPickup] = useState<keyof typeof powerLabels|'jetpack'|'pogo'|null>(null);
+  useEffect(()=>{
+    if(phase!=='playing'){setPickup(null);return}
+    let timer = 0;
+    const acquired = (event:Event) => {
+      clearTimeout(timer);
+      setPickup((event as CustomEvent).detail);
+      timer = window.setTimeout(()=>setPickup(null),1200);
+    };
+    window.addEventListener('runner-power-up',acquired);
+    return ()=>{clearTimeout(timer);window.removeEventListener('runner-power-up',acquired)};
+  },[phase]);
 
   return <>
     <div className="runner-hud" aria-label="跑局狀態">
@@ -134,7 +156,8 @@ function RunHud({ onPause }: { onPause: () => void }) {
             <small>{Math.ceil(timeLeft)} 秒</small></span>;
         })}
       </div>
-      <div className="runner-help">← → 換線 · ↑ 跳 · ↓ 滑鏟 · B 滑板 · P 暫停</div>
+      {pickup&&<div className="runner-pickup" role="status"><RunnerIcon kind={pickup}/>
+        <b>{pickup==='jetpack'?'噴射飛行':pickup==='pogo'?'彈射':powerLabels[pickup]}</b></div>}
       <div className="runner-touch" aria-label="觸控操作">
         {RUNNER_CONTROLS.map(([label, key, description]) => (
           <button type="button" aria-label={description} key={key} onClick={() => sendRunnerInput(key)}>{label}</button>
@@ -167,8 +190,9 @@ function App() {
   const [renderer, setRenderer] = useState(0);
   const [sceneReady, setSceneReady] = useState(false);
   const [renderProblem, setRenderProblem] = useState<'lost' | 'failed' | null>(null);
-  const [mode, setMode] = useState<RunnerMode>('practice');
-  const [mission, setMission] = useState(expeditions.unlocked);
+  const demoMission = /^mission-([1-8])$/.exec(runnerWindow.arcadeTest?.target ?? '');
+  const [mode, setMode] = useState<RunnerMode>(demoMission ? 'mission' : 'practice');
+  const [mission, setMission] = useState(demoMission ? Number(demoMission[1]) - 1 : expeditions.unlocked);
   const [code, setCode] = useState('');
   const [copyStatus, setCopyStatus] = useState('');
   const codeRef = useRef<HTMLInputElement>(null);
@@ -327,6 +351,7 @@ function App() {
           <p className="runner-controls-copy">← → 換線、↑／空白跳、↓ 滑鏟、B 放滑板。手機可用畫面控制。</p>
           {mode === 'practice' && practiceBest > 0 && <p>最佳紀錄 <b>{practiceBest} 分</b></p>}
         </>}
+        {paused && <p className="runner-controls-copy">← → 換線、↑／空白跳、↓ 滑鏟、B 放滑板。手機可用畫面控制。</p>}
         <button type="button" className="start" disabled={phase === 'menu' && mode === 'seeded' && !normalizeSeed(code)}
           onClick={() => {
             if (paused && !renderProblem) togglePause();

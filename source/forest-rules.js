@@ -12,57 +12,76 @@ const gate=(x,y,h,requires,plates=[],any=[])=>({x,y,w:22,h,requires,plates,any,m
 const box=x=>body('step-box','box',x,452,48,48);
 const rock=x=>body('rolling-stone','boulder',x,456,44,44);
 const socket=x=>({id:'socket',x,y:500});
-const shaft=(x,base,top,w,control)=>({...ledge(x,base,w),lift:true,base,top,control});
+const shaft=(x,base,top,w,control)=>({...ledge(x,base,w),lift:true,cycle:true,base,top,control});
 const beam=(id,source,receiver,mirrors)=>({id,source,receiver,mirrors:mirrors.map(([x,y,type])=>({x,y,type,turned:false})),segments:[],lit:false});
+// Every map has two work areas and one shared landing. Door circuits cross over
+// so an element can unblock the other side, but cannot let itself into the middle.
+function relayMap({id, seconds, hint, platforms=[], bodies=[], docks=[], levers=[], plates=[], lights=[], pools=[], hazards=[], circuits, gems, center=422}) {
+ const exits=[[445,center],[510,center]];
+ return {
+  id,seconds,hint,start:[[58,500],[858,500]],end:exits,
+  platforms:[floor(0,960),ledge(399,center,160),...platforms],
+  bodies,docks,levers,lights,pools,hazards,gems,
+  doors:[gate(339,30,470,[circuits[1]],plates),gate(600,30,470,[circuits[0]])],
+  goals:circuits,
+ };
+}
 const maps=[
- {id:'weight-box',seconds:180,hint:'火仔推箱登上左邊高台，踩住上層壓板。冰仔由下路過閘，拉桿接返火仔。',
-  start:[[70,500],[115,500]],end:[[672,278],[725,278]],
-  platforms:[floor(0,960),ledge(200,372,174),ledge(494,420,90),ledge(568,350,112),ledge(633,278,145)],
-  bodies:[box(145)],doors:[gate(400,75,425,[],[plate('high',0,305,372)],['high','back'])],levers:[leverAt('back',1,536,478)],
-  gems:[[274,340,0],[690,253,0],[470,475,1],[603,326,1]],goals:['back']},
- {id:'weight-stone',seconds:210,hint:'兩翼各有精靈。火仔將石球推入中央石槽，冰仔過閘登高台，拉桿開通右上出口。',
-  start:[[60,500],[100,423]],end:[[782,260],[834,260]],
-  platforms:[floor(0,960),ledge(55,423,98),ledge(155,350,116),ledge(514,427,97),ledge(614,353,147),ledge(721,278,85),ledge(770,260,140)],
-  bodies:[rock(240)],docks:[socket(408)],doors:[gate(470,60,440,['socket']),gate(748,90,230,['wing'])],levers:[leverAt('wing',1,657,329)],
-  pools:[{x:530,w:44,type:1}],gems:[[209,325,0],[491,474,0],[92,391,1],[660,322,1]],goals:['socket','wing']},
- {id:'weight-relay',seconds:240,hint:'左翼推箱壓板接橋，右翼推石鎖閘；兩人由各自工作區向中央集合。',
-  start:[[65,500],[862,500]],end:[[454,315],[511,315]],
-  platforms:[floor(0,356),floor(598,362),ledge(215,425,106),ledge(622,420,102),ledge(392,315,190),shaft(348,480,376,82,'crate'),ledge(553,354,70)],
-  bodies:[box(134),rock(789)],docks:[socket(700)],doors:[gate(575,100,260,['socket']),gate(352,120,285,['crate'],[plate('crate',0,274,500,'box')])],
-  levers:[leverAt('relay',1,632,398)],gems:[[243,397,0],[422,289,0],[750,475,1],[635,392,1]],goals:['crate','socket','relay']},
- {id:'motion-lift',seconds:210,hint:'火仔在下月台啟動升降台；冰仔乘台上去開高層閘，兩人再搭台會合。',
-  start:[[90,500],[225,481]],end:[[672,252],[721,252]],
-  platforms:[floor(0,364),floor(590,370),shaft(202,481,261,112,'motor'),ledge(307,269,205),ledge(493,320,118),ledge(594,252,176)],
-  levers:[leverAt('motor',0,123,479),leverAt('upper',1,433,247)],doors:[gate(560,70,285,['upper'])],
-  gems:[[140,477,0],[620,227,0],[358,246,1],[519,296,1]],goals:['motor','upper']},
- {id:'motion-counterweight',seconds:240,hint:'冰仔先登左井，火仔將箱推上配重板。左井升、右井降；冰仔到高台拉桿，右井再升起接應。',
-  start:[[52,500],[260,478]],end:[[735,270],[790,270]],
-  platforms:[floor(0,960),shaft(239,478,252,98,'weight'),ledge(344,253,142),ledge(471,317,107),shaft(587,266,473,106,'lower'),ledge(702,270,161)],
-  bodies:[box(96)],levers:[leverAt('return',1,425,232)],doors:[gate(685,65,435,['return'],[plate('weight',0,179,500,'box')])],
-  gems:[[174,476,0],[758,245,0],[377,228,1],[503,294,1]],goals:['weight','return']},
- {id:'motion-return',seconds:270,hint:'火仔拉桿啟動橫橋。冰仔經安全島避開週期光閘，到對岸解除返回路線。',
-  start:[[64,500],[120,430]],end:[[796,421],[848,421]],
-  platforms:[floor(0,242),floor(400,97),floor(704,256),ledge(74,430,106),{...ledge(203,437,99),moving:true,from:203,to:635,control:'ferry'},ledge(407,364,96),ledge(725,421,168)],
-  levers:[leverAt('ferry',0,124,410),leverAt('shore',1,670,415)],doors:[gate(746,80,420,['shore'])],
-  hazards:[{x:348,y:343,w:14,h:95},{x:569,y:322,w:14,h:115}],gems:[[94,402,0],[427,342,0],[456,472,1],[810,398,1]],goals:['shore','ferry']},
- {id:'light-turn',seconds:240,hint:'火仔在上層轉鏡，讓橫光向上照中接收器；冰仔從下層穿門，打開返回出口。',
-  start:[[60,500],[120,500]],end:[[624,425],[679,425]],
-  platforms:[floor(0,960),ledge(110,428,113),ledge(208,355,183),ledge(470,425,114),ledge(570,425,170)],
-  lights:[beam('elbow',[172,329],[318,206],[[318,329,0]])],
-  levers:[leverAt('reunion',1,524,476)],doors:[gate(410,92,408,['elbow']),gate(574,120,315,['reunion'])],
-  pools:[{x:481,w:48,type:1}],gems:[[203,401,0],[317,330,0],[517,474,1],[650,399,1]],goals:['elbow','reunion']},
- {id:'light-pair',seconds:270,hint:'先移開地面光源前的箱。冰仔喺地面轉第一塊鏡，火仔登左翼轉第二塊；接通之後到右翼開門。',
-  start:[[80,500],[363,500]],end:[[755,343],[813,343]],
-  platforms:[floor(0,960),ledge(143,428,105),ledge(236,351,171),ledge(521,424,152),ledge(658,343,215)],
-  bodies:[box(184)],lights:[beam('double',[98,473],[470,327],[[329,473,1],[329,327,0]])],
-  doors:[gate(488,95,405,['double']),gate(702,85,310,['far'])],levers:[leverAt('far',1,603,400)],
-  gems:[[170,401,0],[316,327,0],[348,473,1],[574,398,1]],goals:['double','far']},
- {id:'light-reunion',seconds:300,hint:'兩翼各自完成一道光路，開啟對方的內閘。穿過兩座鏡台，喺中央上層出口會合。',
-  start:[[55,500],[858,500]],end:[[452,259],[503,259]],
-  platforms:[floor(0,960),ledge(87,424,124),ledge(176,349,149),ledge(309,334,95),ledge(399,259,161),ledge(545,327,121),ledge(641,366,107),ledge(747,426,112)],
-  lights:[beam('west',[99,325],[282,209],[[282,325,0]]),beam('east',[646,340],[717,227],[[717,340,1]])],
-  doors:[gate(364,70,430,['east']),gate(598,70,430,['west'])],
-  gems:[[193,324,0],[392,310,0],[815,400,1],[563,304,1]],goals:['east','west']}
+ relayMap({id:'weight-box',seconds:180,center:426,
+  hint:'火仔推箱到壓板，冰仔喺對面拉桿。交換通路後，喺中央平台會合。',
+  platforms:[ledge(271,470,18,30)],bodies:[box(120)],plates:[plate('west-crate',0,247,500,'box')],
+  levers:[leverAt('east-latch',1,716,478)],circuits:['west-crate','east-latch'],
+  gems:[[89,478,0],[424,403,0],[815,478,1],[535,403,1]]}),
+ relayMap({id:'weight-stone',seconds:200,center:420,
+  hint:'火仔推石入槽。冰仔沿台階上高台開對面閘，再返回中央。',
+  platforms:[ledge(748,431,106),ledge(650,360,135)],
+  bodies:[rock(151)],docks:[socket(276)],levers:[leverAt('east-latch',1,689,340)],
+  pools:[{x:82,w:49,type:0},{x:880,w:38,type:1}],
+  circuits:['socket','east-latch'],gems:[[86,478,0],[424,397,0],[714,334,1],[532,397,1]]}),
+ relayMap({id:'weight-relay',seconds:215,center:360,
+  hint:'兩翼分開推箱同滾石。兩道閘互相開啟，再沿中央台階上去。',
+  platforms:[ledge(275,470,18,30),ledge(367,426,88),ledge(526,426,68)],
+  bodies:[box(114),rock(785)],plates:[plate('west-crate',0,251,500,'box')],
+  docks:[socket(693)],circuits:['west-crate','socket'],
+  gems:[[90,479,0],[423,336,0],[863,479,1],[535,336,1]]}),
+ relayMap({id:'motion-lift',seconds:210,center:416,
+  hint:'先撳兩側低位拉桿，啟動對面升降台。乘台拉高層閘掣。',
+  platforms:[shaft(184,476,390,105,'east-motor'),shaft(660,476,390,104,'west-motor')],
+  levers:[leverAt('west-motor',0,126,479),leverAt('east-motor',1,817,479),leverAt('west-high',0,238,367),leverAt('east-high',1,714,367)],
+  circuits:['west-high','east-high'],gems:[[237,365,0],[424,390,0],[724,365,1],[535,390,1]]}),
+ relayMap({id:'motion-counterweight',seconds:230,center:350,
+  hint:'火仔用箱壓低配重板，冰仔乘台開左閘，再由兩側台階會合。',
+  platforms:[ledge(274,470,18,30),shaft(701,466,362,95,'balance'),ledge(362,430,93),ledge(529,430,65)],
+  bodies:[box(113)],plates:[plate('balance',0,250,500,'box')],
+  levers:[leverAt('east-high',1,746,338)],circuits:['balance','east-high'],
+  gems:[[84,478,0],[419,325,0],[744,338,1],[536,325,1]]}),
+ relayMap({id:'motion-return',seconds:250,center:345,
+  hint:'交換橋掣，到移動台盡頭開對面內閘。避開光閘先返中央。',
+  platforms:[ledge(95,431,100),ledge(765,431,100),
+    {...ledge(148,416,92),moving:true,from:148,to:235,control:'east-start'},
+    {...ledge(623,416,92),moving:true,from:623,to:710,control:'west-start'},
+    ledge(367,423,80),ledge(532,423,63)],
+  levers:[leverAt('west-start',0,108,478),leverAt('east-start',1,834,478),leverAt('west-high',0,294,390),leverAt('east-high',1,646,390)],
+  hazards:[{x:397,y:441,w:14,h:59},{x:551,y:441,w:14,h:59}],
+  circuits:['west-high','east-high'],gems:[[289,388,0],[426,322,0],[652,388,1],[534,322,1]]}),
+ relayMap({id:'light-turn',seconds:220,center:427,
+  hint:'轉動各自嘅鏡面，把光照向接收器，先打開對方嘅門。',
+  platforms:[ledge(127,425,151),ledge(675,425,156)],
+  lights:[beam('west',[112,401],[212,282],[[212,401,0]]),beam('east',[646,401],[743,282],[[743,401,1]])],
+  circuits:['west','east'],gems:[[164,401,0],[424,403,0],[791,401,1],[533,403,1]]}),
+ relayMap({id:'light-pair',seconds:250,center:352,
+  hint:'先移走擋住光路嘅箱，兩翼各自轉鏡。中央兩邊都有階梯。',
+  platforms:[ledge(210,421,102),ledge(659,421,113),ledge(367,426,79),ledge(532,426,62)],
+  bodies:[box(143)],lights:[beam('west',[86,474],[193,368],[[193,474,0]]),beam('east',[635,397],[715,271],[[715,397,1]])],
+  circuits:['west','east'],gems:[[260,398,0],[424,327,0],[715,397,1],[534,327,1]]}),
+ relayMap({id:'light-reunion',seconds:285,center:282,
+  hint:'兩翼各有兩塊鏡，要接通兩段光路。過閘後登上中央高台，一齊到出口。',
+  platforms:[ledge(111,430,160),ledge(216,360,102),ledge(687,430,151),ledge(621,360,104),
+    ledge(349,431,92),ledge(370,354,94),ledge(541,354,58),ledge(539,431,58)],
+  lights:[beam('west',[108,408],[306,337],[[250,408,0],[250,337,0]]),
+    beam('east',[626,407],[838,337],[[708,407,1],[708,337,1]])],
+  pools:[{x:443,w:66,type:2}],circuits:['west','east'],
+  gems:[[287,337,0],[426,259,0],[658,337,1],[532,259,1]]}),
 ];
 const temples=maps.map(m=>[m.id]);
 function temple(n){
@@ -95,8 +114,18 @@ function stepPlatforms(map,players,dt){
   const x=p.x,y=p.y;
   if(p.lift){
    const on=map.id?map.signals[p.control]:map.levers.some(l=>l.id==='needs'&&l.on);
-   const target=on?(p.top??350):(p.base??425);
-   p.y+=Math.max(-60*dt,Math.min(60*dt,target-p.y));
+   const base=p.base??425,top=p.top??350;
+   if(p.cycle&&on){
+    const travel=(base-top)/60, period=2*travel+1.4;
+    p.liftClock=((p.liftClock??0)+dt)%period;
+    const t=p.liftClock;
+    const target=base-Math.min(travel,Math.max(0,t-.7),period-t)*60;
+    p.y+=Math.max(-60*dt,Math.min(60*dt,target-p.y));
+   }else{
+    p.liftClock=0;
+    const target=on?top:base;
+    p.y+=Math.max(-60*dt,Math.min(60*dt,target-p.y));
+   }
   }
   if(p.moving&&map.signals[p.control]){
    p.travel=(p.travel||0)+dt*92;

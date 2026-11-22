@@ -69,7 +69,7 @@ if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missi
 const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v2');
 
 fs.copyFileSync(path.join(root,'source/cashflow-lab.js'),path.join(dist,'cashflow-lab.js'));
-fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'presentation.js'));require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
+fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'presentation.js'));for(const file of ['metrics.html','metrics.js'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,file));fs.copyFileSync(path.join(root,'source/pfap-home.js'),path.join(dist,'pfap-home.js'));require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
 
 if(!process.argv.includes('--preserve-arcade'))require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});
 
@@ -95,7 +95,7 @@ for(const rel of ['index.html','story/index.html','story/anna.html','games/budge
  const scripts=['window.siteMessages='+JSON.stringify(messages)+';\n'+localizer];
  if(rel==='index.html')scripts.push(devScript);
  else if(!['story/anna.html','games/budget-defence/range.html'].includes(rel)){
-  scripts.push(caseChallenge,devScript);
+  scripts.push(caseChallenge,devScript,fs.readFileSync(path.join(root,'source/arcade-run.js'),'utf8'));
   const base=rel.startsWith('story')?'../':'../../';
   const sources=Object.fromEntries(Object.entries(audioManifest).map(([key,file])=>[key,base+'assets/game-audio/'+file]));
   scripts.push(fs.readFileSync(path.join(audioDir,'player.js'),'utf8')+';window.gameAudio=createGameAudio('+JSON.stringify(sources)+');');

@@ -102,6 +102,31 @@ html[lang=en] .case-hero h1{font-size:clamp(3.2rem,6.5vw,5.5rem)}
 }
 @media(max-width:680px){html[lang=en] .case-hero h1 em::before{content:" "}}
 body:has(#play-panel:not([hidden]))>.site-header{display:none}
+[data-home-resume][hidden], #phase2-survey[hidden], .pfap-dialog [hidden] { display:none !important }
+.phase2-survey-content { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
+  gap:.8rem 1.3rem; padding:1.15rem 1.4rem; margin-bottom:1.5rem; border-radius:.9rem; background:#183f36; color:#fff6e3 }
+.phase2-survey-content h2 { color:inherit; font-size:clamp(1rem, 2.4vw, 1.3rem); margin:0 }
+.phase2-survey-content a { background:#ffe0a0; color:#183f36; border-radius:.45rem; padding:.55rem .9rem; font-weight:700 }
+.game-learning strong { display:inline-block; padding:.22rem .55rem; border-radius:.42rem; background:#dbe9df; color:#183f36 }
+.support-phones { padding-inline-start:1.2rem }
+.support-phones li + li { margin-top:.5rem }
+.support-phones a { white-space:nowrap }
+.board-actions, .board-tabs, .board-fields { display:flex; flex-wrap:wrap; gap:.55rem; margin:.75rem 0 }
+.pfap-dialog { color:#183f36; background:#fff8e9; border:1px solid #afbea9; border-radius:.8rem;
+  width:min(40rem, calc(100% - 2rem)); padding:1.3rem; max-height:85dvh; overflow:auto }
+.pfap-dialog::backdrop { background:rgb(13 34 29 / .75) }
+#dev-password-dialog { max-width:27rem }
+#dev-password-error { color:#87311e }
+#dev-picker { margin-top:.75rem }
+#pfap-scores .board-close { float:inline-end }
+#pfap-scores [aria-pressed="true"] { background:#183f36; color:#fff8e9 }
+#score-entries li { padding:.4rem 0; border-bottom:1px solid #d9d2c5 }
+#score-entries li span { margin-inline-start:.7rem }
+#score-publish-controls label { display:inline-block; margin-inline-end:.6rem }
+.metrics-page { padding-block:2rem; max-width:46rem }
+.metrics-page dd { margin:0 0 .9rem; font-size:1.6rem; font-weight:750 }
+.metrics-page table { width:100%; text-align:start; border-spacing:0 }
+.metrics-page th,.metrics-page td { text-align:start; padding:.55rem; border-bottom:1px solid #d9d2c5 }
 #frame-host iframe[hidden]{display:none!important}
 
 .case-hero{align-items:center;min-height:min(560px,72dvh);padding-block:clamp(30px,6vw,85px)}

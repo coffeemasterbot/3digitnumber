@@ -3,34 +3,34 @@
 植物防守|Plant defence
 揀好植物，守住五條防線。先預留生產，再決定點分配有限資源。|Choose plants to defend five lanes. Fund production first, then decide where your limited resources will go.
 零應急儲備|No emergency reserve
-破解「零應急儲備」|Tackle “no emergency reserve”
+破解「零應急儲備」|Tackles: Zero Emergency Fund
 預留緩衝，安排先後|Set aside a buffer and prioritise
 如果一開始花晒陽光，突發進攻時仲有幾多選擇？現實中，你會為必要開支同突發需要預留幾多？|If you spend all your sun, what options remain when a surprise attack starts? How much would you set aside for essentials and emergencies?
 散紙追蹤|Change Chase
 散紙追蹤 3D|Change Chase 3D
 3D 跑酷|3D runner
 換線、跳躍，拾返細額收據。跑得越遠，誘惑越密。|Change lanes, jump and collect receipts. Temptations pile up as you run farther.
-破解「對小錢無感」|Notice the small expenses
+破解「對小錢無感」|Tackles: Micro-Spending Blindness
 留意細額支出|Keep track of small expenses
 遊戲拾取會加分；現實買嘢會花錢。你今日有邊幾筆細額支出？加埋一星期係幾多？|Collectibles earn points here. In life, purchases cost money. What did you spend in small amounts today, and what would a week of that add up to?
 優惠氣流|Jetstream Savings
 優惠氣流 飛行挑戰|Jetstream Savings · Flight challenge
 噴射飛行|Jetpack flight
 揹起噴射背包穿過實驗室，避開導彈、收集金幣。揀練習、載具試駕或者無盡飛行。|Fly through the lab, dodge missiles and collect coins. Choose practice, a vehicle test or an endless run.
-破解「湊免運費與優惠陷阱」|Spot free-shipping and offer traps
+破解「湊免運陷阱」|Tackles: Free-Shipping Traps
 優惠前先睇總支出|Check the total cost before taking an offer
 追逐拾取物會唔會令你撞上障礙？如果為咗免運而加購，最後總額有冇反而增加？|Can chasing a pickup lead you into a hazard? If you add products for free shipping, does the final bill actually go down?
 冰火同行|Fire & Ice Together
 雙角色合作|Two-character co-op
 行動等埋規劃。踩掣、開閘，喺倒數前一齊到門口。|Plan together. Press switches and open gates to reach the exits before time runs out.
-破解「衝動與補償性消費」|Recognise impulse and comfort spending
+破解「衝動消費」|Tackles: Impulse Spending
 行動前停一停，同伴先商量|Pause and talk it through before acting
 兩個角色各自行先會唔會卡住？下次想即刻買嘢時，可以先同邊個商量，或者留幾多時間再決定？|Can the characters get stuck by rushing ahead alone? The next time you want to buy something immediately, who could you talk to, or how long could you wait?
 預算防衛戰|Budget Defence
 預算防衛戰 · 機械人拆彈任務|Budget Defence · Robot defusal mission
 3D 機械人拆彈|3D robot defusal
 第一身穿過街區、利用掩體制止消費壞習慣機械人。核對帳目，拆解財務炸彈。|Move through the streets, use cover and stop robots representing spending habits. Verify the accounts and defuse the financial device.
-破解「Min Pay 與透支未來」|Understand minimum payments and future debt
+破解「Min Pay 透支」|Tackles: Min Pay Debt Spiral
 核實資料，保留必要資源|Check the facts and protect essential funds
 裝備買得越多就一定越好？遇到還款壓力時，你會先核對到期日、還款安排，定只睇眼前可用額？|Does buying more equipment always help? When repayments are difficult, check due dates and repayment terms alongside the cash you have now.
 遊戲選單|Game menu
@@ -500,6 +500,15 @@ V 全螢幕。|V for fullscreen.
 換彈中…|Reloading…
 彈匣已空，R 換彈。|Magazine empty. Press R to reload.
 備彈用盡，請切換武器。|Out of reserve ammo. Switch weapons.
+火仔推箱到壓板，冰仔喺對面拉桿。交換通路後，喺中央平台會合。|Fire moves the crate onto the plate. Ice pulls the opposite lever. Open each other’s routes and meet in the middle.
+火仔推石入槽。冰仔沿台階上高台開對面閘，再返回中央。|Fire docks the stone. Ice climbs to the lever and opens Fire’s gate before returning to the middle.
+兩翼分開推箱同滾石。兩道閘互相開啟，再沿中央台階上去。|Move the crate and stone in opposite wings to unlock each other’s gates, then climb the central steps.
+先撳兩側低位拉桿，啟動對面升降台。乘台拉高層閘掣。|Use the lower levers to operate the opposite lifts. Ride up to reach the upper gate switches.
+火仔用箱壓低配重板，冰仔乘台開左閘，再由兩側台階會合。|Fire weighs down the plate. Ice rides the lift to open Fire’s gate. Meet using the steps on both sides.
+交換橋掣，到移動台盡頭開對面內閘。避開光閘先返中央。|Operate each other’s moving platforms and open the opposite gates. Avoid the timed beams on the way to the middle.
+轉動各自嘅鏡面，把光照向接收器，先打開對方嘅門。|Turn one mirror on each side to light the receivers and open each other’s gates.
+先移走擋住光路嘅箱，兩翼各自轉鏡。中央兩邊都有階梯。|Move the crate out of the beam, turn the mirror on each side and use the steps in the middle.
+兩翼各有兩塊鏡，要接通兩段光路。過閘後登上中央高台，一齊到出口。|Line up both mirrors in each wing. Once the gates are open, take the central steps and meet at the exits.
 門已開；留意門後。|Door open. Check what's beyond it.
 門已關。|Door closed.
 先離開門框，再關門。|Move clear of the doorway before closing it.

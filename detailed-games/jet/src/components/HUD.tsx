@@ -106,7 +106,7 @@ export default function HUD({
           {['mecha','glider','drill'].includes(activePowerUp)?<VehicleIcon type={activePowerUp}/>:<span className="text-xl">{pwCfg.icon}</span>}
           <div className="flex flex-col gap-0.5">
             <span className="font-mono text-xs font-bold uppercase leading-none" style={{ color: pwCfg.color }}>
-              {pwCfg.label}
+              {pwCfg.label.split(' · ')[0]}
             </span>
             {!['mecha','glider','drill','gravity','blink','dragon'].includes(activePowerUp) && (
             <div className="w-24 h-1.5 rounded-full bg-white/10 overflow-hidden">

@@ -203,8 +203,9 @@ export function Game({ onReady }: { onReady?: () => void }) {
 
     let pickupsChanged = false;
     if (extras.time >= extras.next) {
-      const testTarget = extras.index === 0 && (window as any).arcadeTest?.target;
-      const kind = POWER_ORDER.includes(testTarget) ? testTarget : POWER_ORDER[extras.index % POWER_ORDER.length];
+      const target = (window as any).arcadeTest?.target;
+      const testTarget = extras.index === 0 && POWER_ORDER.includes(target) ? target : null;
+      const kind = testTarget ? testTarget : POWER_ORDER[extras.index % POWER_ORDER.length];
       const index = extras.index++;
       const lane = testTarget ? 0 : index === 0 ? LANES[2] : LANES[(index + 1) % 3];
       const ahead = testTarget ? 8 : index === 0 ? 21 : 43;
@@ -235,6 +236,7 @@ export function Game({ onReady }: { onReady?: () => void }) {
           extras[pickup.kind] = extras.time + POWER_DURATION[pickup.kind];
         }
       }
+      if (reached) window.dispatchEvent(new CustomEvent('runner-power-up',{detail:pickup.kind}));
       if (reached || pickup.z - playerZ > 10) {
         extras.pickups.splice(i, 1);
         pickupsChanged = true;

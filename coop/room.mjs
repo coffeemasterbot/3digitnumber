@@ -1,5 +1,5 @@
 import {launchRocket,stepRocket,impactDamage} from '../source/fps/rocket.mjs';
-import {weaponStores,changeMagazine,startReload,tickReload,createMap,move,blocked,interaction,GEAR,WEAPONS,OFFERS} from '../source/fps/rules.mjs';
+import {weaponStores,changeMagazine,startReload,tickReload,needsAutoReload,createMap,move,blocked,interaction,GEAR,WEAPONS,OFFERS} from '../source/fps/rules.mjs';
 const gun=WEAPONS.pistol;
 const neutral=()=>({f:0,r:0,fire:false,use:false,yaw:0,pitch:0});
 const near=p=>Math.hypot(p.x,p.z+13)<2.7;
@@ -54,20 +54,22 @@ export class Room {
    const i=p.input,n=Math.max(1,Math.hypot(i.f,i.r)),c=Math.cos(i.yaw),s=Math.sin(i.yaw);
    move(p,(i.r*c-i.f*s)*5*dt/n,(-i.f*c-i.r*s)*5*dt/n,this.doors);
    const gun=WEAPONS[p.weapon];
-   p.cool=Math.max(0,p.cool-dt);tickReload(p,dt);
+   p.cool=Math.max(0,p.cool-dt);p.recoil=Math.max(0,(p.recoil??0)-dt*.14);tickReload(p,dt);
    if(i.fire&&p.ammo&&!p.cool&&!p.reload){
-    p.ammo--;p.cool=gun.cooldown;
+    p.ammo--;p.cool=gun.cooldown;p.shot=(p.shot??0)+1;p.shotWeapon=p.weapon;
     if(p.weapon==='bazooka'){
 
      const horizontal=Math.cos(i.pitch);
      this.projectiles.push(launchRocket(p.id,{x:p.x,y:1.55,z:p.z},{x:-s*horizontal,y:Math.sin(i.pitch),z:-c*horizontal},now/1000));
     }else{
     const target=this.bots.filter(b=>{const dx=b.x-p.x,dz=b.z-p.z,d=Math.hypot(dx,dz);
-     return b.hp&&d<gun.range&&-dx*s-dz*c>0&&Math.abs(dx*c-dz*s)<.65&&Math.abs(Math.tan(i.pitch)*d)<1&&!blocked(p.x,p.z,b.x,b.z,this.doors)
+     return b.hp&&d<gun.range&&-dx*s-dz*c>0&&Math.abs(dx*c-dz*s)<.65&&Math.abs(Math.tan(i.pitch+p.recoil)*d)<1&&!blocked(p.x,p.z,b.x,b.z,this.doors)
     }).sort((a,b)=>Math.hypot(a.x-p.x,a.z-p.z)-Math.hypot(b.x-p.x,b.z-p.z))[0];
+    p.recoil=Math.min(.19,p.recoil+.043);
     if(target){target.hp=Math.max(0,target.hp-gun.damage);if(!target.hp)p.credits+=100}
     }
    }
+   if(needsAutoReload(p))startReload(p);
    using||=i.use&&near(p)&&this.verified;
   }
   const solids=[...this.walls,...this.doors.filter(d=>!d.open)];
@@ -92,7 +94,7 @@ export class Room {
   if(this.progress>=5)this.finish('合作拆解成功');else if(!this.time||this.players.every(p=>!p.hp))this.finish('任務失敗');
  }
  broadcast(){const snapshot={v:3,type:'state',phase:this.phase,result:this.result,round:this.round,time:this.time,progress:this.progress,verified:this.verified,
-  players:this.players.map(({id,name,x,z,hp,ammo,weapon,credits,launcher,reserves,reload,ready,send,checked,input})=>({id,name,x,z,hp,ammo,weapon,credits,launcher,reserve:reserves[weapon],reload,ready,online:!!send,checked,yaw:input.yaw})),
+  players:this.players.map(({id,name,x,z,hp,ammo,weapon,credits,launcher,reserves,reload,ready,send,checked,input,shot,shotWeapon})=>({id,name,x,z,hp,ammo,weapon,credits,launcher,reserve:reserves[weapon],reload,shot,shotWeapon,ready,online:!!send,checked,yaw:input.yaw})),
   projectiles:this.projectiles.map(r=>({...r})),impacts:this.impacts.slice(),bots:this.bots.map(({id,x,z,hp})=>({id,x,z,hp})),doors:this.doors};
   this.players.forEach(p=>p.send?.(snapshot));this.impacts=[];
  }

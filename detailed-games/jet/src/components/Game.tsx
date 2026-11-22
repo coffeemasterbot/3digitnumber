@@ -15,9 +15,11 @@ import MobileControls from './MobileControls';
 
 export default function Game() {
   // ── User preferences ──────────────────────────
-  const [mode,setMode]=useState((window as any).arcadeTest?'trial':'endless');
-  const [vehicle,setVehicle]=useState((window as any).arcadeTest?.target||'mecha');
-  const [mission,setMission]=useState(0);
+  const demoTarget = (window as any).arcadeTest?.target;
+  const demoMission = /^mission-([1-8])$/.exec(demoTarget ?? '');
+  const [mode,setMode]=useState(demoMission?'mission':demoTarget?'trial':'endless');
+  const [vehicle,setVehicle]=useState(!demoMission&&demoTarget||'mecha');
+  const [mission,setMission]=useState(demoMission ? Number(demoMission[1]) - 1 : 0);
   const [seed,setSeed]=useState('HARBOR');
   const [tools,setTools]=useState<Tool[]>([]);
   const difficulty:Difficulty='medium';

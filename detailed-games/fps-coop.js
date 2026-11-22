@@ -3,7 +3,7 @@ import {createRocketVisuals} from './rocket-visuals.mjs';
 import {buildArenaArt,buildRobotArt,buildEquipmentArt} from './fps-scene-art.mjs';
 import * as THREE from 'three';
 import {createMap,OFFERS,WEAPONS,rocketDescription} from '../source/fps/rules.mjs';
-export function openCoop(onRocketImpact){
+export function openCoop(onRocketImpact,onShot=()=>{}){
  const local=['localhost','127.0.0.1'].includes(location.hostname);
  const endpoint=local?'ws://127.0.0.1:8791/rooms':document.querySelector('meta[name=coop-endpoint]')?.content;
  const dialog=document.createElement('dialog');dialog.style.cssText='width:min(960px,96vw);max-height:96dvh;background:#173a32;color:#fff6da;padding:12px;overflow:auto';
@@ -24,7 +24,7 @@ export function openCoop(onRocketImpact){
   send({type:'input',f:active?Number(keys.has('KeyW'))-Number(keys.has('KeyS')):0,r:active?Number(keys.has('KeyD'))-Number(keys.has('KeyA')):0,
    fire:active&&(fire||keys.has('KeyX')||performance.now()<fireUntil),use:active&&keys.has('KeyE'),yaw,pitch});
  }
- let viewmodel,shownWeapon,rocketVisuals,previousProjectiles=new Map(),snapshotTime=0,lastDraw=0,pendingImpacts=[];
+ let viewmodel,shownWeapon,rocketVisuals,previousProjectiles=new Map(),snapshotTime=0,lastDraw=0,pendingImpacts=[],pistolKick=0;
  function drawRockets(now){
   const mix=Math.min(1,(now-snapshotTime)/100);
   const positions=state.projectiles.map(rocket=>{
@@ -78,7 +78,7 @@ export function openCoop(onRocketImpact){
    const me=state.players.find(p=>p.id===id),eye=me?.hp?me:state.players.find(p=>p.hp)||me;if(!eye)return;
    const w=canvas.clientWidth,h=canvas.clientHeight;if(canvas.width!==w||canvas.height!==h){renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}
    eyeTarget.set(eye.x,1.55,eye.z);
-   if(!ref)ref=eyeTarget.clone();ref.lerp(eyeTarget,.34);camera.position.copy(ref);camera.rotation.set(pitch,yaw,0,'YXZ');
+   if(!ref)ref=eyeTarget.clone();ref.lerp(eyeTarget,.34);camera.position.copy(ref);pistolKick=Math.max(0,pistolKick-.009);camera.rotation.set(pitch+pistolKick,yaw,0,'YXZ');
    for(const d of state.doors){
     const view=doorMap.get(d.id);
     if(!view)continue;
@@ -118,6 +118,15 @@ export function openCoop(onRocketImpact){
   socket.onmessage=e=>{const m=JSON.parse(e.data);if(m.v!==3){status.textContent='合作版本不同，請更新遊戲同房間伺服器。';socket.close();return}if(m.type==='joined'){({id,code,token}=m);try{sessionStorage.setItem('coop-room-session',JSON.stringify({code,token}))}catch{}q('.room-controls').hidden=true;return}
    if(m.type==='state'){
     const fresh=state?.round!==m.round;
+    if(!fresh&&m.phase==='playing')for(const player of m.players){
+     const previous=state.players.find(item=>item.id===player.id);
+     if(player.shot&&previous&&player.shot>(previous.shot??0)&&['pistol','bazooka'].includes(player.shotWeapon)){
+      onShot('shot-'+player.shotWeapon);
+      if(player.id===id&&player.shotWeapon==='pistol')pistolKick=Math.min(.19,pistolKick+.043);
+      if(player.shotWeapon==='bazooka')onShot('rocket-flight');
+     }
+     if(player.id===id&&player.reload>0&&previous&&!previous.reload)onShot('reload');
+    }
     previousProjectiles=new Map((fresh?[]:state.projectiles).map(r=>[r.id,r]));
     if(fresh||m.phase!=='playing'){rocketVisuals?.dispose();rocketVisuals=null;pendingImpacts=[]}
     const wasActive=controlsActive();

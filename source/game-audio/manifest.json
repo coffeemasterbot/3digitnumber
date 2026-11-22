@@ -11,5 +11,11 @@
   "coin": "coin.mp3",
   "forest": "forest.mp3",
   "kill": "kill.mp3",
-  "reload": "reload.mp3"
+  "reload": "reload.mp3",
+  "shot-pistol": "shot-pistol.mp3",
+  "shot-carbine": "shot-carbine.mp3",
+  "shot-sniper": "shot-sniper.mp3",
+  "shot-bazooka": "shot-bazooka.mp3",
+  "rocket-flight": "rocket-flight.mp3",
+  "rocket-impact": "rocket-impact.mp3"
 }

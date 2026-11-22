@@ -1,10 +1,11 @@
-import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import { MeshStandardMaterial, type Group, type Mesh } from 'three';
 import { useGameStore } from '../state/gameStore';
 import { extras } from './extras';
 import { LANES } from '../utils/constants';
 import { runnerCharacter } from './runner-character';
+import { loadRunnerAvatar, type RunnerAvatar } from './runner-avatar';
 
 const reducedMotion = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion:reduce)').matches;
 const freshPose = () => ({lane:1, jump:0, duration:.72, slide:0, y:.9, vy:0, surface:0, launch:-20});
@@ -39,6 +40,17 @@ export const Player = forwardRef<PlayerHandle>((_, ref) => {
   const last = useRef(0);
   const landing = useRef(0);
 
+  const [avatar, setAvatar] = useState<RunnerAvatar>();
+  useEffect(()=>{
+    let disposed=false;
+    let loaded:RunnerAvatar|undefined;
+    loadRunnerAvatar().then(model=>{
+      if(disposed){model.dispose();return}
+      loaded=model;
+      setAvatar(model);
+    }).catch(()=>{ /* Keep the local procedural model if WebGL cannot load the asset. */ });
+    return ()=>{disposed=true;loaded?.dispose()};
+  },[]);
   const art = useMemo(runnerCharacter, []);
   const material = useMemo(() => new MeshStandardMaterial({vertexColors:true, roughness:.76}), []);
   useEffect(() => () => {
@@ -82,7 +94,7 @@ export const Player = forwardRef<PlayerHandle>((_, ref) => {
       sync();
       movement.current.jump = 0;
       movement.current.vy = -8;
-      movement.current.slide = .8;
+      movement.current.slide = 1.1;
     },
     checkCollision: () => false,
   }), []);
@@ -128,9 +140,11 @@ export const Player = forwardRef<PlayerHandle>((_, ref) => {
     const compression = landing.current ? Math.sin(Math.PI * landing.current / .19) * .11 : 0;
     const bounce = !inAir && !sliding && !riding && !reducedMotion ? .035 * Math.abs(Math.sin(swing)) : 0;
     actor.position.y = (sliding ? .38 + s.surface : s.y) + (riding ? .13 : 0) + bounce - compression;
-    const lean = sliding ? -1.21 : inAir ? (s.vy > 0 ? .21 : -.16) : .08;
+    const leaningBack = Math.min(1, s.slide / .18);
+    const lean = sliding ? .95 * leaningBack : extras.airKind==='jetpack' ? -.68 : inAir ? (s.vy > 0 ? .21 : -.16) : -.08;
     frame.rotation.x += (lean - frame.rotation.x) * lift;
     frame.rotation.z = (LANES[s.lane] - actor.position.x) * -.18;
+    if(state.gameState==='playing')avatar?.pose(sliding||extras.airKind ? 'idle' : inAir ? (s.vy>0?'jump_up':'fall') : riding?'idle':'happy_run', reducedMotion?0:dt);
 
     for (let i = 0; i < 2; i++) {
       const step = i ? swing + Math.PI : swing;
@@ -194,6 +208,8 @@ export const Player = forwardRef<PlayerHandle>((_, ref) => {
       <meshBasicMaterial color="#233f3c" transparent opacity={.26} depthWrite={false}/>
     </mesh>
     <group ref={rig} dispose={null}>
+      {avatar && <primitive object={avatar.root}/>}
+      <group visible={!avatar}>
       <mesh geometry={art.body} material={material}/>
       <mesh geometry={art.head} material={material}/>
       <mesh geometry={art.pack} material={material}/>
@@ -215,6 +231,7 @@ export const Player = forwardRef<PlayerHandle>((_, ref) => {
           </group>
         </group>
       </group>)}
+      </group>
       <group ref={flightPack} visible={false}>
         <mesh geometry={art.flight} material={material}/>
         {[-.255, .255].map(x => <mesh key={x} position={[x, -.242, .354]}>

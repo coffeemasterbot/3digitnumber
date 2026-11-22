@@ -17,12 +17,14 @@ const jsString=value=>value.replace(/[^\x00-\x7F]/g,char=>'\\u'+char.charCodeAt(
 
 let home=fs.readFileSync(path.join(output,'index.html'),'utf8');
 home=replaceRequired(home,
-  '公開遊戲連結，不需要登入。此分享版本不設線上排行榜。',
+  '打開網址就可以直接遊玩，毋須登入或下載。',
   '呢個 GitHub Pages 版本毋須登入；遊戲最佳分數只保存在本機，不設共用排行榜。',
   'Pages score notice');
 
-fs.writeFileSync(path.join(output,'index.html'),home);
+fs.writeFileSync(path.join(output,'index.html'),home.replace('<body>','<body data-pfap-static>'));
 
+fs.writeFileSync(path.join(output,'metrics.html'),'<!doctype html><html lang="zh-HK"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>戶口三位數 · 成效</title><p><a href="https://lost-found-money-journey.cottonpatch1.chatgpt.site/metrics.html">開啟私人成效面板 / Open team metrics</a></p></html>');
+fs.rmSync(path.join(output,'metrics.js'),{force:true});
 const slideFile=path.join(output,'presentation.js');
 let slides=fs.readFileSync(slideFile,'utf8');
 slides=replaceRequired(slides,'跑酷與飛行設有所有玩家共享的線上排行榜。','跑酷與飛行的最佳分數只保存在本機。','Chinese slide leaderboard copy');
@@ -32,9 +34,10 @@ fs.writeFileSync(slideFile,slides);
 const appFile=path.join(output,'app.js');
 let app=fs.readFileSync(appFile,'utf8');
 app=replaceRequired(app,
-  '跑酷及飛行的線上排行榜會儲存及公開每局暱稱、分數、距離、難度及遊玩時間，並使用匿名識別 cookie 防止重複提交；不會上傳阿俊的故事存檔。',
-  'GitHub Pages 版本只在本機保存跑酷及飛行最佳分數，不會提交共用排行榜；不會上傳阿俊的故事存檔。',
+  '開啟公開成績後，排行榜會顯示暱稱、遊戲、模式、成績及遊玩時間，並使用匿名 cookie 識別此瀏覽器。你可以刪除由此瀏覽器發布嘅成績；阿俊嘅故事存檔留喺本機。',
+  '此版本只保留本機成績。',
   'Pages privacy copy');
+
 fs.writeFileSync(appFile,app);
 
 for(const game of ['runner','jet']){

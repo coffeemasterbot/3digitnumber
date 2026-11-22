@@ -55,7 +55,7 @@ export default function PauseMenu({ onResume, onRestart, onMenu, soundEnabled, o
         <SoundButton enabled={soundEnabled} onToggle={onSoundToggle}/>
 
         <div className="text-xs font-mono text-cyan-900 uppercase tracking-widest">
-          Press P or ESC to resume
+          按住空白鍵、W、↑ 或觸控上升，放開下降。
         </div>
       </motion.div>
     </div>

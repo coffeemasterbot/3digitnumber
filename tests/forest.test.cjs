@@ -7,7 +7,7 @@ test('Closing gates cannot leave a character embedded in a wall',()=>{const m=F.
 test('Levers require the correct character near the handle and operate distinct circuits',()=>{const m=F.level(2),red=actor(0,425),blue=actor(1,495);red.y=391;blue.y=316;assert.ok(F.lever(m,red));F.update(m,[red,blue]);assert.equal(m.doors[1].open,false);assert.ok(F.lever(m,blue));F.update(m,[red,blue]);assert.equal(m.doors[1].open,true);red.x=100;blue.x=150;F.update(m,[red,blue]);assert.equal(m.doors[1].open,true);assert.equal(m.doors[0].open,false);const wrong={...blue,x:425-14,y:391};assert.equal(F.lever(m,wrong),false)});
 test('walk-up and manual controls respect role and interaction distance',()=>{
   const map=F.temple(1);
-  const back=map.levers.find(l=>l.id==='back');
+  const back=map.levers.find(l=>l.id==='east-latch');
   const actor={x:back.x-14,y:back.y-17,type:back.type};
   const wrongRole={...actor,type:1-actor.type};
   const nearby={...actor,x:actor.x-39};

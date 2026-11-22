@@ -87,28 +87,33 @@
       coins:current.runner.cleared.length+' / 8 項街區任務',
       shipping:current.jet.length+' / 8 項飛行任務',
       defence:Object.keys(current.defence.completed).length+' / 9 項單人任務',
-      pause:'已開放至第 '+current.forest+' / 9 關',
+      pause:'共 9 關 · 挑戰解鎖',
+      instalments:'共 5 關 · 挑戰解鎖',
     };
     const list=panel.querySelector('ul');list.replaceChildren();
     for(const [key,title] of Object.entries(games)){
       const li=document.createElement('li');li.textContent=title+' · '+(scores[key]?'最佳 '+scores[key].best+' 分 · '+scores[key].plays+' 局':'未有紀錄');list.append(li);
       const progress=document.querySelector('[data-game-card="'+key+'"] [data-game-progress]');
       if(progress){
-        if(key==='instalments')try{milestones[key]=current.garden.unlocked?'已開放生存及挑戰':'已開放至第 '+gameProgress().gardenStage+' / 5 關'}catch{}
+        if(key==='instalments'&&current.garden.unlocked)milestones[key]+=' · 已開放生存及挑戰';
         const record=scores[key];
         const scoreLabel=key==='coins'||key==='shipping'?'練習最佳 ':'最佳 ';
         progress.textContent=[milestones[key],record?.plays?'已玩 '+record.plays+' 局':'',record?.best?scoreLabel+record.best+' 分':''].filter(Boolean).join(' · ');
       }
     }
-    const resume=panel.querySelector('[data-resume]');resume.hidden=!profile.recent;
+    const resume=panel.querySelector('[data-resume]');
     const homeResume=document.querySelector('[data-home-resume]');
-    homeResume.hidden=resume.hidden;
-    if(profile.recent){homeResume.textContent=resume.textContent='繼續遊玩 · '+games[profile.recent];homeResume.onclick=()=>resume.click()}
+    const recorded=Object.keys(scores).filter(key=>scores[key].plays>0);
+    const started=window.pfapScores?.lastPlayed();
+    const recent=Object.hasOwn(games,started)?started:recorded.includes(profile.recent)?profile.recent:recorded[0];
+    resume.hidden=homeResume.hidden=!recent;
+    resume.textContent=recent?'繼續遊玩 · '+games[recent]:'';
+    homeResume.textContent=recent?'▶ 繼續遊玩 · '+games[recent]:'';
+    resume.onclick=recent?()=>document.querySelector('[data-play="'+recent+'"]')?.click():null;
+    homeResume.onclick=recent?()=>resume.click():null;
   }
-  panel.querySelector('[data-resume]').onclick=()=>document.querySelector('[data-play="'+profile.recent+'"]').click();
-  document.addEventListener('click',e=>{
-    const key=e.target.closest('[data-play]')?.dataset.play;
-    if(Object.hasOwn(games,key)){profile.recent=key;save();render()}
+  window.addEventListener('pfap-played',event=>{
+    if(Object.hasOwn(games,event.detail)){profile.recent=event.detail;save();render()}
   });
   window.addEventListener('arcade-records-change',render);
   window.addEventListener('storage',event=>{

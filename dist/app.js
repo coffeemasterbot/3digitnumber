@@ -33,6 +33,7 @@ function launch(kind,habitSuggestion='',testTarget=null){
   if(!active)originFocus=document.activeElement;
   flushFrame($('game-frame'));
   active=kind;
+  if(!testTarget&&window.gameCatalogue.some(game=>game.key===kind))window.trackEvent?.('game-launch-'+kind);
   $('landing').hidden=true;
   $('play-panel').hidden=false;
   document.querySelector('footer').hidden=true;
@@ -58,6 +59,7 @@ function startCaseGame(message,storyFrame){
   storyFrame.id='case-frame';
   storyFrame.hidden=true;
   active=quest.game;
+  window.trackEvent?.('game-launch-'+quest.game);
   setPlayerTitle(quest.title,'返回案情');
   const frame=makeFrame(quest.game,'arcade-story-v1/'+caseRun.id+'/'+caseRun.runId);
   mountFrame(frame,quest.game);
@@ -128,7 +130,7 @@ function refreshCaseLabel(){
 }
 refreshCaseLabel();
 window.addEventListener('arcade-records-change',refreshCaseLabel);
-$('privacy-open').onclick=()=>showInfo('<div class="eyebrow">私隱說明</div><h2>你嘅記錄，喺你手上。</h2><p>主線進度、遊戲回顧同七日行動存在瀏覽器 localStorage。主線毋須登入。跑酷及飛行的線上排行榜會儲存及公開每局暱稱、分數、距離、難度及遊玩時間，並使用匿名識別 cookie 防止重複提交；不會上傳阿俊的故事存檔。</p><p>請勿喺行動卡填寫戶口、收入或欠款等敏感資料。下載嘅行動卡會保存在你裝置。清除網站資料會移除本機進度。</p><p>外部官方連結按其服務條款及私隱政策運作。網站託管服務本身亦可能處理基本連線記錄。</p>');
+$('privacy-open').onclick=()=>showInfo('<div class="eyebrow">私隱說明</div><h2>你嘅記錄，喺你手上。</h2><p>主線進度、遊戲回顧同七日行動存在瀏覽器 localStorage。主線毋須登入。開啟公開成績後，排行榜會顯示暱稱、遊戲、模式、成績及遊玩時間，並使用匿名 cookie 識別此瀏覽器。你可以刪除由此瀏覽器發布嘅成績；阿俊嘅故事存檔留喺本機。</p><p>網上版本用匿名瀏覽器識別碼統計訪問同正式開局，成效報表只向獲授權嘅團隊成員開放。</p><p>請勿喺行動卡填寫戶口、收入或欠款等敏感資料。下載嘅行動卡會保存在你裝置。清除網站資料會移除本機進度。</p><p>外部官方連結按其服務條款及私隱政策運作。網站託管服務本身亦可能處理基本連線記錄。</p>');
 window.addEventListener('message',e=>{
   const f=$('game-frame');
   if(e.source!==f?.contentWindow||e.origin!==location.origin&&!(window.offlineMount&&e.origin==='null'))return;
@@ -145,20 +147,3 @@ window.addEventListener('message',e=>{
 const start=location.hash.replace('#play-','');if(location.hash.startsWith('#play-')&&labels[start])launch(start);
 // Keep the iframe in sync when browser Back/Forward crosses an anchor navigation.
 window.addEventListener('popstate',()=>{const key=location.hash.replace('#play-','');if(location.hash.startsWith('#play-')&&Object.hasOwn(labels,key)){if(active!==key)launch(key)}else{if(active)leavePlay();$(location.hash.slice(1))?.scrollIntoView()}});
-
-// Read the actual URL so ?dev=1 also works in the self-contained offline edition.
-const devPanel=document.getElementById('dev-tools');
-const devEnabled=new URL(window.location.href).searchParams.get('dev')==='1';
-if(devPanel)devPanel.hidden=!devEnabled;
-const devGame=document.getElementById('dev-game'),devTarget=document.getElementById('dev-target');
-if(devGame&&devEnabled){
- for(const game of window.gameCatalogue)devGame.add(new Option(game.title,game.key));
- const options=()=>devTarget.replaceChildren(...window.arcadeDevTargets[devGame.value].map(id=>new Option(id,id)));
- devGame.onchange=options;options();
- document.getElementById('dev-start').onclick=()=>launch(devGame.value,'',devTarget.value);
- window.addEventListener('message',e=>{
-  const f=document.getElementById('game-frame'),m=e.data;
-  if(!f||e.source!==f.contentWindow||e.origin!==location.origin||m?.type!=='arcade-test-v1'||f.name!=='arcade-test-v1/'+m.game+'/'+m.target||m.runId!==f.contentWindow.arcadeTest?.runId)return;
-  const list=window.arcadeDevTargets[m.game];if(m.action==='end')home();else if(m.action==='restart'||m.action==='next')launch(m.game,'',m.action==='restart'?m.target:list[(list.indexOf(m.target)+1)%list.length]);
- });
-}

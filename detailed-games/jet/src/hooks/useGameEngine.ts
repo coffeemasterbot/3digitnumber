@@ -174,10 +174,13 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     if(equipped.current.has('shield'))playerRef.current.shieldFrames=5400;
     if(mode==="trial"&&vehicles.includes(vehicle as PowerUpType)){playerRef.current.powerUp=vehicle as PowerUpType;playerRef.current.powerUpTimer=0}
     gameStateRef.current = 'playing';
+    const board = mode === 'mission' ? 'mission-' + route.current?.id
+      : mode === 'seed' ? 'seed-' + route.current?.id : mode;
+    (window as any).arcadeRun?.start('jet', board, difficulty);
     play('start');
     play('bgm');
     syncUI();
-  }, [resetGame, play,mode,vehicle,mission,seed,tools]);
+  }, [resetGame, play,mode,vehicle,mission,seed,tools,difficulty]);
 
   function releaseThrust() {
     keyboardThrust.current.clear();
@@ -276,6 +279,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
   function finishRun() {
     gameStateRef.current = 'gameover';
     finishedAt.current = performance.now();
+    (window as any).arcadeRun?.finish(scoreRef.current, frameRef.current / 60, distanceRef.current);
     const hs = Math.max(highScoreRef.current, Math.floor(scoreRef.current));
     highScoreRef.current = hs;
     try{
@@ -453,7 +457,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
     if (p.powerUp !== 'none'&&!vehicles.includes(p.powerUp)) {
       p.powerUpTimer--;
       if (p.powerUpTimer <= 0) {
-        
+
         p.powerUp = 'none';
         p.powerUpTimer = 0;
       }
@@ -605,7 +609,7 @@ export function useGameEngine(difficulty: Difficulty, soundEnabled: boolean,mode
       }
     }
 
-    
+
     // Sync UI every 10 frames
     if (frame % 10 === 0) syncUI();
 

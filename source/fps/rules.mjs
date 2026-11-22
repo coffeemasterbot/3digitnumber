@@ -1,4 +1,12 @@
 export const SOLO_ROBOTS=Object.freeze([4,5,6]);
+const waveBoost = Object.freeze([
+  Object.freeze({movement:1,projectile:1,health:1}),
+  Object.freeze({movement:1.15,projectile:1.15,health:1.15}),
+  Object.freeze({movement:1.25,projectile:1.25,health:1.30}),
+]);
+export const soloWaveBoost = round => waveBoost[round-1] ?? waveBoost[0];
+export const needsAutoReload = state => state.ammo===0 && !state.reload &&
+  WEAPONS[state.weapon].reload>0 && state.reserves[state.weapon]>0;
 const OLD_CITY=[
 {x:0,z:-18,w:36,d:1,h:5},{x:0,z:18,w:36,d:1,h:5},{x:-18,z:0,w:1,d:36,h:5},{x:18,z:0,w:1,d:36,h:5},
 {x:-7,z:-5,w:.65,d:14,h:3.8},{x:-7,z:7,w:.65,d:2,h:3.8},{x:-7,z:11,w:.65,d:2,h:3.8},{x:7,z:4,w:.65,d:12,h:3.8},{x:7,z:-14.25,w:.65,d:3.5,h:3.8},{x:7,z:-7.75,w:.65,d:3.5,h:3.8},
@@ -9,7 +17,7 @@ const EDGE=OLD_CITY.slice(0,4);const wall=(x,z,w,d,h=3.8)=>({x,z,w,d,h});const g
 export function createMap(round=1){if(round===1)return {name:'舊城街區',walls:OLD_CITY.map(v=>({...v})),doors:oldDoors()};if(round===2)return {name:'倉庫迴廊',walls:[...EDGE,wall(-14.4,4,5.2,.65),wall(-5,4,6,.65),wall(5,4,6,.65),wall(14.4,4,5.2,.65),wall(-6,-4,.65,10),wall(6,-4,.65,10),wall(-12.5,-9,9,.65),wall(0,-9,10,.65),wall(12.5,-9,9,.65),wall(-12,9,3,2,1.15),wall(12,8,3,2,1.15),wall(0,9,2.5,2,1.15),wall(-12,-3,2,3,1.2),wall(12,-3,2,3,1.2),wall(-3,-13,2,2,1.2),wall(8,-14,2,2,1.2)],doors:[gate('west-store',-10,4,3.4,.65),gate('main-store',0,4,3.8,.65),gate('east-store',10,4,3.4,.65),gate('west-vault',-6.5,-9,2.7,.65),gate('east-vault',6.5,-9,2.7,.65)]};return {name:'花園堡壘',walls:[...EDGE,wall(-9,6,.65,14),wall(9,6,.65,14),wall(-9,-7,.65,6),wall(9,-7,.65,6),wall(0,-6,.65,10),wall(0,3,4,.65),wall(-6.5,3,3,.65),wall(6.5,3,3,.65),wall(-6,-12,7,.65),wall(6,-12,7,.65),wall(-3,10,2,2,1.1),wall(3,10,2,2,1.1),wall(-5,-5,2,2,1.1),wall(5,-6,2,2,1.1),wall(-13,7,2.5,3,1.2),wall(13,5,2.5,3,1.2)],doors:[gate('left-court',-3.5,3,2.8,.65),gate('right-court',3.5,3,2.8,.65),gate('west-passage',-9,-2.5,.65,2.8),gate('east-passage',9,-2.5,.65,2.8),gate('temple-vault',0,-12,4.8,.65)]}}
 export let WALLS=OLD_CITY;export function activateMap(round=1){const map=createMap(round);WALLS=map.walls;return map}export const makeDoors=(round=1)=>createMap(round).doors;
 export const OFFERS=[{q:'「保證回報，先轉訂金。」而基本生活費未預留。',answers:['拒絕轉帳，先保基本需要','先畀訂金，之後再諗生活費'],right:0,why:'保證回報同催促轉帳係警號。先核實資料、保住基本需要。'},{q:'今日只有 $50；$600 人工三日後先到。',answers:['當作已有 $650，今日就花','只用現有現金，確認到帳日再排支出'],right:1,why:'未到帳收入唔係今日可用現金；先安排每日需要同缺口。'},{q:'湊單免運 $300；只買需要嘅貨連運費 $205。',answers:['只買需要嘅貨，實付 $205','多買未需要嘅嘢，為咗免運付 $300'],right:0,why:'比較最後總額。唔為咗免運而多花 $95。'}];
-export const WEAPONS={pistol:{label:'手槍',mag:12,reserve:60,damage:24,cooldown:.3,reload:1.4,range:50},carbine:{label:'步槍',mag:24,reserve:96,damage:25,cooldown:.13,reload:1.8,range:55},sniper:{label:'狙擊槍',mag:5,reserve:20,damage:85,cooldown:1.3,reload:2.3,range:75},bazooka:{label:'火箭筒',mag:1,reserve:2,damage:220,splash:160,blastRadius:4.5,selfCap:50,cooldown:1.5,reload:2.5,range:55},knife:{label:'匕首',mag:0,reserve:0,damage:60,cooldown:.6,reload:0,range:2.2}};
+export const WEAPONS={pistol:{label:'手槍',mag:12,reserve:60,damage:24,cooldown:.42,reload:1.4,range:50},carbine:{label:'步槍',mag:24,reserve:96,damage:25,cooldown:.13,reload:1.8,range:55},sniper:{label:'狙擊槍',mag:5,reserve:20,damage:85,cooldown:1.3,reload:2.3,range:75},bazooka:{label:'火箭筒',mag:1,reserve:5,damage:220,splash:160,blastRadius:4.5,selfCap:50,cooldown:1.5,reload:2.5,range:55},knife:{label:'匕首',mag:0,reserve:0,damage:60,cooldown:.6,reload:0,range:2.2}};
 export function weaponStores(keys){
  return {
   magazines:Object.fromEntries(keys.map(key=>[key,WEAPONS[key].mag])),
@@ -36,7 +44,7 @@ export function tickReload(s,dt){
  const transfer=Math.min(WEAPONS[s.weapon].mag-s.ammo,s.reserves[s.weapon]);
  s.ammo+=transfer;s.reserves[s.weapon]-=transfer;
 }
-export const rocketDescription=()=>`直擊 ${WEAPONS.bazooka.damage} · 爆風中心 ${WEAPONS.bazooka.splash} · 半徑 ${WEAPONS.bazooka.blastRadius}m · 共三發，自傷上限 ${WEAPONS.bazooka.selfCap}`;
+export const rocketDescription=()=>`直擊 ${WEAPONS.bazooka.damage} · 爆風中心 ${WEAPONS.bazooka.splash} · 半徑 ${WEAPONS.bazooka.blastRadius}m · 共 ${WEAPONS.bazooka.mag+WEAPONS.bazooka.reserve} 發，自傷上限 ${WEAPONS.bazooka.selfCap}`;
 export const GEAR={bazooka:{cost:350,label:'火箭筒'},carbine:{cost:220,label:'步槍'},sniper:{cost:300,label:'狙擊槍'},kit:{cost:80,label:'快速拆解工具'}};
 export function create(){return {phase:'menu',round:1,credits:0,earned:0,spent:0,headshots:0,weaponReady:{},purchases:[],hp:100,weapon:'pistol',owned:['pistol','knife'],...weaponStores(['pistol','knife']),ammo:12,maxAmmo:12,reload:0,cooldown:0,time:95,defuse:0,verified:false,checked:false,decisionCorrect:0,attempts:0,kills:0,totalKills:0,shots:0,hits:0,melee:0,x:0,z:14,y:1.65,jumpY:0,vy:0,crouch:false,feedback:'100 生命值。利用掩體、偵察路線，再拆解財務炸彈。'}}
 export function collides(x,z,r=.34,doors=[]){return [...WALLS,...doors.filter(d=>!d.open)].some(w=>Math.abs(x-w.x)<w.w/2+r&&Math.abs(z-w.z)<w.d/2+r)}

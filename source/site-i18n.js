@@ -21,12 +21,15 @@
     }
   }
   const patterns = [
-    [/^繼續遊玩 · (.+)$/, (_,name) => 'Continue · '+lookup(name)],
+    [/^(▶ )?繼續遊玩 · (.+)$/, (_,icon,name) => (icon||'')+'Continue · '+lookup(name)],
     [/^已玩 (\d+) 局$/, (_,n) => 'Runs: '+n],
     [/^(練習最佳|最佳) (\d+) 分$/, (_,label,n) => (label==='最佳'?'Best: ':'Practice best: ')+n],
     [/^(\d+) \/ (\d+) 項(街區任務|飛行任務|單人任務)$/, (_,n,total,name) => n+' / '+total+' '+lookup(name)],
     [/^已開放至第 (\d+) \/ (\d+) 關$/, (_,n,total) => 'Unlocked: '+n+' / '+total],
     [/^第 (\d+) (幕|關|波|輪)$/, (_,n,unit) => ({幕:'Act',關:'Stage',波:'Wave',輪:'Round'}[unit])+' '+n],
+    [/^任務 (\d+)$/, (_,n) => 'Mission '+n],
+    [/^地圖 (\d+)$/, (_,n) => 'Map '+n],
+    [/^靈體 (\d+)$/, (_,n) => n+' spirits'],
     [/^神殿 · 第 (\d+) 關$/, (_,n) => 'Temple · Stage '+n],
     [/^第 (\d+)／(\d+) 關・(.+)$/, (_,n,total,mode) => 'Stage '+n+' / '+total+' · '+lookup(mode)],
     [/^(.+) (\d+)／2・(.+) (\d+)／2・(♥+)$/, (_,a,one,b,two,hp) => [defaultDuo(a)+' '+one+'/2',defaultDuo(b)+' '+two+'/2',hp].join(' · ')],
@@ -117,7 +120,7 @@
     }
     if(node.nodeType!==Node.ELEMENT_NODE||node.matches('script,style,[translate="no"]'))return;
     const records=originalAttrs.get(node)??{};
-    for(const attr of localAttrs){
+    for(const attr of node.matches('meta[data-brand-meta]')?['content']:localAttrs){
       const current=node.getAttribute(attr);
       if(current===null)continue;
       const record=localizeValue(current,records[attr]);

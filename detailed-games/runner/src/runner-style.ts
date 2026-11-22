@@ -38,7 +38,7 @@ html:fullscreen .runner-app, body:fullscreen .runner-app {
 .runner-seed button{width:auto;min-height:42px;margin:0;white-space:nowrap;padding:5px 12px}
 .runner-hud button:disabled,.runner-overlay button:disabled{opacity:.56;cursor:default}
 .runner-overlay[role=dialog] section:focus{outline:none}
-.runner-help{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:600;background:#213b33e8;padding:6px 12px;border-radius:5px;color:#fff8df;pointer-events:none}
+ .runner-pickup{position:absolute;z-index:4;top:22%;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:.45rem;pointer-events:none;background:#193b35;color:#fff5de;border:2px solid #ffd482;border-radius:1rem;padding:.55rem .85rem;box-shadow:0 10px 20px #17312a66}.runner-pickup svg{width:2rem;height:2rem}.runner-help{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:13px;font-weight:600;background:#213b33e8;padding:6px 12px;border-radius:5px;color:#fff8df;pointer-events:none}
 .runner-impact{pointer-events:none;z-index:4}
 body[data-game=runner] #shell-timer{display:none}
 @media (hover:hover) and (pointer:fine){.runner-touch{display:none}}

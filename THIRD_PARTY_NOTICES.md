@@ -69,3 +69,37 @@ FPS / 5 November 2026 upgrade:
 Original local arena, AI robots, training weapon models, procedural geometry, vector plant art and synthesized sound effects. Uses existing Three.js 0.160.1 under its retained MIT notice in games/licenses/three_0.160.1.txt.
 Architecture references: https://threejs.org/examples/games_fps.html and https://threejs.org/docs/pages/PointerLockControls.html
 No Valve, EA/PopCap or commercial-game extracted maps, sprites or sound files were added.
+
+# Additional launch assets
+
+## Change Chase
+
+The runner avatar is adapted from Mini Sophia in the [Godot 4 3D Characters Repository](https://github.com/EH-DN/3D-Characters-Repository), copyright 2023 GDQuest, under the MIT License. The model was repackaged for the browser, with four animation clips and reduced material textures.
+
+MIT License
+
+Copyright (c) 2023 GDQuest
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+## Budget Defence and Fire & Ice
+
+Budget Defence shot recordings are adapted from [Gunshot Sounds](https://opengameart.org/content/gunshot-sounds), copyright 2009 Vincent Sevedge, under the [Creative Commons Attribution 3.0 Unported License](https://creativecommons.org/licenses/by/3.0/) specified in the download. Excerpts were trimmed, level adjusted, encoded as MP3, and combined with original layers for the launcher effects.
+
+Fire & Ice uses the project-team-supplied `Video Project 2.mp3`.
