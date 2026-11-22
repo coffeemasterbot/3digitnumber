@@ -161,3 +161,25 @@ html[lang=en] #plantSelection .plantCard .name {font-size:.67rem;max-width:7.5em
   text-align: center;
   pointer-events: none;
 }
+
+/* Fit the lawn inside the available HUD and footer space in both player modes. */
+#gameContainer{container-type:size;height:100dvh;max-height:700px}
+:fullscreen #gameContainer{height:100dvh;max-height:100dvh;max-width:1600px}
+#gameContainer{
+  --lawn-top:144px;
+  --lawn-bottom:82px;
+  --lawn-gutters:122px;
+  --lawn-width:min(calc(100cqw - var(--lawn-gutters)),max(1px,calc((100cqh - var(--lawn-top) - var(--lawn-bottom)) * 1.8)));
+}
+#gameBoard{
+  box-sizing:border-box;top:var(--lawn-top)!important;bottom:auto!important;
+  left:calc((100cqw - var(--lawn-width) + 48px) / 2)!important;right:auto!important;
+  width:var(--lawn-width);height:auto;aspect-ratio:9/5;
+}
+#campaign-track{left:calc((100cqw - var(--lawn-width) + 48px) / 2);right:auto;width:var(--lawn-width)}
+@media(orientation:landscape) and (max-height:600px){
+  #gameContainer{--lawn-top:112px;--lawn-bottom:73px;--lawn-gutters:72px}
+}
+@media(orientation:landscape) and (max-height:450px){
+  #gameContainer{--lawn-top:111px;--lawn-bottom:67px}
+}

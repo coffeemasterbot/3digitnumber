@@ -293,7 +293,7 @@ function App() {
   const nextStep = costSteps[extras.deathKind] ?? '下次定個小額儲蓄目標，出糧後先留起嗰一份。';
   const paused = phase === 'paused';
   return <div className="runner-app" ref={viewport} tabIndex={-1} aria-label="散紙追蹤 3D">
-    <style>{runnerStyle}</style>
+    <style>{runnerStyle + 'html,body,#root{height:100%;margin:0}#root{display:grid;place-items:center;background:#102721}.runner-app{width:min(100vw,233.333333dvh);height:min(100dvh,75vw)}'}</style>
     {phase !== 'menu' && <div className="runner-scene">
       <SceneBoundary key={renderer} onFailure={reportFailure}>
         <Canvas frameloop={running && !renderProblem ? 'always' : 'demand'} dpr={1}

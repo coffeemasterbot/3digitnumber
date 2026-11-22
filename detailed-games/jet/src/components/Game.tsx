@@ -59,7 +59,7 @@ export default function Game() {
       const maxH = parent.clientHeight - 16;
       const scaleX = maxW / CANVAS_WIDTH;
       const scaleY = maxH / CANVAS_HEIGHT;
-      if (maxW > 0 && maxH > 0) setScale(Math.min(1.7, scaleX, scaleY));
+      if (maxW > 0 && maxH > 0) setScale(Math.min(scaleX, scaleY));
     };
     measure();
     const observer = new ResizeObserver(measure);

@@ -34,7 +34,7 @@ arcade = arcade.slice(0,arcade.lastIndexOf('})();')) + '\n' + fs.readFileSync(pa
 const freeBridge=`<script>
 (()=>{const q=new URLSearchParams(location.search),key=q.get('arcade');const standalone=['coins','shipping','instalments','pause'].includes(key);const embedded=parent!==window;const close=window.closeModal;function back(){if(embedded)parent.postMessage({type:'website-v1-back'},location.origin);else location.href='../#arcade'}
 if(standalone){enterDemo();document.body.classList.add('standalone');const finish=window.finishArcade;window.finishArcade=function(){finish();try{const r=JSON.parse(localStorage.getItem('website-v1-arcade')||'{}');if(s.arcade?.[key])r[key]={...s.arcade[key],demo:false};localStorage.setItem('website-v1-arcade',JSON.stringify(r))}catch{}};window.closeModal=function(){close();back()};window.openMini(key)}
-else if(q.has('plan')){document.body.classList.add('personal-card');render=function(){document.getElementById('app').innerHTML=planCard();const hint=window.frameElement?.dataset.habit;if(hint&&!s.habit)document.getElementById('habit').value=hint};render()}
+else if(q.has('plan')){document.body.classList.add('personal-card');render=function(){document.getElementById('app').innerHTML=planCard()};render()}
 document.getElementById('dialog').addEventListener('cancel',()=>{if(standalone)back()});
 if(!embedded){const a=document.createElement('a');a.className='site-return';a.href='../';a.textContent='← 戶口三位數 website v1';document.body.prepend(a)}
 })();</script>`;
@@ -52,7 +52,7 @@ fs.writeFileSync(path.join(dist,'story','index.html'),h);
 // Keep repair logic outside the preserved story script; load after arcade wrappers.
 h=h.replace('</body>','<script src="journey-repairs.js"></script></body>').replace('</head>','<link rel="stylesheet" href="journey-repairs.css"><link rel="icon" href="../assets/site-icon.svg" type="image/svg+xml"></head>');
 fs.writeFileSync(path.join(dist,'story','index.html'),h);
-for(const file of ['journey-core.js','journey-repairs.js','journey-repairs.css'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,'story',file));
+for(const file of ['journey-core.js','action-card.js','journey-repairs.js','journey-repairs.css'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,'story',file));
 for(const file of ['anna.html','anna.css','anna-case.js','anna.js'])fs.copyFileSync(path.join(root,'source','anna',file),path.join(dist,'story',file));
 fs.mkdirSync(path.join(dist,'games','budget-defence'),{recursive:true});
 for(const file of ['model.js','game.js','style.css'])fs.copyFileSync(path.join(root,'source','budget-defence',file),path.join(dist,'games','budget-defence',file));

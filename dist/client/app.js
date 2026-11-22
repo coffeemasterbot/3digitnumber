@@ -16,7 +16,8 @@ function makeFrame(kind,name=''){
   const frame=document.createElement('iframe');
   frame.title=labels[kind];
   frame.id='game-frame';
-  frame.allow='autoplay; fullscreen';
+  frame.allow=kind==='plan'?'autoplay; fullscreen; web-share; clipboard-write':'autoplay; fullscreen';
+  if(window.gameCatalogue.some(game=>game.key===kind))frame.dataset.arcadeGame=kind;
   if(name)frame.name=name;
   return frame;
 }

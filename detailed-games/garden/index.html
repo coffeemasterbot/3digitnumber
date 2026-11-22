@@ -1366,7 +1366,10 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
         // Update board dimensions
         function updateBoardDimensions() {
             const board = document.getElementById('gameBoard');
-            gameState.boardRect = board.getBoundingClientRect();
+            const nextRect = board.getBoundingClientRect();
+            if (!nextRect.width || !nextRect.height) return;
+            const scaleX = gameState.boardRect?.width ? nextRect.width / gameState.boardRect.width : 1;
+            gameState.boardRect = nextRect;
             const cells = board.getElementsByClassName('cell');
             if (cells.length > 0) {
                 const cellRect = cells[0].getBoundingClientRect();
@@ -1376,13 +1379,19 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
                 };
             }
             
-            // Update existing zombie and projectile positions
-            gameState.zombies.forEach(zombie => {
-                if (zombie.element) {
-                    const yPosition = gameState.boardRect.top + zombie.row * gameState.cellSize.height + gameState.cellSize.height / 2 - 20;
-                    zombie.element.style.top = yPosition + 'px';
-                }
-            });
+            // Keep live actors in the same part of the lawn after resizing.
+            for (const actor of gameState.zombies) {
+                if (!actor.element) continue;
+                actor.x *= scaleX;
+                actor.element.style.left = (nextRect.left + actor.x) + 'px';
+                actor.element.style.top = (nextRect.top + (actor.row + .5) * gameState.cellSize.height - 20) + 'px';
+            }
+            for (const projectile of gameState.projectiles) {
+                if (!projectile.element) continue;
+                projectile.x *= scaleX;
+                projectile.element.style.left = (nextRect.left + projectile.x) + 'px';
+                projectile.element.style.top = (nextRect.top + (projectile.row + .5) * gameState.cellSize.height - 10) + 'px';
+            }
         }
 
         // Setup Event Listeners

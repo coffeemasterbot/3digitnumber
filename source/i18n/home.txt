@@ -53,7 +53,6 @@
 可能係第四日。|might be day four.
 記帳寫咗三日就停？今次，唔使追求完美。|Did you stop tracking expenses after three days? This time, keep it manageable.
 完成故事，揀一個細到做得到嘅行動，試足七日。|Finish the story, pick one small action and try it for seven days.
-我的七日行動|My seven-day action
 一個細到做得到嘅開始|One small step
 每晚刷牙之後，|Each evening after brushing my teeth,
 記低一筆支出。|I'll record one expense.
@@ -262,3 +261,6 @@ B 結餘|B balance
 完成挑戰，返回案情|Finish challenge and return to the case
 返回案情|Back to the case
 挑戰完成|Challenge complete
+我的七日行動|My 7-Day Action
+30 秒揀一個微習慣，試足 7 日，跨過最難第 4 日。|Pick one tiny habit in 30 seconds and try it for seven days, including the tricky fourth day.
+開始七日行動|Start my 7-day action

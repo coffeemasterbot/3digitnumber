@@ -10,13 +10,13 @@
 
 
 .audio-toggle{display:flex;align-items:center;gap:12px;padding:12px 0;font-size:.95rem}.audio-toggle input{width:20px;height:20px;accent-color:#366b55}.audio-range{display:block;font-size:.8rem;color:#78685d;padding:0 0 18px}.audio-range output{float:right}.audio-range input{display:block;width:100%;margin-top:12px;accent-color:#db6a32}#audio-button{white-space:nowrap}@media(max-width:480px){.top{flex-wrap:wrap;gap:2px}.top-actions{margin-left:auto}.brand{width:100%}}
-</style><style>.arcade-status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:14px 0;font-size:.9rem}.arcade-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.arcade-controls .btn{font-size:.85rem;padding:10px 14px;min-height:44px;touch-action:none}#arcade-canvas{display:block;width:100%;max-width:600px;height:auto;border:1px solid #d5bea1;border-radius:18px;touch-action:none;margin:auto;outline-offset:4px}.arcade-board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:16px}.arcade-tile{border:2px solid transparent;border-bottom:4px solid #baa58f;border-radius:10px;padding:13px 0;min-height:48px;color:#362a24;font-size:.82rem;font-weight:700}.arcade-tile.picked{outline:3px solid #366b55;outline-offset:1px;transform:translateY(-3px)}@media(max-width:480px){.arcade-tile{font-size:.7rem;min-height:44px;padding:9px 0}.arcade-board{gap:4px}}</style><style>#print-card{display:none}.personal-card :is(.top,.hud,#chapters,.footer){display:none}#card-copy{width:100%;min-height:14em}@media print{body:has(#print-card)>:not(#print-card){display:none!important}#print-card{display:block;white-space:pre-wrap;overflow-wrap:anywhere;color:black;background:white}}</style></head>
+</style><style>.arcade-status{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:14px 0;font-size:.9rem}.arcade-controls{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}.arcade-controls .btn{font-size:.85rem;padding:10px 14px;min-height:44px;touch-action:none}#arcade-canvas{display:block;width:100%;max-width:600px;height:auto;border:1px solid #d5bea1;border-radius:18px;touch-action:none;margin:auto;outline-offset:4px}.arcade-board{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;margin-top:16px}.arcade-tile{border:2px solid transparent;border-bottom:4px solid #baa58f;border-radius:10px;padding:13px 0;min-height:48px;color:#362a24;font-size:.82rem;font-weight:700}.arcade-tile.picked{outline:3px solid #366b55;outline-offset:1px;transform:translateY(-3px)}@media(max-width:480px){.arcade-tile{font-size:.7rem;min-height:44px;padding:9px 0}.arcade-board{gap:4px}}</style><style>#print-card{display:none}.personal-card :is(.top,.hud,#chapters,.footer){display:none}#card-copy{width:100%;min-height:10em}</style></head>
 <body><div class="top"><div class="brand">人生失物認領處 <span style="font-weight:400">／ CASE 0409</span></div><div class="top-actions"><button class="textbtn" onclick="window.pauseShift()">休息</button><button class="textbtn" onclick="window.openJournal()">案情簿 <span id="clue-count">0</span></button><button class="textbtn" onclick="window.judgeTools()">評審工具</button></div></div>
 <div id="demo" class="demo" hidden>評審預覽 · 唔會改玩家紀錄 <button class="textbtn" onclick="window.exitDemo()">返回玩家</button></div>
 <header class="hud"><div class="hud-inner"><div class="hud-left"><div class="hud-time" id="clock">22:10</div><div class="hud-bank">阿俊可用餘額<br><strong id="balance">待查</strong></div></div><nav class="chapters" aria-label="四幕故事" id="chapters"></nav></div></header>
 <main class="layout" id="app" tabindex="-1"></main><footer class="footer"><span id="save-status" class="save">進度只存喺呢個瀏覽器</span><span>虛構個案 · 可以慢慢討論 <button class="textbtn" onclick="window.aboutGame()">關於遊戲</button></span></footer>
 <dialog id="dialog" aria-labelledby="modal-title"><div class="modal-head"><strong id="modal-title"></strong><button class="textbtn" aria-label="關閉" onclick="window.closeModal()">關閉</button></div><div class="modal-body" id="modal-body"></div></dialog><div id="toast" class="toast" role="status" hidden></div>
-<script src="journey-core.js"></script><script>
+<script src="journey-core.js"></script><script src="action-card.js"></script><script>
 /* Local single-file edition. All inline handlers are exposed on window. */
 const KEY='life-lost-found-guided-v5';
 const ACTION_KEY='lost-found-action-v1';
@@ -82,28 +82,147 @@ window.acceptBudget=function(){const gap=Math.max(0,-Math.min(...cashflow().map(
 window.fullBudget=function(){const rows=cashflow(),gap=Math.max(0,-Math.min(...rows.map(x=>x.balance)));modal('七日現金流',`<p>起始 $50。Day ${s.delay?5:3} 入帳 $600。Day 5 電話費 $50。</p><div class="table-wrap"><table><thead><tr><th>日</th><th>入帳</th><th>當日支出</th><th>日終現金</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${r.day}</td><td>$${r.income}</td><td>$${r.cost}</td><td class="${r.balance<0?'negative':''}">$${r.balance}</td></tr>`).join('')}</tbody></table></div><p class="subtle">支出＝餐費－適用飯券＋交通＋當日電話費。全屬故事試算。</p><details style="margin-top:20px"><summary>多走一步：如果人工遲兩日？</summary><div class="actions">${btn(s.delay?'改返 Day 3 到帳':'改為 Day 5 到帳','window.delayPay()','secondary')}</div>${s.delay&&gap?`<div class="response warn">仍有 $${gap} 現金缺口。呢個版本未係可執行預算。</div>${choice('先確認收入日期、可用支援同可協商付款安排',"window.ackGap()",'唔會假設支援一定批出，亦唔會憑空加錢。')}`:''}</details>`)};
 window.delayPay=function(){s.delay=!s.delay;s.gapAck=false;s.budgetDone=false;render();window.fullBudget();$('modal-body').querySelector('details').open=true};
 window.ackGap=function(){s.gapAck=true;s.budgetDone=true;save();window.closeModal();render(true);notify('已保留缺口；支援未落實之前，呢份預算仍未可以執行。')};
-function planCard(){const p=profiles[s.profile]||profiles.N;return `<section class="focus"><div class="kicker">阿俊嘅故事之後 ／ 輪到自己</div><h2>唔使一晚變成另一個人。<br>只揀一件，聽日做得到嘅事。</h2><p class="intro">本記帳簿只寫咗三日。第 4 日唔追求完美，只練習再開始。</p><div class="surface"><span class="badge">${p[0]} ${p[1]}</span><button class="textbtn" onclick="window.profiles()">換個提醒</button><form onsubmit="event.preventDefault();window.savePersonalPlan()"><label for="habit">我會……</label><input class="input" id="habit" maxlength="120" value="${esc(s.habit)}" placeholder="${esc(p[3])}" required><label for="trigger">喺咩時候做？</label><input class="input" id="trigger" maxlength="120" value="${esc(s.trigger)}" placeholder="例如：每晚刷牙之後"><div class="actions"><button class="btn green" type="submit">${s.planStart?'更新行動':'由今日開始七日'}</button></div></form>${s.planStart?stamps():''}<div class="actions">${btn('下載行動卡','window.downloadActionCard()','secondary')}${s.planStart?btn('複製文字','window.copyCard()','secondary')+btn('列印','window.printCard()','secondary'):''}${s.planStart&&!personalCard?btn('認領返自己嘅下一步','window.finishCase()'):''}</div></div><p class="subtle">唔使填戶口、收入或者欠款。行動卡同打卡只存喺呢個瀏覽器。</p></section>`}
+const planTimings=['每晚刷牙之後','食完晚飯之後','搭車返屋企時'];
+function planText(text){return window.siteLocale?.text(text)||text}
+function defaultHabit(profile){return planText((profiles[profile]||profiles.N)[3])}
+function planCard(){
+  const profile=profiles[s.profile]?s.profile:'N';
+  const suggestion=personalCard?window.frameElement?.dataset.habit:'';
+  const choices=Object.entries(profiles).map(([key,p])=>`<button type="button" class="plan-chip" data-plan-profile="${key}" aria-pressed="${key===profile}" onclick="window.pickPlanHabit('${key}')">${p[0]} ${p[1]}</button>`).join('');
+  const timings=planTimings.map((time,i)=>`<button type="button" class="plan-chip" data-plan-time="${i}" onclick="window.pickPlanTime(${i})">${time}</button>`).join('');
+  queueMicrotask(drawPlanPreview);
+  return `<section class="plan-editor"><header><h2>我的七日行動</h2><p>揀一個微習慣，再揀幾時做。<br>每日做完就蓋印，第 4 日可以重新開始。</p></header>
+    <div class="plan-columns"><div class="plan-controls">
+      <form novalidate data-plan-profile="${profile}" onsubmit="event.preventDefault();window.savePersonalPlan()" oninput="window.refreshPlanPreview(event.target)">
+        <div class="plan-chips" role="group" aria-label="揀一個微習慣">${choices}</div>
+        <label for="habit">我會……</label><input class="input" id="habit" maxlength="120" value="${esc(s.habit||suggestion||defaultHabit(profile))}" data-plan-default="${!s.habit&&!suggestion}">
+        <label for="trigger">喺咩時候做？</label><input class="input" id="trigger" maxlength="120" value="${esc(s.trigger||planText(planTimings[0]))}" data-plan-default="${!s.trigger}">
+        <div class="plan-chips" role="group" aria-label="揀個時間">${timings}</div>
+        <button class="btn green" id="plan-save" type="submit">${s.planStart?'更新行動':'由今日開始七日'}</button>
+      </form>${s.planStart?stamps():''}
+      <div class="plan-exports">${btn('📲 直接開 IG Story 分享','window.sharePlanCard()','plan-share')}${btn('📄 下載精美行動卡 PDF','window.downloadActionCard()','secondary')}${btn('📋 複製 IG 打卡文案','window.copyHabitStory()','secondary')}</div>
+      ${s.planStart&&!personalCard?btn('認領返自己嘅下一步','window.finishCase()'):''}
+      <p class="subtle">行動同印仔只存喺呢個瀏覽器。</p>
+    </div><div class="plan-preview"><h3>行動卡預覽</h3><canvas id="plan-preview" width="1080" height="1920" role="img"></canvas></div></div></section>`;
+}
+function readPlanCard(){
+  const habit=$('habit'), timing=$('trigger');
+  const profile=habit?.form?.dataset.planProfile||s.profile;
+  return { profile, action:habit?.value.trim()||s.habit||defaultHabit(profile), timing:timing?.value.trim()||s.trigger||planText(planTimings[0]), tag:planText((profiles[profile]||profiles.N)[1]), stamps:s.stamps, demo, en:window.siteLocale?.language==='en' };
+}
+function drawPlanPreview(){
+  const canvas=$('plan-preview');
+  if(!canvas)return;
+  const card=readPlanCard();
+  ActionCard.draw(canvas,card);
+  canvas.setAttribute('aria-label',card.en?'When '+card.timing+', I will '+card.action:'當 '+card.timing+'，我會 '+card.action);
+}
+window.refreshPlanPreview=function(field){
+  if(field?.matches('#habit,#trigger'))field.dataset.planDefault='false';
+  drawPlanPreview();
+};
+window.pickPlanHabit=function(profile){
+  if(!profiles[profile])return;
+  const field=$('habit');
+  field.form.dataset.planProfile=profile;
+  field.value=defaultHabit(profile);
+  field.dataset.planDefault='true';
+  field.form.querySelectorAll('button[data-plan-profile]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.planProfile===profile)));
+  drawPlanPreview();
+};
+window.pickPlanTime=function(index){
+  const field=$('trigger');
+  field.value=planText(planTimings[index]);
+  field.dataset.planDefault=String(index);
+  drawPlanPreview();
+};
+new MutationObserver(()=>{
+  const habit=$('habit'), timing=$('trigger');
+  if(habit?.dataset.planDefault==='true')habit.value=defaultHabit(habit.form.dataset.planProfile);
+  if(timing&&timing.dataset.planDefault!=='false')timing.value=planText(planTimings[Number(timing.dataset.planDefault)||0]);
+  drawPlanPreview();
+}).observe(document.documentElement,{attributes:true,attributeFilter:['lang']});
 function stamps(){return `<div class="rule"></div><p>當 <strong>${esc(s.trigger)}</strong>，我會 <strong>${esc(s.habit)}</strong>。</p><div class="habit-grid">${s.stamps.map((stamp,i)=>`<button class="stamp ${i===3?'day4':''} ${stamp?'marked':''}" aria-pressed="${!!stamp}" ${!demo&&i>elapsed()?'disabled':''} onclick="window.toggleHabitDay(${i},event)"><small>DAY ${i+1}</small><span>${stamp?'💮':i===3?'🌱':'○'}</span>${i===3?'再開始':stamp?'已記錄':'一小步'}</button>`).join('')}</div><p class="subtle">${demo?'評審示範蓋印，唔係真實完成紀錄。':`由 ${esc(s.planStart)} 開始。到當日先解鎖；錯過可以如實補記。`}</p>`}
-window.savePersonalPlan=function(){const habit=$('habit').value.trim(),trigger=$('trigger').value.trim()||'每晚刷牙之後';if(!habit)return notify('揀一件細到做得到嘅事。');s.habit=habit.slice(0,120);s.trigger=trigger.slice(0,120);s.planStart=s.planStart||hkDate();if(personalCard)save(true);render();window.spawnFloatingBadge('由下一筆開始')};
-window.toggleHabitDay=function(i,e){if(!Number.isInteger(i)||i<0||i>6||!s.planStart)return;if(!demo&&i>elapsed())return;s.stamps[i]=s.stamps[i]?null:{date:hkDate(),backfill:i<elapsed(),demo};if(personalCard)save(true);render();if(s.stamps[i])window.spawnFloatingBadge(demo?'示範蓋印':'記低咗一小步','',e);if(s.stamps.every(Boolean))window.fireConfetti()};
+window.savePersonalPlan=function(){
+  const card=readPlanCard();
+  s.habit=card.action.slice(0,120);s.trigger=card.timing.slice(0,120);s.profile=card.profile;
+  s.planStart=s.planStart||hkDate();save(true);render();$('plan-save')?.focus({preventScroll:true});
+  notify(planText('由下一筆開始'));
+};
+window.toggleHabitDay=function(i){
+  if(!Number.isInteger(i)||i<0||i>6||!s.planStart||!demo&&i>elapsed())return;
+  s.stamps[i]=s.stamps[i]?null:{date:hkDate(),backfill:i<elapsed(),demo};
+  if(personalCard)save(true);
+  render();
+  document.querySelectorAll('.stamp')[i]?.focus({preventScroll:true});
+  if(s.stamps[i])notify(planText(demo?'示範蓋印':'記低咗一小步'));
+  if(s.stamps.every(Boolean))window.fireConfetti();
+};
 window.finishCase=function(){if(!s.planStart)return;s.complete=true;render(true);window.fireConfetti()};
 function ending(){return `<section class="scene"><div class="copy"><div class="kicker">#0409 ／ 已有人同行</div><h2>「本簿，<br>我想拎返。」</h2><p>阿俊冇突然多咗錢。帳單亦未消失。但佢願意打開本簿，同一個信任嘅人，睇下一筆。</p><div class="response good">你帶畀佢嘅：<br>${s.witnesses.includes(2)?'睇見付款背後嘅委屈。':s.witnesses.includes(1)?'睇見佢想保住嘅關係。':'先聽需要，再作判斷。'}<br>${s.repairs?'講錯咗，仍然願意修補。':'留低一個可以繼續講嘅位置。'}<br>${s.gapAck?'唔假裝缺口已經解決，先確認支援。':'將未來收入，同今日可用嘅錢分清楚。'}</div><div class="actions">${btn('保留我嘅行動卡','window.downloadActionCard()')}${btn('返去七日打卡','window.returnPlan()','secondary')}</div><p class="subtle">最後同同伴講一句：你曾經以為阿俊係點嘅人？依家有咩唔同？</p></div><div class="visual surface"><div class="big-icon">📒</div><div class="kicker">唔係清零，而係重新開始</div><h3>三日之後，<br>仲有第四日。</h3><div class="rule"></div><p>當 ${esc(s.trigger)}，<br>我會 ${esc(s.habit)}。</p><div class="tags"><span class="tag">七日後，再睇有冇做到</span></div></div></section>`}
 window.returnPlan=function(){s.complete=false;render(true)};
-function actionCardText(){const review=new Date(s.planStart+'T12:00:00Z');review.setUTCDate(review.getUTCDate()+6);
-if(window.siteLocale?.language==='en'){
- const t=window.siteLocale.text;
- return ['Lost & Found | Seven-day action card',demo?'Demo check-ins':'Local player plan',
-  'Start: '+s.planStart,'Review: '+review.toISOString().slice(0,10),
-  'At '+s.trigger+', I will '+s.habit,'Reminder: '+t((profiles[s.profile]||profiles.N)[1]),'',
-  ...s.stamps.map((stamp,i)=>'Day '+(i+1)+': '+(stamp?(demo||stamp.demo?'Demo':(stamp.backfill?'Backfilled ':'Recorded ')+stamp.date):'Not recorded')),
-  '', 'If you stop tracking, start again with the next expense.',
-  'This plan stays on your device.',
-  'Debt counselling: https://www.ifec.org.hk/web/tc/moneyessentials/debts-and-borrowing/manage-exist-debt/counselling.page'].join('\n');
+function actionCanvas(card){
+  const canvas=document.createElement('canvas');
+  if(!ActionCard.draw(canvas,card))throw Error('Canvas unavailable');
+  return canvas;
 }
-const lines=['人生失物認領處｜七日行動卡',demo?'【評審示範，並非真實完成紀錄】':'本機玩家計劃','開始：'+s.planStart,'檢視：'+review.toISOString().slice(0,10),'當 '+s.trigger+'，我會 '+s.habit+'。','提醒：'+(profiles[s.profile]||profiles.N)[1],'',...s.stamps.map((x,i)=>`Day ${i+1}${i===3?' 三日之後，再開始':''}：${x?(demo||x.demo?'示範':(x.backfill?'補記 ':'已記錄 ')+x.date):'未記錄'}`),'','記帳中斷，可以由下一筆重新開始。','計劃只存喺本機；唔係財務或心理診斷。','債務輔導資料：https://www.ifec.org.hk/web/tc/moneyessentials/debts-and-borrowing/manage-exist-debt/counselling.page'];return lines.join('\n')}
-window.copyCard=async function(){const text=actionCardText();try{await navigator.clipboard.writeText(text);notify('已複製行動卡。')}catch{modal('選取並複製行動卡','<textarea id="card-copy" readonly aria-label="行動卡文字"></textarea>');$('card-copy').value=text;$('card-copy').select()}};
-window.printCard=function(){let sheet=$('print-card');if(!sheet){sheet=document.createElement('pre');sheet.id='print-card';document.body.append(sheet)}sheet.textContent=actionCardText();window.print()};
-window.downloadActionCard=function(){if(!s.planStart)return notify('先揀一個想試嘅小行動。');const url=URL.createObjectURL(new Blob([actionCardText()],{type:'text/plain;charset=utf-8'}));const a=document.createElement('a');a.href=url;a.download=window.siteLocale?.language==='en'?'lost-found-action-card'+(demo?'-demo':'')+'.txt':'人生失物認領處_七日行動卡'+(demo?'_示範':'')+'.txt';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};
+function copyPlanText(text){
+  try{return navigator.clipboard.writeText(text).then(()=>true,()=>false)}catch{return Promise.resolve(false)}
+}
+function showPlanCopy(text,withInstagram=false){
+  modal('選取並複製文字','<textarea id="card-copy" readonly aria-label="IG 打卡文字"></textarea>'+(withInstagram?'<p><a href="https://www.instagram.com/poor_guysssss/" target="_blank" rel="noopener">打開 Instagram ↗</a></p>':''));
+  $('card-copy').value=text;
+  $('card-copy').focus();
+  $('card-copy').select();
+}
+window.copyHabitStory=async function(){
+  const card=readPlanCard();
+  const completed=card.demo?0:card.stamps.filter(stamp=>stamp&&!stamp.demo).length;
+  const caption=[card.en?'My 7-Day Action':'戶口三位數｜七日行動',card.en?'When '+card.timing+', I will '+card.action:'當 '+card.timing+'，我會 '+card.action,card.en?completed+'/7 days recorded':'已完成 '+completed+'／7 日',ActionCard.handle].join('\n');
+  if(await copyPlanText(caption))notify(planText('已複製 IG 打卡文案。'));
+  else showPlanCopy(caption);
+};
+window.downloadActionCard=function(){
+  try{ActionCard.download(ActionCard.pdf(actionCanvas(readPlanCard())),'戶口三位數_poor_guysssss_七日行動卡.pdf')}
+  catch{notify(planText('暫時未能製作圖卡，請再試一次。'))}
+};
+window.sharePlanCard=async function(){
+  let file;
+  try{
+    const data=actionCanvas(readPlanCard()).toDataURL('image/png').split(',')[1];
+    file=new File([Uint8Array.from(atob(data),char=>char.charCodeAt(0))],'poor_guysssss_7-day-action.png',{type:'image/png'});
+  }catch{notify(planText('暫時未能製作圖卡，請再試一次。'));return}
+  const copied=copyPlanText(ActionCard.handle);
+  const share={files:[file],title:'戶口三位數 7日行動卡'};
+  const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+  try{
+    if(mobile&&navigator.canShare?.(share)){
+      await navigator.share(share);
+      if(!await copied)showPlanCopy(ActionCard.handle);
+      return;
+    }
+  }catch(error){if(error.name==='AbortError')return}
+  ActionCard.download(file,file.name);
+  const instagram='https://www.instagram.com/poor_guysssss/';
+  // Open within the click gesture so popup blockers permit the fallback.
+  const tab=window.open('about:blank','_blank');
+  if(tab){
+    tab.opener=null;
+    if(mobile)tab.location.href='instagram://story-camera';
+    setTimeout(()=>{
+      try{if(!tab.closed&&tab.location.href==='about:blank'&&(!mobile||tab.document.visibilityState==='visible'))tab.location.href=instagram}catch{}
+    },900);
+  }
+  if(await copied){
+    notify(planText('已存好 9:16 圖卡並複製 @poor_guysssss，直接喺 IG 上載出 Story！'));
+    if(!tab){
+      const link=document.createElement('a');
+      link.href=instagram;link.target='_blank';link.rel='noopener';
+      link.textContent=planText('打開 Instagram ↗');
+      $('toast').append(' ',link);
+    }
+  }else showPlanCopy(ActionCard.handle,true);
+};
 window.jumpToStage=function(n,judge=false){if(!Number.isInteger(n)||n<1||n>4)return;if(judge)enterDemo();if(n>s.unlocked&&!demo)return notify('跟住眼前嘅線索先行落去。');s.started=true;s.stage=n;render(true)};
 window.openJournal=function(){modal('案情簿 ／ 你真正知道嘅事',`${s.clues.length?s.clues.map(k=>`<div class="journal-entry"><strong>${evidence[k].icon} ${evidence[k].name}</strong><p>${evidence[k].quote}。${evidence[k].detail}</p><button class="textbtn" onclick="window.inspectClue('${k}')">重看證物 ↗</button></div>`).join(''):'<p>箱仲未打開。先由一件失物開始。</p>'}${s.witnesses.length?'<div class="rule"></div><h3>聽過嘅說話</h3>'+s.witnesses.map(i=>`<div class="journal-entry"><strong>${witnesses[i].name}</strong><p>${witnesses[i].quote}</p></div>`).join(''):''}<div class="rule"></div><p class="subtle">故事時間會因調查而推進，唔會按你閱讀嘅速度倒數。未查清楚嘅事，可以帶住問題去問。</p>`)};
 window.pauseShift=function(){modal('休息一下，個故事會等你',`<p>放低裝置，飲啖水。進度會留喺呢個瀏覽器。</p><p class="subtle">故事涉及債務同情緒困擾。你可以用旁白代替真人演繹，唔使分享自己嘅財務經歷。</p><div class="actions">${btn('準備好，再繼續','window.closeModal()')}</div>`)};
@@ -241,7 +360,7 @@ const helpTexts={
  followup:['呢段係故事中嘅第四日。先讀訊息，再揀一個你願意跟進嘅方法。','故事模擬唔會替你本人打卡。三個方向會帶出唔同尾聲。'],
  ending:['故事已完成。你可以下載行動卡，亦可以返回七日格。','想知點解行到呢個結局，可以打開「回望我嘅選擇」。']
 };
-window.guideHelp=function(){const ctx=guideContext==='stage'?currentGuide()[2]:guideContext;guideLevel=0;window.showGuideHint(ctx)};
+window.guideHelp=function(){const ctx=personalCard?'plan':guideContext==='stage'?currentGuide()[2]:guideContext;guideLevel=0;window.showGuideHint(ctx)};
 window.showGuideHint=function(ctx){lastHelpContext=ctx;const lines=helpTexts[ctx]||helpTexts.mini;const text=lines[Math.min(guideLevel,lines.length-1)];if($('dialog').open){let box=$('modal-body').querySelector('#inline-guide');if(!box){box=document.createElement('aside');box.id='inline-guide';box.className='inline-guide';$('modal-body').prepend(box)}box.innerHTML=`<strong>呢一步點做</strong><p>${text}</p>${guideLevel<lines.length-1?'<button class="textbtn" onclick="window.moreGuideHint()">再講清楚少少 ↗</button>':''}<button class="textbtn" onclick="window.dismissGuideHint()">收起提示</button>`;box.scrollIntoView({block:'nearest',behavior:'instant'});return}const existing=$('app').querySelector('#inline-guide');if(existing)existing.remove();const box=document.createElement('aside');box.id='inline-guide';box.className='inline-guide in-page';box.innerHTML=`<strong>呢一步點做</strong><p>${text}</p>${guideLevel<lines.length-1?'<button class="textbtn" onclick="window.moreGuideHint()">再講清楚少少 ↗</button>':''}<button class="textbtn" onclick="window.dismissGuideHint()">收起提示</button>`;const anchor=$('app').querySelector('.next-guide');if(anchor)anchor.after(box);else $('app').prepend(box);box.scrollIntoView({block:'nearest',behavior:'instant'})};
 window.moreGuideHint=function(){guideLevel++;window.showGuideHint(lastHelpContext)};
 window.dismissGuideHint=function(){const root=$('dialog').open?$('modal-body'):$('app');root.querySelector('#inline-guide')?.remove()};
