@@ -52,7 +52,7 @@
 最難嗰日，|The hardest day
 可能係第四日。|might be day four.
 記帳寫咗三日就停？今次，唔使追求完美。|Did you stop tracking expenses after three days? This time, keep it manageable.
-完成故事，揀一個細到做得到嘅行動，試足七日。|Finish the story, pick one small action and try it for seven days.
+完成故事，揀一個細到做得到嘅行動，試足十四日。|Finish the story, pick one small action and try it for fourteen days.
 一個細到做得到嘅開始|One small step
 每晚刷牙之後，|Each evening after brushing my teeth,
 記低一筆支出。|I'll record one expense.
@@ -80,7 +80,7 @@ Academic Building · 1103 室|Academic Building · Room 1103
 邀請朋友，一齊試玩。|Invite friends to play
 打開網址就可以直接遊玩，毋須登入或下載。|Play directly in your browser. No sign-in or download required.
 打開網址就可以直接遊玩。共用排行榜設喺完整網站。|Play directly in your browser. Visit the full website for shared leaderboards.
-戶口三位數係香港科技大學理財企劃。走入阿俊嘅故事，試玩五款理財遊戲，再為自己留低七日行動。|poor_guysssss is an HKUST financial education project. Explore Ah Jun’s story, try five money games and plan your next seven days.
+戶口三位數係香港科技大學理財企劃。走入阿俊嘅故事，試玩五款理財遊戲，再為自己留低十四日行動。|poor_guysssss is an HKUST financial education project. Explore Ah Jun’s story, try five money games and plan your next fourteen days.
 香港科技大學理財企劃 · 戶口三位數|HKUST Financial Education · poor_guysssss
 共 5 關 · 挑戰解鎖|5 Stages · Unlock as You Play
 共 9 關 · 挑戰解鎖|9 Stages · Unlock as You Play
@@ -200,7 +200,7 @@ Academic Building · 1103 室|Academic Building · Room 1103
 套用匯入|Apply import
 取消匯入|Cancel import
 帶去行動卡嘅建議（可以改）|Suggestion for your action card (editable)
-開啟我的七日行動卡 →|Open my seven-day action card →
+開啟我的十四日行動卡 →|Open my fourteen-day action card →
 手上現金|Cash on hand
 預計收入|Expected income
 到帳日（1–7）|Payment day (1–7)
@@ -253,7 +253,7 @@ B 結餘|B balance
 主線故事|Main story
 已查看證物|Evidence examined
 有紀錄嘅遊戲|Games with records
-七日行動|Seven-day action
+十四日行動|Fourteen-day action
 進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。|Progress is kept in this browser. Download backups from the investigation or arcade.
 已複製 / Link copied|Link copied
 請複製已選取的網址 / Copy the selected URL|Copy the selected URL
@@ -261,6 +261,6 @@ B 結餘|B balance
 完成挑戰，返回案情|Finish challenge and return to the case
 返回案情|Back to the case
 挑戰完成|Challenge complete
-我的七日行動|My 7-Day Action
-30 秒揀一個微習慣，試足 7 日，跨過最難第 4 日。|Pick one tiny habit in 30 seconds and try it for seven days, including the tricky fourth day.
-開始七日行動|Start my 7-day action
+我的十四日行動|My 14-Day Action
+30 秒揀一個微習慣，試足 14 日，跨過最難第 4 日。|Pick one tiny habit in 30 seconds and try it for fourteen days, including the tricky fourth day.
+開始十四日行動|Start my 14-day action

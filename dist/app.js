@@ -1,5 +1,5 @@
 'use strict';
-const labels={story:'失物認領處',plan:'我的七日行動',...Object.fromEntries(window.gameCatalogue.map(game=>[game.key,game.title+' ／ '+game.genre.split(' / ').pop()]))};
+const labels={story:'失物認領處',plan:'我的十四日行動',...Object.fromEntries(window.gameCatalogue.map(game=>[game.key,game.title+' ／ '+game.genre.split(' / ').pop()]))};
 const $=id=>document.getElementById(id);let active=null,originFocus=null;
 function read(key,fallback){try{const value=JSON.parse(localStorage.getItem(key));return value&&typeof value==='object'&&!Array.isArray(value)?value:fallback}catch{return fallback}}
 function caseProgress(){
@@ -93,7 +93,7 @@ document.querySelector('[data-progress]').onclick=()=>{
   const current=caseProgress(),action=read('lost-found-action-v1',read('life-lost-found-guided-v5',{})),free=read('website-v1-arcade',{});
   const progress=current?.completed?'已結案':current?.act?'第 '+current.act+' 幕':'未開始';
   const days=Array.isArray(action.stamps)?action.stamps.filter(stamp=>stamp&&!stamp.demo).length:0;
-  showInfo(`<h2>我的旅程</h2><div class="progress-row">主線故事 <span class="progress-value">${progress}</span></div><div class="progress-row">已查看證物 <span class="progress-value">${current?.clues.length||0}</span></div><div class="progress-row">有紀錄嘅遊戲 <span class="progress-value">${Object.keys(free).length} / 5</span></div><div class="progress-row">七日行動 <span class="progress-value">${days} / 7 日</span></div><p>進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。</p><div class="buttons"><button class="primary" id="resume-progress">${current?.act?'繼續調查':'開始調查'}</button></div>`);
+  showInfo(`<h2>我的旅程</h2><div class="progress-row">主線故事 <span class="progress-value">${progress}</span></div><div class="progress-row">已查看證物 <span class="progress-value">${current?.clues.length||0}</span></div><div class="progress-row">有紀錄嘅遊戲 <span class="progress-value">${Object.keys(free).length} / 5</span></div><div class="progress-row">十四日行動 <span class="progress-value">${days} / 14 日</span></div><p>進度儲存喺目前瀏覽器。調查同遊戲大廳都可以下載備份。</p><div class="buttons"><button class="primary" id="resume-progress">${current?.act?'繼續調查':'開始調查'}</button></div>`);
   $('resume-progress').onclick=()=>{$('info-dialog').close();launch('story');};
 };
 function refreshCaseLabel(){
@@ -103,7 +103,7 @@ function refreshCaseLabel(){
 }
 refreshCaseLabel();
 window.addEventListener('arcade-records-change',refreshCaseLabel);
-$('privacy-open').onclick=()=>showInfo('<div class="eyebrow">私隱說明</div><h2>你嘅記錄，喺你手上。</h2><p>主線進度、遊戲回顧同七日行動存在瀏覽器 localStorage。主線毋須登入。開啟公開成績後，排行榜會顯示暱稱、遊戲、模式、成績及遊玩時間，並使用匿名 cookie 識別此瀏覽器。你可以刪除由此瀏覽器發布嘅成績；阿俊嘅故事存檔留喺本機。</p><p>網上版本用匿名瀏覽器識別碼統計訪問同正式開局，成效報表只向獲授權嘅團隊成員開放。</p><p>請勿喺行動卡填寫戶口、收入或欠款等敏感資料。下載嘅行動卡會保存在你裝置。清除網站資料會移除本機進度。</p><p>外部官方連結按其服務條款及私隱政策運作。網站託管服務本身亦可能處理基本連線記錄。</p>');
+$('privacy-open').onclick=()=>showInfo('<div class="eyebrow">私隱說明</div><h2>你嘅記錄，喺你手上。</h2><p>主線進度、遊戲回顧同十四日行動存在瀏覽器 localStorage。主線毋須登入。開啟公開成績後，排行榜會顯示暱稱、遊戲、模式、成績及遊玩時間，並使用匿名 cookie 識別此瀏覽器。你可以刪除由此瀏覽器發布嘅成績；阿俊嘅故事存檔留喺本機。</p><p>網上版本用匿名瀏覽器識別碼統計訪問同正式開局，成效報表只向獲授權嘅團隊成員開放。</p><p>請勿喺行動卡填寫戶口、收入或欠款等敏感資料。下載嘅行動卡會保存在你裝置。清除網站資料會移除本機進度。</p><p>外部官方連結按其服務條款及私隱政策運作。網站託管服務本身亦可能處理基本連線記錄。</p>');
 window.addEventListener('message',e=>{
   const f=$('game-frame');
   if(e.source!==f?.contentWindow||e.origin!==location.origin&&!(window.offlineMount&&e.origin==='null'))return;

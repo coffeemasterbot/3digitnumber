@@ -1,6 +1,18 @@
 const {test}=require('node:test'),assert=require('node:assert/strict'),C=require('../source/journey-core.js');
 const defaults={version:6,started:false,stage:1,unlocked:1,minutes:0,clues:[],witnesses:[],mini:{},talk:0,repairs:0,talkOutcome:'',budgetStep:0,basic:false,vouchers:false,budgetDone:false,habit:'',trigger:'',planStart:'',stamps:Array(7).fill(null),profile:'N',complete:false,openingChoice:'',route:'',delay:false,gapAck:false};
 test('valid v5 migrates, deduplicates clues, and caps unlocked progress',()=>{const s=C.validate({...defaults,version:5,clues:['phone','phone'],stage:4,unlocked:4},defaults);assert.equal(s.version,6);assert.deepEqual(s.clues,['phone']);assert.equal(s.stage,1)});
+test('seven-day action saves retain their check-ins and can record day 14',()=>{
+ const stamp={date:'2026-11-23',backfill:false,demo:false};
+ const legacy={...defaults,planStart:'2026-11-17',habit:'Record one expense',stamps:[...Array(6).fill(null),stamp]};
+ const load=value=>C.load({getItem:()=>JSON.stringify(value)},defaults);
+ const {state,status}=load(legacy);
+ assert.equal(status,'ready');
+ assert.equal(state.planStart,legacy.planStart);
+ assert.equal(state.habit,legacy.habit);
+ assert.deepEqual(state.stamps,[...legacy.stamps,...Array(7).fill(null)]);
+ state.stamps[13]={...stamp,date:'2026-11-30'};
+ assert.deepEqual(load(state).state.stamps,state.stamps);
+});
 test('corrupted, future and typed-invalid saves preserve original data',()=>{for(const raw of ['{',JSON.stringify({...defaults,version:90}),JSON.stringify({...defaults,mini:null}),JSON.stringify({...defaults,kit:'x'}),JSON.stringify({...defaults,stamps:[{}]})]){const r=C.load({getItem:()=>raw},defaults);assert.equal(r.status,'recovery');assert.equal(r.raw,raw)}});
 test('blocked storage and missing save support a playable fresh state',()=>{assert.equal(C.load({getItem(){throw Error()}},defaults).status,'unavailable');assert.equal(C.load({getItem:()=>null},defaults).status,'new')});
 test('inconsistent save cannot use plan link to skip prerequisites',()=>{const s=C.validate({...defaults,stage:4,unlocked:4,budgetDone:true},defaults);assert.equal(s.stage,1);assert.equal(s.budgetDone,false)});

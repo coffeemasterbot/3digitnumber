@@ -55,7 +55,7 @@ window.ActionCard = (() => {
     }
     rect(124, 100, 832, 74, 36, ink);
     label('HKUST 戶口三位數 · poor_guysssss', 540, 148, 34, paper);
-    label(en ? 'My 7-Day Action' : '我的七日行動', 540, 337, en ? 80 : 96);
+    label(en ? 'My 14-Day Action' : '我的十四日行動', 540, 337, en ? 80 : 96);
     rect(92, 402, 896, 62, 15, '#f5d8bc');
     label('Personal Finance Ambassador Programme 2026–27 · 人生財開始', 540, 443, 24);
 
@@ -91,15 +91,21 @@ window.ActionCard = (() => {
     while (rows.length * size * 1.3 > 324 && size > 23) rows = wrap(--size);
     rows.forEach((row, i) => label(row, 540, 814 + (i - (rows.length - 1) / 2) * size * 1.3, size, paper));
 
-    for (let day = 0; day < 7; day++) {
-      const x = day < 4 ? 116 + day * 218 : 225 + (day - 4) * 218;
-      const y = day < 4 ? 1070 : 1307;
+    for (let day = 0; day < card.stamps.length; day++) {
+      const rowStart = Math.floor(day / 4) * 4;
+      const rowCount = Math.min(4, card.stamps.length - rowStart);
+      const x = 540 - (rowCount * 218 - 24) / 2 + (day - rowStart) * 218;
+      const y = 1048 + Math.floor(day / 4) * 144;
       const stamp = card.stamps[day];
       const restart = day === 3;
-      rect(x, y, 194, 209, 24, restart ? '#f5d8bc' : '#e2ead9');
-      label('DAY ' + (day + 1), x + 97, y + 49, 25);
+      rect(x, y, 194, 130, 18, restart ? '#f5d8bc' : '#e2ead9');
+      label('DAY ' + (day + 1), x + 97, y + 32, 25);
       ctx.strokeStyle = restart ? '#a34a22' : ink;
       ctx.lineWidth = 5;
+      ctx.save();
+      ctx.translate(x + 97, y + 67);
+      ctx.scale(.73, .73);
+      ctx.translate(-x - 97, -y - 103);
       ctx.beginPath();
       ctx.arc(x + 97, y + 103, 27, 0, Math.PI * 2);
       ctx.stroke();
@@ -116,10 +122,11 @@ window.ActionCard = (() => {
         ctx.quadraticCurveTo(x + 114, y + 103, x + 98, y + 107);
       }
       ctx.stroke();
-      label(restart ? (en ? 'Start again' : '再開始') : stamp ? (en ? 'Recorded' : '已打卡') : (en ? 'One step' : '一小步'), x + 97, y + 176, 25);
+      ctx.restore();
+      label(restart ? (en ? 'Start again' : '再開始') : stamp ? (en ? 'Recorded' : '已打卡') : (en ? 'One step' : '一小步'), x + 97, y + 111, 24);
     }
     if (card.demo || card.stamps.some(stamp => stamp?.demo)) {
-      label(en ? 'Demo check-ins' : '示範打卡', 540, 1570, 28);
+      label(en ? 'Demo check-ins' : '示範打卡', 540, 1650, 26);
     }
     label(handle, 540, 1700, 58);
     label("HKEX Foundation · IFEC · St. James' Settlement", 540, 1782, 25);

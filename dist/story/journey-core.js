@@ -2,6 +2,7 @@
 (function(root,factory){const api=factory();if(typeof module==='object')module.exports=api;else root.JourneyCore=api})(globalThis,()=>{
  'use strict';
  const VERSION=6,KEY='life-lost-found-guided-v5'; // retain the existing storage namespace
+ const PLAN_DAYS=14;
  const clueKeys=['phone','bill','shoes','note'],miniKeys=['coins','shipping','instalments','pause'];
  const branch=()=>({timeline:[],timelineDone:false,timelineSkipped:false,timelineTries:0,social:'',socialSettled:false,kit:[],kitLocked:false,connection:'',space:false,missteps:[],followup:'',followupDone:false,endingId:'',reviewSeen:[]});
  const plain=x=>!!x&&typeof x==='object'&&!Array.isArray(x);
@@ -21,7 +22,15 @@
   if('mini' in raw&&!plain(raw.mini))throw Error('mini');
   out.mini=Object.fromEntries(miniKeys.filter(k=>raw.mini?.[k]===true).map(k=>[k,true]));
   if('arcade' in raw){if(!plain(raw.arcade))throw Error('arcade');out.arcade={};for(const k of miniKeys)if(plain(raw.arcade[k]))out.arcade[k]=Object.fromEntries(Object.entries(raw.arcade[k]).filter(([n,v])=>/^[a-zA-Z]+$/.test(n)&&((typeof v==='number'&&Number.isFinite(v))||typeof v==='boolean')))}
-  if('stamps' in raw){if(!Array.isArray(raw.stamps)||raw.stamps.length!==7)throw Error('stamps');out.stamps=raw.stamps.map(x=>{if(x===null)return null;if(!plain(x)||!date(x.date))throw Error('stamp');return {date:x.date,backfill:x.backfill===true,demo:x.demo===true}})}
+  if('stamps' in raw){
+   if(!Array.isArray(raw.stamps)||![7,PLAN_DAYS].includes(raw.stamps.length))throw Error('stamps');
+   out.stamps=Array.from({length:PLAN_DAYS},(_,i)=>{
+    const stamp=i<raw.stamps.length?raw.stamps[i]:null;
+    if(stamp===null)return null;
+    if(!plain(stamp)||!date(stamp.date))throw Error('stamp');
+    return {date:stamp.date,backfill:stamp.backfill===true,demo:stamp.demo===true};
+   });
+  }
   if(out.planStart&&!date(out.planStart))throw Error('planStart');
   const enums={social:['','honest','quiet','promise','kept','renegotiated'],connection:['','trusted','self','written'],followup:['','small','together','pause'],endingId:['','fourth','company','boundary','repair','relay'],profile:['N','A','B','C','D','E'],route:['','early','late']};
   for(const [k,values] of Object.entries(enums))if(!values.includes(out[k]))throw Error(k);
@@ -71,5 +80,5 @@
   return {availableCents:s.openingCents,pendingIncomeCents:s.pendingIncomeCents,payday:s.payday,ledger,rows,gapCents,firstDeficitDay,closingCents:balanceCents};
  }
  function project(s){return calculateCashflow(storyScenario(s))}
- return {VERSION,KEY,validate,load,branch,project,example,storyScenario,validateScenario,calculateCashflow};
+ return {VERSION,KEY,PLAN_DAYS,validate,load,branch,project,example,storyScenario,validateScenario,calculateCashflow};
 });

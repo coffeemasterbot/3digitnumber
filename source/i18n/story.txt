@@ -86,7 +86,7 @@
 比較總還款、成本、日期同支援選擇，先決定下一步。|Compare total repayments, costs, timing and available support before deciding.
 入帳同扣款時間|Timing of credits and debits
 5 號晚入帳，6 號凌晨扣款。要用完整記錄先可以解釋結餘。|The salary arrived on the evening of the fifth. The debits were early on the sixth. A full statement is needed to explain the balance.
-開始七日行動卡|Start the seven-day action card
+開始十四日行動卡|Start the fourteen-day action card
 回看案情簿|Reopen the case file
 舊手機冇電，屏幕由右上裂開。充電後要輸入六位數字。|The phone is out of power and cracked at the top right. Once charged, it asks for a six-digit PIN.
 查看銀行訊息|View the banking messages
@@ -230,7 +230,7 @@ $1.50 已經可以由三筆扣款完整解釋。|The three debits fully explain 
 我會……|I will…
 喺咩時候做？|When will I do it?
 例如：每晚刷牙之後|e.g. after brushing my teeth each evening
-由今日開始七日|Start seven days today
+由今日開始十四日|Start fourteen days today
 更新行動|Update my action
 下載行動卡|Download action card
 複製文字|Copy text
@@ -458,7 +458,7 @@ KWUN TONG ／ 3號觀景亭|KWUN TONG / Pavilion 3
 ✓ 已放入|✓ Packed
 拎起認領袋，出發|Pick up the bag and go
 袋入面已有兩件。可以先拎返一件出嚟。|The bag already has two items. You can take one out first.
-我的七日行動|My 7-Day Action
+我的十四日行動|My 14-Day Action
 揀一個微習慣，再揀幾時做。|Choose one tiny habit and when you’ll do it.
 每日做完就蓋印，第 4 日可以重新開始。|Stamp each day you do it. Day 4 is a chance to start again.
 揀一個微習慣|Choose a tiny habit

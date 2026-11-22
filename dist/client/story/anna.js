@@ -138,7 +138,7 @@
   function finale() {
     if(state.completed)return header('結案 · 認領返下一步','門鎖打開。阿俊願意先暫停確認借款，同你一齊逐筆核對帳目。')+
       '<dl class="case-debrief">'+debriefs.map(([title,copy])=>'<div><dt>'+title+'</dt><dd>'+copy+'</dd></div>').join('')+'</dl>'+
-      '<div class="case-actions">'+button('開始七日行動卡','data-action="plan"','primary')+button('回看案情簿','data-action="dossier"','secondary')+'</div>';
+      '<div class="case-actions">'+button('開始十四日行動卡','data-action="plan"','primary')+button('回看案情簿','data-action="dossier"','secondary')+'</div>';
     return header('自修室 C 區 13 號','地圖上嘅白格原來係自修室包廂。陳警長喺門外等你，阿俊喺入面諗住確認一筆新借款。')+
       '<blockquote class="case-quote">「只要撳確認，我就可以借到兩萬蚊，清咗之前嘅卡數，撐過今個月。」</blockquote>'+
       (!state.heard?'<div class="case-actions">'+button('先聽你講，今晚最擔心啲乜？','data-action="listen"','primary')+
