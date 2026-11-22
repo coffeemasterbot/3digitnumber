@@ -251,7 +251,7 @@
       catch{session={status:'temporary'};}
       state=C.fresh();dialog.close();render(true);
     },
-    plan:()=>{if(parent!==window)parentMessage({type:'website-v1-play',key:'plan'});else location.href='../#play-plan';},
+    plan:()=>{if(parent!==window)parentMessage({type:'website-v1-play',key:'plan'});else location.href='./index.html?plan=1';},
   };
   $('dossier').onclick=dossier;
   $('help').onclick=help;
