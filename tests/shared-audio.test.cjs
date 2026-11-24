@@ -47,6 +47,18 @@ function trustedGesture(){
   return Object.defineProperty(new Event('pointerdown'),'isTrusted',{value:true});
 }
 
+test('missile warning has three distinct notes and launch uses a separate sound',()=>{
+  const {audio,document,contexts}=fixture();
+  document.dispatchEvent(trustedGesture());
+  const [ctx]=contexts;
+  audio.play('missile_warning');
+  audio.play('missile_warning');
+  assert.deepEqual(ctx.frequencies,[880,1047,1318]);
+  audio.play('missile_launch');
+  assert.deepEqual(ctx.frequencies,[880,1047,1318,155]);
+  assert.equal(ctx.buffers.length,1);
+});
+
 function fixture(storage){
   const contexts=[];
   const node=()=>({connect(){},disconnect(){},start(){},stops:0,stop(){this.stops++}});

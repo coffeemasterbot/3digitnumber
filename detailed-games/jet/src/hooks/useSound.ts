@@ -1,11 +1,12 @@
 import { useCallback, useEffect } from 'react';
 
-type SoundName = 'coin' | 'powerup' | 'hit' | 'death' | 'start' | 'bgm' | 'warning_beep' | 'vehicle_chord';
+type SoundName = 'coin' | 'powerup' | 'hit' | 'death' | 'start' | 'bgm' | 'warning_beep' | 'missile_warning' | 'missile_launch' | 'vehicle_chord';
 export const audio = () => (window as any).PFAPAudio;
 
 const cues = {
   coin: 'coin_pickup', powerup: 'buy_equip', hit: 'hit_thud', death: 'shield_break',
-  start: 'jump', warning_beep: 'warning_beep', vehicle_chord: 'vehicle_chord',
+  start: 'jump', warning_beep: 'warning_beep', missile_warning: 'missile_warning',
+  missile_launch: 'missile_launch', vehicle_chord: 'vehicle_chord',
 };
 
 export function useSound() {

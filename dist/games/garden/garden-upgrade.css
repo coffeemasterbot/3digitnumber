@@ -76,14 +76,6 @@
  #wave {top:92px!important;left:16px!important;right:auto!important;padding:1px 8px!important;font-size:11px!important;line-height:14px;flex-direction:row;gap:3px}
  #gameBoard {top:111px!important}
 }
-.zombie.mechanical-body .habit-body {background:none;border:0}
-.zombie.mechanical-body .habit-body svg {
-  width:2.15em;height:2.10em;max-width:none;
-  translate:-56% -27%;transform-origin:62% 60%;
-  filter:drop-shadow(-.08em .1em .08em #20231bcc);
-}
-.zombie.mechanical-body.exposed .habit-body svg {filter:drop-shadow(0 0 .08em #fff387) drop-shadow(-.08em .1em .08em #20231bcc)}
-.zombie.mechanical-body :is(.habit-label,.zombie-health-bar) {translate:-30px 0}
 html[lang=en] #plantSelection .plantCard .name {font-size:.67rem;max-width:7.5em;overflow:hidden;text-overflow:ellipsis}
 #gameContainer .boss-attack {
   width:clamp(45px,7vw,88px);height:auto;border:0;background:none;box-shadow:none;
@@ -188,11 +180,25 @@ html[lang=en] #plantSelection .plantCard .name {font-size:.67rem;max-width:7.5em
 #garden-intro .picker-library button[aria-pressed="true"]{border-color:#29614a;background:#c9e6ad}
 #garden-intro .picker-library button[aria-disabled="true"]{border-color:#a7947b;background:#e9e2d0}
 
-.garden-boss-rig{position:fixed;z-index:5;pointer-events:none;aspect-ratio:172/240;filter:drop-shadow(0 8px 7px #1e2b3b77);transition:transform .2s ease}
-.garden-boss-rig svg{display:block;width:100%;height:100%}
-.garden-boss-rig.exposed{transform:translateY(6%) rotate(-4deg)}
-.garden-boss-rig.enraged .boss-reactor{fill:#ff8c4b;stroke:#e46e38}
-.mechanical-body .habit-body{scale:.6;opacity:.8}
 #gameContainer .boss-attack{z-index:14;width:clamp(42px,6vw,76px)}
 #gameContainer .boss-impact-warning{z-index:10}
-@media(prefers-reduced-motion:reduce){.garden-boss-rig{transition:none}}
+
+#boss-health:not([hidden]){position:fixed;display:flex;align-items:center;gap:.5rem;transform:translateY(-100%);z-index:16;
+ padding:3px 7px;border:1px solid #e2bf78;border-radius:8px;background:#202e2c;color:#fff1d1;pointer-events:none;font-size:clamp(10px,1.15vw,14px)}
+#boss-health progress{flex:1;min-width:0;height:14px;appearance:none;border:0;border-radius:6px;overflow:hidden;background:#492b31}
+#boss-health progress::-webkit-progress-bar{background:#492b31}
+#boss-health progress::-webkit-progress-value{background:linear-gradient(90deg,#d04b36,#ffad62)}
+#boss-health progress::-moz-progress-bar{background:linear-gradient(90deg,#d04b36,#ffad62)}
+#boss-health output{font-variant-numeric:tabular-nums;white-space:nowrap}
+.zombie.mechanical-body{width:var(--boss-hit-width,32px);height:40px;animation:none!important}
+.zombie.mechanical-body .habit-body{background:none;border:0;transform:none}
+.zombie.mechanical-body :is(.habit-label,.zombie-health-bar){display:none}
+.garden-boss-rig{position:absolute;right:15%;top:var(--boss-center,20px);height:var(--boss-size,140px);aspect-ratio:172/240;
+ transform:translateY(-50%);pointer-events:none;filter:drop-shadow(0 7px 5px #1e2b3bb0)}
+.zombie.mechanical-body .garden-boss-rig svg{display:block;width:100%;height:100%;max-width:none;animation:none;transition:transform .2s ease}
+.zombie.mechanical-body.exposed .garden-boss-rig svg{transform:translateY(3%) rotate(-4deg)}
+.zombie.mechanical-body.enraged .boss-reactor{fill:#ff8c4b;stroke:#e46e38}
+.boss-lane-marker{position:absolute;left:0;top:20px;width:14px;height:14px;transform:translate(-50%,-50%) rotate(45deg);
+ border:2px solid #fcdf8b;background:#3a4440;box-shadow:0 0 0 2px #202f2a;pointer-events:none}
+.exposed .boss-lane-marker{background:#fff1a6;box-shadow:0 0 9px 3px #f8a844}
+@media(prefers-reduced-motion:reduce){.zombie.mechanical-body .garden-boss-rig svg{transition:none}}

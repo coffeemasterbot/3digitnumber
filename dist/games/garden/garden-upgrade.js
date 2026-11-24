@@ -13,7 +13,7 @@ if(type==='repeater')head+='<path d="M18 22l4-14 14 6 6-11 10 14" fill="#27662c"
 function walkerArt(type){
   const framed=body=>'<svg viewBox="0 0 78 92" aria-hidden="true"><g stroke="#394534" stroke-width="2.5" stroke-linejoin="round">'+body+'</g></svg>';
   if(type==='zomboni')return framed('<path d="M6 65 12 51h55l5 15-6 12H14Z" fill="#435553"/><circle cx="20" cy="66" r="10" fill="#8ba7aa"/><circle cx="59" cy="66" r="10" fill="#8ba7aa"/><path d="m7 56 5-17 18-5 4-19h25l8 40Z" fill="#c57843"/><path d="m34 34 4-14h14l3 16Z" fill="#b5e4df"/><path d="m6 51 22 3-8 13-17-7Z" fill="#c4dce0"/><path d="M42 48h16m-16 5h16" stroke="#664d39"/>');
-  if(type==='boss')return framed('<path d="m9 46 6-18 13 3 3-18h27l4 18 9 6-4 20-9 8-8-8H32l-9 7-12-4Z" fill="#89968b"/><path d="m25 24 11-9 20 2 6 13-8 14-23-2Z" fill="#bdc6aa"/><path d="m27 30 30-3-4 11-21 1Z" fill="#4b665d"/><path d="m31 34 8-2m9-1 6-1" stroke="#ffdd75"/><path d="m30 47 21-1 4 15-13 9-15-10Z" fill="#84624c"/><circle cx="40" cy="54" r="6" fill="#ffc15d"/><path d="m15 57 12 4-4 13 7 2-4 8H9l2-16m40-6 10-3 7 14 4 9H55l-3-9" fill="#58665e"/>');
+  if(type==='boss')return GardenBoss.art();
   const hats={
     float:'<ellipse cx="40" cy="61" rx="28" ry="10" fill="#e6a64d"/><path d="m14 57 6 7m37-9 6 7" stroke="#fff0bb" stroke-width="5"/>',
     dancer:'<path d="m20 20-3-8 7-4 2-5 10 1 8-3 8 5 7 2-2 13-9-4-15 2Z" fill="#433840"/><path d="m49 43 9 2 6-18 5-2 1 10-7 22-13 1Z" fill="#a4b790"/><path d="m32 41 7 11-6 5-6-10m21-7-3 14 10-6" fill="#c07d95"/>',

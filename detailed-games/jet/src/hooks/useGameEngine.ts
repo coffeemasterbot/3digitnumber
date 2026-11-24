@@ -525,8 +525,12 @@ export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,
         if (!m.active) return false;
         if (m.warningFrames && m.warningFrames > 0) {
           m.x = CANVAS_WIDTH - m.width;
-          if (!warned.current.has(m)) { warned.current.add(m); play("warning_beep"); }
+          if (!warned.current.has(m)) {
+            warned.current.add(m);
+            play(m.hazard === 'missile' ? 'missile_warning' : 'warning_beep');
+          }
           m.warningFrames--;
+          if (m.hazard === 'missile' && m.warningFrames === 0) play('missile_launch');
           return true;
         }
         if (m.hazard && m.hazard !== 'missile') {

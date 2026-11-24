@@ -3,19 +3,34 @@ const GardenBoss=(()=>{
  const rules=GardenRules.BOSS;
  const panel=document.createElement('section');
  panel.id='mechanical-boss';panel.hidden=true;
- panel.innerHTML='<strong>財務風暴 · 機械博士</strong> <progress max="'+rules.hp+'" value="'+rules.hp+'" aria-label="機械博士生命"></progress><span role="status"></span><button type="button">冰火應急卡</button>';
+ panel.innerHTML='<span role="status"></span><button type="button">冰火應急卡</button>';
+ const health=document.createElement('section');
+ health.id='boss-health';health.hidden=true;
+ health.innerHTML='<strong>機械博士</strong><progress max="'+rules.hp+'" value="'+rules.hp+'" aria-label="機械博士生命"></progress><output></output>';
+ document.getElementById('gameContainer').append(health);
+ const meter=health.querySelector('progress'),hpLabel=health.querySelector('output');
  document.getElementById('gameContainer').append(panel);
  const status=panel.querySelector('span'),ice=panel.querySelector('button');
- const rig=document.createElement('div');
- rig.className='garden-boss-rig';rig.hidden=true;rig.setAttribute('aria-hidden','true');
- rig.innerHTML='<svg viewBox="0 0 172 240"><path fill="#252f31" stroke="#e9b55f" stroke-width="4" d="M55 144h62l17 79-29 11-19-52-19 52-29-11z"/><path fill="#53686b" stroke="#273535" stroke-width="5" d="M41 59h90l25 64-36 22-16 32H68l-16-32-36-22z"/><path fill="#798d8a" stroke="#2a4241" stroke-width="5" d="M18 89 4 147l15 32 24-17-4-43zm136 0 14 58-15 32-24-17 4-43z"/><path fill="#607575" stroke="#263f40" stroke-width="5" d="m49 28 16-21h42l16 21-9 44H58z"/><path fill="#f8c875" d="M59 35h22v9H59zm32 0h22v9H91z"/><path class="boss-reactor" fill="#fee4a4" stroke="#e4a147" stroke-width="6" d="m86 71 19 16-5 25H72l-5-25z"/><path fill="#d7a468" d="m68 129 18 17 18-17v17l-18 14-18-14z"/></svg>';
- document.getElementById('gameContainer').append(rig);
+ const markup=
+   '<span class="garden-boss-rig" aria-hidden="true"><svg viewBox="0 0 172 240"><path fill="#252f31" stroke="#e9b55f" stroke-width="4" d="M55 144h62l17 79-29 11-19-52-19 52-29-11z"/>'+
+   '<path fill="#53686b" stroke="#273535" stroke-width="5" d="M41 59h90l25 64-36 22-16 32H68l-16-32-36-22z"/>'+
+   '<path fill="#798d8a" stroke="#2a4241" stroke-width="5" d="M18 89 4 147l15 32 24-17-4-43zm136 0 14 58-15 32-24-17 4-43z"/>'+
+   '<path fill="#607575" stroke="#263f40" stroke-width="5" d="m49 28 16-21h42l16 21-9 44H58z"/>'+
+   '<path fill="#82966a" stroke="#263f40" stroke-width="3" d="M60 32q8-18 26-15t25 20l-5 19-11 6H78l-14-9z"/>'+
+   '<path fill="#e9ed99" d="M68 36h12v8H68zm24 0h11v8H92z"/>'+
+   '<path stroke="#31483a" stroke-width="3" d="m74 35 4 8m17-8 4 8m-21 9h18"/>'+
+   '<path class="boss-reactor" fill="#fee4a4" stroke="#e4a147" stroke-width="6" d="m86 71 19 16-5 25H72l-5-25z"/>'+
+   '<path fill="#d7a468" d="m68 129 18 17 18-17v17l-18 14-18-14z"/></svg></span><span class="boss-lane-marker" aria-hidden="true"></span>';
+ const art=()=>markup;
  zombieTypes.boss={emoji:'⚙',health:rules.hp,maxHealth:rules.hp,speed:0,damage:0,points:2500};
  function start(){
    spawnZombie('boss',2);
    const z=gameState.zombies.at(-1);z.x=gameState.boardRect.width-gameState.cellSize.width*.6;
    gameState.boss={z,cycle:0,left:rules.exposed,exposed:true,hazard:null,iceReady:0};
-   positionRig();panel.hidden=rig.hidden=false;z.element.classList.add('mechanical-body');
+   z.element.classList.add('mechanical-body');
+   panel.hidden=health.hidden=false;
+   paintHealth(gameState.boss);
+   window.dispatchEvent(new Event('arcade-game-state'));
  }
  function clearBall(b){b.hazard?.element?.remove();b.hazard?.warning?.remove();b.hazard=null}
  function frontPlant(row){
@@ -58,7 +73,7 @@ const GardenBoss=(()=>{
  function pepper(row){const b=gameState.boss;if(b?.hazard?.kind==='ice'&&b.hazard.row===row)clearBall(b)}
  function step(dt){
    const b=gameState.boss;
-   if(!b?.z.element){if(b)clearBall(b);panel.hidden=rig.hidden=true;return}
+   if(!b?.z.element){if(b)clearBall(b);panel.hidden=health.hidden=true;return}
    b.iceReady=Math.max(0,b.iceReady-dt);b.left-=dt;
    if(b.hazard){
      b.hazard.left-=dt;
@@ -85,27 +100,30 @@ const GardenBoss=(()=>{
      }
    }
    if(b.hazard)drawAttack(b.hazard);
-   panel.querySelector('progress').value=b.z.health;
    b.z.element.classList.toggle('exposed',b.exposed);
-   positionRig();
-   rig.classList.toggle('exposed',b.exposed);
-   rig.classList.toggle('enraged',b.z.health<=rules.hp/2);
+   b.z.element.classList.toggle('enraged',b.z.health<=rules.hp/2);
+   paintHealth(b);
    ice.disabled=!b.hazard||b.hazard.kind==='stomp'||b.iceReady>0;
    const message=b.hazard?'第 '+(b.hazard.row+1)+' 行 · '+({fire:'火球：使用應急卡',ice:'冰球：辣椒或應急卡',stomp:'重擊：避開標記格'}[b.hazard.kind])+' · '+Math.ceil(b.hazard.left/1000)+' 秒':b.exposed?'低頭 · 第 '+(b.z.row+1)+' 行弱點可攻擊':'裝甲防守';
    if(globalThis.siteLocale)globalThis.siteLocale.write(status,message);
    else if(status.textContent!==message)status.textContent=message;
  }
- function positionRig(){
-   const board=gameState.boardRect;
-   if(board){
-     rig.style.right=(innerWidth-board.right+4)+'px';
-     rig.style.top=(board.top+board.height*.2)+'px';
-     rig.style.height=board.height*.6+'px';
-   }
+ function paintHealth(b){
+   meter.value=b.z.health;
+   const hp=Math.ceil(b.z.health)+' / '+rules.hp;
+   if(hpLabel.textContent!==hp)hpLabel.textContent=hp;
+   const board=gameState.boardRect, cell=gameState.cellSize.height;
+   if(!board||!cell)return;
+   health.style.left=(board.left+board.width*.18)+'px';
+   health.style.width=(board.width*.64)+'px';
+   health.style.top=(board.top-3)+'px';
+   b.z.element.style.setProperty('--boss-size',cell*3+'px');
+   b.z.element.style.setProperty('--boss-hit-width',gameState.cellSize.width*.6+'px');
+   b.z.element.style.setProperty('--boss-center',((Math.max(1,Math.min(3,b.z.row))-b.z.row)*cell+20)+'px');
  }
  function reset(){
    if(gameState.boss)clearBall(gameState.boss);
-   panel.hidden=rig.hidden=true;
+   panel.hidden=health.hidden=true;
  }
- return {start,step,pepper,reset};
+ return {start,step,pepper,reset,art};
 })();

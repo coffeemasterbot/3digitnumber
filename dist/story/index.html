@@ -225,7 +225,7 @@ const STAGES=[
   {id:'ice',world:4,title:'冰道 · 分期壓力'},
   {id:'roof',world:5,title:'屋頂 · 機械決戰'}
 ];
-const BOSS={hp:96,exposed:5500,enraged:4500,armored:2000,response:4000,minions:3};
+const BOSS={hp:130,exposed:5500,enraged:4500,armored:2000,response:4000,minions:3};
 const EXTRAS={
   survival:{title:'生存 · 持續防守',world:1,endless:true},
   limited:{title:'挑戰 · 限量陽光',world:1,sun:100},
@@ -367,6 +367,8 @@ function mowers(){return Array.from({length:5},(_,row)=>({row,x:-34,state:'ready
     slide: [[240,.08,0,'triangle'],[120,.11,.035,'triangle']],
     shield_break: [[310,.12,0,'square'],[150,.14,.04,'triangle']],
     warning_beep: [[1080,.055],[1080,.055,.11],[1240,.065,.22]],
+    missile_warning: [[880,.11,0,'triangle'],[1047,.11,.16,'triangle'],[1318,.19,.32,'triangle']],
+    missile_launch: [[155,.15,0,'triangle']],
     vehicle_chord: [[392,.17],[494,.18,.055],[587,.24,.11]],
     fire_jump: [[455,.075,0,'triangle'],[670,.10,.025,'triangle']],
     ice_jump: [[755,.045],[530,.12,.032]],
@@ -380,6 +382,7 @@ function mowers(){return Array.from({length:5},(_,row)=>({row,x:-34,state:'ready
     defuse_ok: [[523,.14],[659,.14,.07],[880,.24,.14]],
   };
   const noiseCues = {
+    missile_launch: [.2,850,.18],
     lane_whoosh: [.10,1150,.17],
     slide: [.12,690,.09],
     shoot: [.075,550,.20],

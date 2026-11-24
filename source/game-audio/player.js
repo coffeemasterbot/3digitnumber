@@ -26,6 +26,8 @@
     slide: [[240,.08,0,'triangle'],[120,.11,.035,'triangle']],
     shield_break: [[310,.12,0,'square'],[150,.14,.04,'triangle']],
     warning_beep: [[1080,.055],[1080,.055,.11],[1240,.065,.22]],
+    missile_warning: [[880,.11,0,'triangle'],[1047,.11,.16,'triangle'],[1318,.19,.32,'triangle']],
+    missile_launch: [[155,.15,0,'triangle']],
     vehicle_chord: [[392,.17],[494,.18,.055],[587,.24,.11]],
     fire_jump: [[455,.075,0,'triangle'],[670,.10,.025,'triangle']],
     ice_jump: [[755,.045],[530,.12,.032]],
@@ -39,6 +41,7 @@
     defuse_ok: [[523,.14],[659,.14,.07],[880,.24,.14]],
   };
   const noiseCues = {
+    missile_launch: [.2,850,.18],
     lane_whoosh: [.10,1150,.17],
     slide: [.12,690,.09],
     shoot: [.075,550,.20],

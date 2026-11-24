@@ -102,10 +102,11 @@
     }
     const audio = window.gameAudio;
     if (!audio || kind === 'jet') return;
-    const picker = kind === 'garden' && document.getElementById('garden-intro');
+    const intro = kind === 'garden' && document.getElementById('garden-intro');
+    const picker = intro && !intro.hidden;
     const track = document.hidden || (!picker && snapshot.state !== 'playing')
       ? null : kind === 'runner' ? 'runner' : picker ? 'garden-picker'
-        : gameState.boss ? 'garden-boss' : 'garden-' + gardenLevel();
+        : gameState.boss?.z.element ? 'garden-boss' : 'garden-' + gardenLevel();
     if (!track && snapshot.state === "paused") window.PFAPAudio?.stopEffects();
     if (track === activeTrack) return;
     activeTrack = track;
@@ -130,7 +131,7 @@
   // The older Garden loop may change state without emitting an event.
   const uiTimer = setInterval(update, 500);
   window.addEventListener('pagehide', () => { window.flushArcadeResult(); clearInterval(uiTimer); });
-  window.detailedMusicStatus = () => ({kind, muted:!window.PFAPAudio?.enabled("bgm"), running:!!activeTrack, state:state().state});
+  window.detailedMusicStatus = () => ({kind, muted:!window.PFAPAudio?.enabled("bgm"), running:!!activeTrack, track:activeTrack, state:state().state});
 
   if (kind === 'garden') {
     window.detailedGameSnapshot = () => ({
