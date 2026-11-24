@@ -187,7 +187,12 @@ window.installLandscapeGate = function ({ playing, pause, resume, leave }) {
       intro.id = 'garden-intro';
       intro.innerHTML = '<section><small>五個世界 · 五關戰役</small><h1>守住你嘅花園</h1><p>先種陽光植物儲資源，再安排防線。</p><p>揀植物，再撳草地。撳陽光收集。</p><button id="garden-start" type="button">選關同揀植物</button></section>';
       document.body.append(intro);
-      document.getElementById('garden-start').onclick = () => { intro.remove(); resumeGame(); update(); };
+      document.getElementById('garden-start').onclick = () => {
+        intro.hidden=true;
+        if(intro.dataset.next==='yes'){delete intro.dataset.next;resetGame()}
+        else resumeGame();
+        update();
+      };
       update();
     });
   }

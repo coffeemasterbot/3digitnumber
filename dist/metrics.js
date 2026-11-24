@@ -8,6 +8,26 @@
   };
   const form=id('metrics-unlock');
   const input=form.querySelector('input');
+  const exportButton=id('metrics-export-sid');
+  async function exportSids(key) {
+    const status=id('metrics-export-status');
+    exportButton.disabled=true;
+    try {
+      const response=await fetch('/api/survey/verification',{headers:{'x-pfap-metrics-key':encodeURIComponent(key)}});
+      if(!response.ok)throw new Error('Unavailable');
+      const {entries}=await response.json();
+      // Keep student numbers as strings so leading zeroes survive the export.
+      const file=new Blob([JSON.stringify(entries,null,2)],{type:'application/json'});
+      const url=URL.createObjectURL(file);
+      const link=document.createElement('a');
+      link.href=url;
+      link.download='pfap-private-sid-verification.json';
+      link.click();
+      setTimeout(()=>URL.revokeObjectURL(url),5000);
+      status.textContent='已下載核對檔，請私下保存。 / Private verification file downloaded.';
+    } catch { status.textContent='未能匯出核對檔。 / Verification export unavailable.'; }
+    finally { exportButton.disabled=false; }
+  }
   async function load(key) {
     const status=id('metrics-status');
     status.textContent='載入中… / Loading…';
@@ -43,6 +63,7 @@
         for(const value of [label,counts?.players??0,counts?.starts??0])setText(row,'td',value);
       }
       id('metrics-results').hidden=false;
+      exportButton.onclick=()=>exportSids(key);
     } catch { status.textContent='未能載入數據。 / Metrics are temporarily unavailable.'; }
   }
   form.addEventListener('submit',async event=>{

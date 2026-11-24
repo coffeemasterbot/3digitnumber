@@ -1,3 +1,5 @@
+import {canRead} from './activity.mjs';
+
 const opens = Date.parse('2026-11-20T00:00:00+08:00');
 const closes = Date.parse('2026-11-28T00:00:00+08:00');
 const habits = {
@@ -5,8 +7,51 @@ const habits = {
   after: ['log', 'wait', 'cut', 'reserve'],
 };
 const pairPattern = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
+const sidPattern = /^[0-9]{6,12}$/;
+const encoder = new TextEncoder();
+const decoder = new TextDecoder();
+
+async function sidKey(env) {
+  if (typeof env.PFAP_SID_KEY !== 'string' || env.PFAP_SID_KEY.length < 24) {
+    throw new Error('SID key unavailable');
+  }
+  const material = await crypto.subtle.digest('SHA-256', encoder.encode('pfap-survey-aes-v1:' + env.PFAP_SID_KEY));
+  return crypto.subtle.importKey('raw', material, 'AES-GCM', false, ['encrypt', 'decrypt']);
+}
+
+async function encryptSid(key, pair, sid) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const ciphertext = await crypto.subtle.encrypt(
+    {name: 'AES-GCM', iv, additionalData: encoder.encode(pair)}, key, encoder.encode(sid));
+  return btoa(String.fromCharCode(...iv, ...new Uint8Array(ciphertext)));
+}
+
+async function decryptSid(key, pair, value) {
+  const bytes = Uint8Array.from(atob(value), char => char.charCodeAt(0));
+  return decoder.decode(await crypto.subtle.decrypt(
+    {name: 'AES-GCM', iv: bytes.subarray(0, 12), additionalData: encoder.encode(pair)}, key, bytes.subarray(12)));
+}
+
+async function verification(request, env) {
+  const reply = (body, status = 200) => Response.json(body, {
+    status, headers: {'cache-control': 'no-store', 'x-content-type-options': 'nosniff'},
+  });
+  if (request.method !== 'GET') return reply({error: 'Method not allowed'}, 405);
+  if (!(await canRead(request, env))) return reply({error: 'Restricted'}, 403);
+  try {
+    const key = await sidKey(env);
+    const {results} = await env.DB.prepare(
+      "SELECT pair_id, game, created_at, sid_encrypted FROM pfap_survey WHERE phase='after' AND sid_encrypted IS NOT NULL ORDER BY created_at"
+    ).all();
+    const entries = await Promise.all(results.map(async row => ({
+      sid: await decryptSid(key, row.pair_id, row.sid_encrypted), game: row.game, time: row.created_at,
+    })));
+    return reply({entries});
+  } catch { return reply({error: 'Verification unavailable'}, 503); }
+}
 
 export async function surveyApi(request, env, games, now = Date.now()) {
+  if (new URL(request.url).pathname === '/api/survey/verification') return verification(request, env);
   const origin = request.headers.get('origin');
   const pages = origin === 'https://coffeemasterbot.github.io';
   const cors = pages ? {'access-control-allow-origin': origin, vary: 'Origin'} : {};
@@ -26,7 +71,8 @@ export async function surveyApi(request, env, games, now = Date.now()) {
   if (!env.DB) return reply({error: 'Survey unavailable'}, 503);
   try {
     if (request.method === 'GET') {
-      await env.DB.prepare('SELECT 1 FROM pfap_survey LIMIT 1').first();
+      await sidKey(env);
+      await env.DB.prepare('SELECT sid_encrypted FROM pfap_survey LIMIT 1').first();
       return reply({open: true});
     }
     if (request.method !== 'POST' || !origin) return reply({error: 'Method not allowed'}, 405);
@@ -51,17 +97,22 @@ export async function surveyApi(request, env, games, now = Date.now()) {
     try { body = JSON.parse(new TextDecoder().decode(bytes.subarray(0, size))); }
     catch { return reply({error: 'Invalid JSON'}, 400); }
     if (!body || !Object.hasOwn(habits, body.phase)) return reply({error: 'Invalid phase'}, 400);
-    const {phase, pair, attitude, knowledge, habit, game} = body;
+    const {phase, pair, attitude, knowledge, habit, game, sid} = body;
     const validRating = value => Number.isInteger(value) && value >= 1 && value <= 5;
     if (typeof pair !== 'string' || !pairPattern.test(pair) || !validRating(attitude) ||
         !validRating(knowledge) || !habits[phase].includes(habit) ||
-        !(game === '' || game === 'plan' || games.has(game))) {
+        !(phase === 'before' ? (game === '' || game === 'trpg' || games.has(game))
+          : (game === 'trpg' || game === 'trpg-live' || games.has(game)))) {
       return reply({error: 'Invalid response'}, 400);
     }
+    if (phase === 'after' && (typeof sid !== 'string' || !sidPattern.test(sid))) {
+      return reply({error: 'Student ID required'}, 400);
+    }
+    const encrypted = phase === 'after' ? await encryptSid(await sidKey(env), pair.toLowerCase(), sid) : null;
     await env.DB.prepare(`INSERT INTO pfap_survey
-      (pair_id,phase,attitude,knowledge,habit,game,created_at) VALUES (?,?,?,?,?,?,?)
+      (pair_id,phase,attitude,knowledge,habit,game,created_at,sid_encrypted) VALUES (?,?,?,?,?,?,?,?)
       ON CONFLICT(pair_id,phase) DO NOTHING`)
-      .bind(pair.toLowerCase(), phase, attitude, knowledge, habit, game, now).run();
+      .bind(pair.toLowerCase(), phase, attitude, knowledge, habit, game, now, encrypted).run();
     return reply({saved: true});
   } catch {
     return reply({error: 'Survey unavailable'}, 503);

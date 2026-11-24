@@ -10,6 +10,8 @@
   const submit = id('survey-submit');
   const skip = id('survey-skip');
   const questions = id('survey-questions');
+  const student = id('survey-student');
+  const sid = id('survey-sid');
   const comparison = id('survey-comparison');
   const status = id('survey-status');
   const staticPage = document.body.hasAttribute('data-pfap-static');
@@ -35,7 +37,14 @@
   let state = {};
   try {
     const saved = JSON.parse(localStorage.getItem(localKey));
-    if (saved && typeof saved === 'object' && !Array.isArray(saved)) state = saved;
+    if (saved && typeof saved === 'object' && !Array.isArray(saved)) {
+      state = saved;
+      if (!state.terminalVersion) {
+        delete state.completedActivity;
+        delete state.afterOffered;
+        delete state.pending?.after;
+      }
+    }
   } catch {}
   let current = null;
   let afterPending = false;
@@ -90,6 +99,9 @@
   function show(phase, game = '', resume = null) {
     if (!available() || dialog.open) return false;
     current = {phase, game, resume, saved: false};
+    form.reset();
+    student.hidden = sid.disabled = phase !== 'after';
+    sid.required = phase === 'after';
     id('survey-title').textContent = phase === 'before' ? '理財前測' : phase === 'after' ? '理財後測' : '理財前後測';
     id('survey-intro').textContent = phase === 'complete'
       ? '多謝你參加理財前後測。'
@@ -109,6 +121,7 @@
     if (submit.disabled) return;
     const session = current;
     current = null;
+    sid.value = '';
     if (session?.resume && !session.saved) remember({skipped: true});
     dialog.close();
     session?.resume?.();
@@ -130,7 +143,7 @@
     else {
       if (show('complete')) {
         id('survey-title').textContent = '前測已收到';
-        id('survey-intro').textContent = '完成一局遊戲或儲存十四日行動，就可以填後測。';
+        id('survey-intro').textContent = '完成整個故事或遊戲，再填寫後測。';
       }
     }
   });
@@ -151,7 +164,8 @@
       for (const choice of questions.querySelectorAll('input')) choice.disabled = true;
       const response = await fetch(endpoint, {
         method: 'POST', headers: {'content-type': 'application/json'},
-        credentials: 'omit', body: JSON.stringify(payload), signal: AbortSignal.timeout(8000),
+        credentials: 'omit', body: JSON.stringify(session.phase === 'after'
+          ? {...payload, sid: String(fields.get('sid') ?? '').trim()} : payload), signal: AbortSignal.timeout(8000),
       });
       if (!response.ok || !(await response.json()).saved) throw new Error('Unconfirmed');
       const pending = {...state.pending};
@@ -160,6 +174,8 @@
       session.saved = true;
       status.textContent = '多謝，已收到你嘅答案。';
       submit.hidden = true;
+      student.hidden = sid.disabled = true;
+      sid.value = '';
       skip.textContent = '關閉';
       questions.replaceChildren();
       if (session.phase === 'after') showComparison();
@@ -173,33 +189,31 @@
   window.pfapSurvey = {
     beforeGame(game, resume) {
       return automatic() && !state.before && !state.skipped && state.completedActivity === undefined &&
-        show('before', gameKeys[game], resume);
+        show('before', gameKeys[game] ?? 'trpg', resume);
     },
     finished(game) {
       if (!available() || state.after) return;
-      if (state.completedActivity === undefined) remember({completedActivity: game});
+      if (state.completedActivity === undefined) remember({completedActivity: game, terminalVersion: 1});
       if (state.afterOffered || !automatic()) return;
       remember({afterOffered: true});
       afterPending = true;
       openPendingAfter();
     },
-    watchPlan(frame) {
-      frame.addEventListener('load', () => {
-        if (!available()) return;
-        try {
-          frame.contentDocument?.addEventListener('submit', event => {
-            if (!event.target.matches('[data-plan-profile]')) return;
-            setTimeout(() => {
-              const saved = '進度已存喺呢個瀏覽器';
-              const label = frame.contentWindow?.siteLocale?.text(saved) ?? saved;
-              if (id('game-frame') === frame &&
-                  frame.contentDocument?.getElementById('save-status')?.textContent === label) {
-                window.pfapSurvey.finished('plan');
-              }
-            }, 0);
-          }, {capture: true});
-        } catch { /* An unavailable frame cannot complete an action. */ }
-      });
-    },
   };
+  const attendee = id('trpg-event-survey');
+  if (attendee) {
+    const update = () => { attendee.hidden = !available(); };
+    update();
+    window.addEventListener('pageshow', update);
+    document.addEventListener('visibilitychange', update);
+    if (delay > 0 && delay < 2 ** 31) setTimeout(update, delay);
+    attendee.addEventListener('click', () => {
+      if (!available()) return;
+      if (state.after) show('complete');
+      else {
+        if (state.completedActivity === undefined) remember({completedActivity: 'trpg-live', terminalVersion: 1});
+        show('after', state.completedActivity);
+      }
+    });
+  }
 })();

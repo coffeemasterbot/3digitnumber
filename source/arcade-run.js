@@ -5,6 +5,9 @@
   const notify = (action, details) => parent.postMessage(
     {type:'pfap-arcade-run', action, ...details}, location.origin === 'null' ? '*' : location.origin);
   window.arcadeRun = {
+    complete(game) {
+      notify('complete', {game});
+    },
     start(game, board, difficulty = 'standard') {
       run = {game, board, difficulty, id:crypto.randomUUID(), at:performance.now()};
       notify('start', {game, board, difficulty, id:run.id});

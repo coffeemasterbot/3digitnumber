@@ -146,9 +146,14 @@
       '<p>「我最驚係一停落嚟，就要面對晒所有人。」阿俊願意一齊睇貸款畫面。</p>'+tasksBlock('verify')+
       (state.challenges.verify?'<div class="case-actions">'+button('一齊核對帳單，完成結案','data-action="complete"','primary')+'</div>':''));
   }
+  let reportedConclusion=false;
   function render(focus=false) {
     $('case-main').innerHTML=(state.act?trail():'')+[opening,station,hotel,cafe,finale][state.act]();
     saveWarning();
+    if(state.completed&&!reportedConclusion&&parent!==window){
+      reportedConclusion=true;
+      parentMessage({type:'pfap-arcade-run',action:'complete',game:'trpg'});
+    }
     if(focus) {
       $('act-title').focus({preventScroll:true});
       window.scrollTo({top:0,behavior:'instant'});

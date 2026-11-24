@@ -1,11 +1,18 @@
 function configureGardenSeeds(stageControl,startButton) {
   const cards=Array.from(document.querySelectorAll('#plantSelection [data-plant]'));
   const selected=new Set();
+  const key='garden-loadouts-v1';
+  let saved={};
+  try {
+    const data=JSON.parse(localStorage.getItem(key));
+    if(data&&typeof data==='object'&&!Array.isArray(data))saved=data;
+  } catch {}
+  const stageKey=()=>stageControl.value;
   const host=document.createElement('div');
   stageControl.after(host);
   startButton.hidden=true;
   const unlock=GardenAbilities.unlockStage;
-  const available=id=>(id==='repeater'?gardenRepeaterAvailable():unlock(id)<=gardenLevel())&&(window.gardenSeedRestriction?.()?.includes(id)??true);
+  const available=id=>window.gardenPlantUnlocked(id)&&(window.gardenSeedRestriction?.()?.includes(id)??true);
   function plants(){
     return cards.map(card=>{
       const id=card.dataset.plant,world=unlock(id);
@@ -31,7 +38,8 @@ function configureGardenSeeds(stageControl,startButton) {
     for(const card of cards)card.hidden=!selected.has(card.dataset.plant);
     startButton.disabled=!selected.size;
     renderPicker({plants:plants(),selected:Array.from(selected),enemies:enemies(),canStart:!!selected.size,
-      notice:gardenLevel()===3&&!selected.has('lily')?'水行種植需要浮葉基座。':''});
+      notice:gardenLevel()===3&&!selected.has('lily')?'水行種植需要浮葉基座。':
+        gardenLevel()===5&&!selected.has('pepper')?'辣椒可化解冰球；亦可用公用應急卡。':''});
   }
   function recommend(){
     selected.clear();
@@ -39,12 +47,28 @@ function configureGardenSeeds(stageControl,startButton) {
     for(const id of ['sunflower','peashooter','wallnut','mine','squash',gardenRepeaterAvailable()?'repeater':'firepea',special,'cherrybomb'])if(available(id))selected.add(id);
     draw();
   }
+  function restore(){
+    const loadout=saved[stageKey()];
+    if(!Array.isArray(loadout))return recommend();
+    const valid=loadout.filter(id=>cards.some(card=>card.dataset.plant===id)&&available(id));
+    if(!valid.length)return recommend();
+    selected.clear();
+    for(const id of valid.slice(0,8))selected.add(id);
+    draw();
+  }
   const renderPicker=createGardenSeedPicker(host,{
     toggle(id){if(!cards.some(c=>c.dataset.plant===id)||!available(id))return;
       if(selected.has(id))selected.delete(id);else if(selected.size<8)selected.add(id);draw()},
-    recommend,start(){if(selected.size&&!startButton.disabled)startButton.click()}
+    recommend,start(){
+      if(!selected.size||startButton.disabled)return;
+      if(!window.arcadeTest){
+        saved[stageKey()]=[...selected];
+        try{localStorage.setItem(key,JSON.stringify(saved))}catch{}
+      }
+      startButton.click();
+    }
   });
-  stageControl.addEventListener('change',recommend);
-  recommend();
-  return recommend;
+  stageControl.addEventListener('change',restore);
+  restore();
+  return restore;
 }

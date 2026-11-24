@@ -6,7 +6,7 @@ function cookie(request) {
   const id = request.headers.get('cookie')?.match(/(?:^|;\s*)pfap_activity=([^;]+)/)?.[1];
   return id && randomId.test(id) ? id : null;
 }
-async function canRead(request,env) {
+export async function canRead(request,env) {
   const key = typeof env.PFAP_METRICS_KEY==='string' ? env.PFAP_METRICS_KEY : '';
   if (key.length<16) return false;
   const offered = request.headers.get('x-pfap-metrics-key');

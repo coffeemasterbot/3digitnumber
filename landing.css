@@ -200,3 +200,8 @@ body:has(#play-panel:not([hidden])){height:100dvh}
   #arcade .game-card:nth-child(n){grid-column:auto}
 }
 @media(max-width:550px){#arcade .game-grid{grid-template-columns:1fr}}
+
+#survey-student label{display:block;font-weight:700}
+#survey-sid{max-width:16rem;width:100%;border:1px solid #76644e;border-radius:8px;padding:.55rem;font:inherit;background:#fffdf6;color:#213e32}
+#survey-student p{font-size:.88rem;margin-top:.35rem}
+#trpg-event-survey{background:#1e3a2f;color:#fff8ed;border:1px solid #1e3a2f;border-radius:8px;padding:.45rem .7rem}

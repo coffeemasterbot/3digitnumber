@@ -23,7 +23,7 @@
     preview.querySelector('h3').textContent = name;
     preview.querySelector('p').textContent = info?.[3] || uses[type];
     preview.querySelector('output').textContent = card.dataset.cost+' 陽光 · 冷卻 '+gardenPlantCooldown(type)/1000+' 秒';
-    preview.querySelector('small').textContent = '第 '+level+' 關解鎖 · '+((type==='repeater'?gardenRepeaterAvailable():gardenLevel()>=level)?'可種植':'尚未解鎖');
+    preview.querySelector('small').textContent = '第 '+level+' 關解鎖 · '+(window.gardenPlantUnlocked(type)?'可種植':'尚未解鎖');
     for(const button of grid.children) button.setAttribute('aria-pressed',String(button.dataset.plantType===type));
   }
   for(const card of document.querySelectorAll('#plantSelection [data-plant]')) {

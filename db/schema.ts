@@ -9,4 +9,5 @@ export const survey = sqliteTable('pfap_survey', {
   habit: text('habit').notNull(),
   game: text('game').notNull(),
   createdAt: integer('created_at').notNull(),
+  sidEncrypted: text('sid_encrypted'),
 }, table => [primaryKey({columns: [table.pairId, table.phase]})]);

@@ -3,15 +3,19 @@ const GardenBoss=(()=>{
  const rules=GardenRules.BOSS;
  const panel=document.createElement('section');
  panel.id='mechanical-boss';panel.hidden=true;
- panel.innerHTML='<strong>財務風暴 · 機械博士</strong> <progress max="'+rules.hp+'" value="'+rules.hp+'" aria-label="機械博士生命"></progress><span role="status"></span><button type="button">冰凍應急卡</button>';
+ panel.innerHTML='<strong>財務風暴 · 機械博士</strong> <progress max="'+rules.hp+'" value="'+rules.hp+'" aria-label="機械博士生命"></progress><span role="status"></span><button type="button">冰火應急卡</button>';
  document.getElementById('gameContainer').append(panel);
  const status=panel.querySelector('span'),ice=panel.querySelector('button');
+ const rig=document.createElement('div');
+ rig.className='garden-boss-rig';rig.hidden=true;rig.setAttribute('aria-hidden','true');
+ rig.innerHTML='<svg viewBox="0 0 172 240"><path fill="#252f31" stroke="#e9b55f" stroke-width="4" d="M55 144h62l17 79-29 11-19-52-19 52-29-11z"/><path fill="#53686b" stroke="#273535" stroke-width="5" d="M41 59h90l25 64-36 22-16 32H68l-16-32-36-22z"/><path fill="#798d8a" stroke="#2a4241" stroke-width="5" d="M18 89 4 147l15 32 24-17-4-43zm136 0 14 58-15 32-24-17 4-43z"/><path fill="#607575" stroke="#263f40" stroke-width="5" d="m49 28 16-21h42l16 21-9 44H58z"/><path fill="#f8c875" d="M59 35h22v9H59zm32 0h22v9H91z"/><path class="boss-reactor" fill="#fee4a4" stroke="#e4a147" stroke-width="6" d="m86 71 19 16-5 25H72l-5-25z"/><path fill="#d7a468" d="m68 129 18 17 18-17v17l-18 14-18-14z"/></svg>';
+ document.getElementById('gameContainer').append(rig);
  zombieTypes.boss={emoji:'⚙',health:rules.hp,maxHealth:rules.hp,speed:0,damage:0,points:2500};
  function start(){
    spawnZombie('boss',2);
    const z=gameState.zombies.at(-1);z.x=gameState.boardRect.width-gameState.cellSize.width*.6;
    gameState.boss={z,cycle:0,left:rules.exposed,exposed:true,hazard:null,iceReady:0};
-   panel.hidden=false;z.element.classList.add('mechanical-body');
+   positionRig();panel.hidden=rig.hidden=false;z.element.classList.add('mechanical-body');
  }
  function clearBall(b){b.hazard?.element?.remove();b.hazard?.warning?.remove();b.hazard=null}
  function frontPlant(row){
@@ -36,8 +40,7 @@ const GardenBoss=(()=>{
      document.getElementById('gameContainer').append(h.element);
    }
    const board=gameState.boardRect;
-   const target=frontPlant(h.row)?.col??0;
-   const impact=(target+.5)*gameState.cellSize.width;
+   const impact=(h.col+.5)*gameState.cellSize.width;
    const launch=board.width-gameState.cellSize.width*.55;
    const progress=Math.min(1,Math.max(0,1-h.left/rules.response));
    h.element.style.left=(board.left+(h.kind==='stomp'?impact:launch+(impact-launch)*progress))+'px';
@@ -48,41 +51,61 @@ const GardenBoss=(()=>{
    h.warning.style.height=gameState.cellSize.height+'px';
  }
  ice.onclick=()=>{
-   const b=gameState.boss;if(!b||gameState.isPaused||gameState.isGameOver||b.iceReady||b.hazard?.kind!=='fire')return;
-   clearBall(b);b.iceReady=8000;
+   const b=gameState.boss;
+   if(!b||gameState.isPaused||gameState.isGameOver||b.iceReady||!b.hazard||b.hazard.kind==='stomp')return;
+   clearBall(b);b.iceReady=12000;
  };
  function pepper(row){const b=gameState.boss;if(b?.hazard?.kind==='ice'&&b.hazard.row===row)clearBall(b)}
  function step(dt){
    const b=gameState.boss;
-   if(!b?.z.element){if(b)clearBall(b);panel.hidden=true;return}
+   if(!b?.z.element){if(b)clearBall(b);panel.hidden=rig.hidden=true;return}
    b.iceReady=Math.max(0,b.iceReady-dt);b.left-=dt;
    if(b.hazard){
      b.hazard.left-=dt;
      if(b.hazard.left<=0){
-       const p=frontPlant(b.hazard.row);
-       if(p){p.element.remove();p.element=null}
+       const h=b.hazard;
+       const p=gameState.plants.find(plant=>plant.element&&plant.row===h.row&&plant.col===h.col);
+       if(p){
+         p.health-=h.kind==='stomp'?3:2;
+         if(p.health<=0){p.element.remove();p.element=null}
+         else updatePlantHealth(p);
+       }
        clearBall(b);
      }
    }
    if(b.left<=0){
-     b.exposed=!b.exposed;b.left=b.exposed?rules.exposed:rules.armored;
+     b.exposed=!b.exposed;
+     b.left=b.exposed?(b.z.health<=rules.hp/2?rules.enraged:rules.exposed):rules.armored;
      if(b.exposed){b.z.row=(b.z.row+2)%5}
      else{
        const kind=['fire','ice','stomp'][b.cycle++%3];
-       if(kind==='stomp'||(kind==='fire'&&!b.iceReady)||(kind==='ice'&&gameState.sun>=125&&!gameState.cooldowns?.pepper&&document.querySelector('[data-plant="pepper"]:not([hidden])'))){
-         const row=b.z.row;
-         b.hazard={kind,row,left:rules.response};
-       }
+       const row=b.z.row;
+       if(!b.hazard)b.hazard={kind,row,col:frontPlant(row)?.col??0,left:rules.response};
        if(gameState.zombies.filter(z=>z.element&&z.type!=='boss').length<rules.minions)spawnZombie('normal',(b.z.row+1)%5);
      }
    }
    if(b.hazard)drawAttack(b.hazard);
    panel.querySelector('progress').value=b.z.health;
    b.z.element.classList.toggle('exposed',b.exposed);
-   ice.disabled=!b.hazard||b.hazard.kind!=='fire'||b.iceReady>0;
-   const message=b.hazard?'第 '+(b.hazard.row+1)+' 行 · '+({fire:'火球：使用應急卡',ice:'冰球：同行辣椒',stomp:'重擊：前排準備受損'}[b.hazard.kind])+' · '+Math.ceil(b.hazard.left/1000)+' 秒':b.exposed?'低頭 · 第 '+(b.z.row+1)+' 行弱點可攻擊':'裝甲防守';
+   positionRig();
+   rig.classList.toggle('exposed',b.exposed);
+   rig.classList.toggle('enraged',b.z.health<=rules.hp/2);
+   ice.disabled=!b.hazard||b.hazard.kind==='stomp'||b.iceReady>0;
+   const message=b.hazard?'第 '+(b.hazard.row+1)+' 行 · '+({fire:'火球：使用應急卡',ice:'冰球：辣椒或應急卡',stomp:'重擊：避開標記格'}[b.hazard.kind])+' · '+Math.ceil(b.hazard.left/1000)+' 秒':b.exposed?'低頭 · 第 '+(b.z.row+1)+' 行弱點可攻擊':'裝甲防守';
    if(globalThis.siteLocale)globalThis.siteLocale.write(status,message);
    else if(status.textContent!==message)status.textContent=message;
  }
- return {start,step,pepper};
+ function positionRig(){
+   const board=gameState.boardRect;
+   if(board){
+     rig.style.right=(innerWidth-board.right+4)+'px';
+     rig.style.top=(board.top+board.height*.2)+'px';
+     rig.style.height=board.height*.6+'px';
+   }
+ }
+ function reset(){
+   if(gameState.boss)clearBall(gameState.boss);
+   panel.hidden=rig.hidden=true;
+ }
+ return {start,step,pepper,reset};
 })();

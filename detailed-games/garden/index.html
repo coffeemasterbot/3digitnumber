@@ -906,7 +906,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
             </div>
         </div>
 
-        <div id="victoryScreen"><button class="btn" id="campaign-advance" hidden>下一關</button>
+        <div id="victoryScreen"><p id="garden-unlock-result" hidden></p><button class="btn" id="campaign-advance" hidden>下一關</button>
             <h2>🎉 挑戰完成！ 🎉</h2>
             <div class="stats">
                 <p style="font-size: 1.3em; color: #FFD700;">你守住今關五波！</p>
@@ -1069,6 +1069,7 @@ Copyright (c) 2025 Valentyn Kolesnikov <0009-0003-9608-3364@orcid.org>
 
         // Reset game state to initial values
         function resetGame() {runGeneration++;
+            if (typeof GardenBoss !== 'undefined') GardenBoss.reset();
             // Clear any existing timers
             if (gameState.waveTimer) {
                 clearTimeout(gameState.waveTimer);

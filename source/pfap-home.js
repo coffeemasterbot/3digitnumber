@@ -204,7 +204,9 @@
     const finished = openRun;
     openRun = null;
     saveBest(finished,message);
-    window.pfapSurvey?.finished(finished.game);
+    if (finished.board === 'endless' && ['runner','jet'].includes(finished.game)) {
+      window.pfapSurvey?.finished(finished.game);
+    }
     const session = await finished.remote;
     if (finished.shared && publish.checked) {
       syncStatus.textContent='已保留本機成績，未能上傳。';

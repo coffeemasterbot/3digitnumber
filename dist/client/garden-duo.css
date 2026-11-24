@@ -38,3 +38,7 @@ body.forest-active #journey-canvas{width:100%;height:auto;aspect-ratio:12/7}
   body.forest-active .journey-stage{container-type:size}
   body.forest-active #journey-canvas{width:min(100cqw,calc(100cqh * 12 / 7));max-height:100%;height:auto}
 }
+
+#forest-finance{display:inline-flex;align-items:center;gap:.45rem;font-size:.78rem}
+#forest-finance button{padding:.22rem .5rem;border:1px solid #9cae96;border-radius:1rem;background:#e8edda;color:#263c32;font:inherit}
+#forest-finance button:disabled{opacity:.65}

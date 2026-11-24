@@ -40,7 +40,7 @@ test('roof finale limits simultaneous escorts with or without a live boss',()=>{
     assert.ok(events.every(e=>e.type==='spawn'&&!e.giant));
     assert.deepEqual(rules.step(wave,30000,3+Number(boss),boss),[]);
   }
-  assert.deepEqual(rules.BOSS,{hp:60,exposed:9000,armored:3000,response:6000,minions:3});
+  assert.deepEqual(rules.BOSS,{hp:96,exposed:5500,enraged:4500,armored:2000,response:4000,minions:3});
 });
 
 test('the opening preparation does not spend wave time or spawn attackers',()=>{

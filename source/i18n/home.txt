@@ -301,3 +301,11 @@ B 結餘|B balance
 我的十四日行動|My 14-Day Action
 30 秒揀一個微習慣，試足 14 日，跨過最難第 4 日。|Pick one tiny habit in 30 seconds and try it for fourteen days, including the tricky fourth day.
 開始十四日行動|Start my 14-day action
+
+2026 年 11 月 23 日 · 下午 5–7 時|23 November 2026 · 5–7 pm
+我已完成現場 TRPG，填寫後測|I completed the in-person TRPG — take the after survey
+自願參加。系統用隨機代碼配對兩份問卷，答案唔會公開。|Taking part is optional. A random code pairs the surveys. Your answers are private.
+學生編號（SID）|Student ID (SID)
+提交後測須填寫 6 至 12 位數字。SID 只供授權團隊核對及撰寫報告。|Enter 6 to 12 digits to submit the after survey. Only authorized team members use your SID for verification and reporting.
+完成整個故事或遊戲，再填寫後測。|Complete the full story or game to take the after survey.
+前後測屬自願。網站用隨機代碼配對，收集自評、習慣選項同活動種類。後測必須填 SID，會加密儲存，只供授權團隊核對及撰寫報告。問卷與故事、排行榜同訪問紀錄分開。|The survey is optional. A random code pairs your self-ratings, habits and activity type. The after survey requires a student ID, encrypted for authorized verification and reporting. Responses are kept separate from story saves, leaderboards and visit records.

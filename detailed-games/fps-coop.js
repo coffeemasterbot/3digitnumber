@@ -19,7 +19,7 @@ export function openCoop(onRocketImpact,onShot=()=>{},mode='coop'){
  dialog.append(window.PFAPAudio?.controls()??document.createElement('span'));
  document.body.append(dialog);dialog.showModal();
  const q=selector=>dialog.querySelector(selector),status=q('[role=status]'),canvas=q('canvas'),inputs=dialog.querySelectorAll('input'),abort=new AbortController();
- const on=(el,event,fn)=>el.addEventListener(event,fn,{signal:abort.signal});let socket,id,code,token,seq=0,state,renderer,scene,camera,raf,timer,fire=false,aiming=false,fireUntil=0,yaw=0,pitch=0,ref=null,suspended=false,leaving=false;
+ const on=(el,event,fn)=>el.addEventListener(event,fn,{signal:abort.signal});let socket,id,code,token,seq=0,state,matchReported=false,renderer,scene,camera,raf,timer,fire=false,aiming=false,fireUntil=0,yaw=0,pitch=0,ref=null,suspended=false,leaving=false;
  const keys=new Set(),objects=new Map();
  const send=data=>{if(socket?.readyState===1)socket.send(JSON.stringify({v:3,seq:++seq,...data}))};
  let matchPointer;
@@ -107,6 +107,8 @@ export function openCoop(onRocketImpact,onShot=()=>{},mode='coop'){
  function show(){
   const me=state.players.find(p=>p.id===id);if(!me)return;
   status.textContent='房間 '+code+' · '+state.players.map(p=>p.name+' '+p.hp+' HP'+(!p.online?'（離線）':p.ready?'（已準備）':'')).join(' ／ ')+' · '+(state.phase==='playing'?Math.ceil(state.time)+' 秒 · 彈匣 '+me.ammo+' / 備彈 '+me.reserve+(me.reload?' · 換彈 '+me.reload.toFixed(1)+'s':'')+' · '+(state.verified?'已核實':'到北面查帳')+' · 拆解 '+state.progress.toFixed(1)+'/5 秒'+(suspended?' · 選單開啟，合作對局繼續':''):state.result||'等候兩人準備');
+  if(duel&&state.phase==='playing'&&!Object.values(state.wins??{}).some(Boolean))matchReported=false;
+  if(duel&&!matchReported&&state.phase==='result'&&Object.values(state.wins??{}).some(wins=>wins>=3)){matchReported=true;window.arcadeRun?.complete('defence')}
   if(duel)status.textContent='房間 '+code+' · '+state.players.map(p=>p.name+' '+(state.wins?.[p.id]||0)+' 勝 · '+p.hp+' HP').join(' ／ ')+' · '+(state.phase==='playing'?Math.ceil(state.time)+' 秒 · 彈匣 '+me.ammo+' / '+me.reserve:state.result||'等候兩人準備');
   q('[data-buy-rocket]').disabled=!me.hp||me.launcher||me.credits<350;
   q('[data-reload]').disabled=!me.hp||me.reload>0||!me.reserve||me.ammo>=WEAPONS[me.weapon].mag;

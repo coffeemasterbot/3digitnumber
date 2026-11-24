@@ -1,6 +1,7 @@
 (()=>{'use strict';for(const [type,z] of Object.entries(zombieTypes)){if(type==="boss")continue;z.health=Math.ceil(z.health*1.3);z.maxHealth=z.health}zombieTypes.giant={emoji:'🗿',health:220,maxHealth:220,speed:5,damage:3,points:1500};let storage;try{storage=window.localStorage}catch{}
 const campaign=GardenRules.campaign(storage);const dev=window.arcadeTest?.target.split('-').map(Number);if(dev)campaign.level=dev[1];
 window.gardenRepeaterAvailable=()=>campaign.repeater||!!dev&&campaign.level>=2;
+window.gardenPlantUnlocked=id=>id==='repeater'?window.gardenRepeaterAvailable():GardenAbilities.unlockStage(id)<=Math.max(campaign.unlocked,dev?campaign.level:1);
 window.gardenLevel=()=>GardenRules.STAGES[campaign.level-1].world;
 const extrasKey='garden-extras-v1';
 let mode='campaign',recommendSeeds,stageSelect;
@@ -104,9 +105,15 @@ const previous=window.gardenActiveStep;window.gardenActiveStep=dt=>{previous?.(d
    updateWaveDisplay();updateDamageDisplay();addScore(100*gameState.wave);saveGameState();
   }
   if(e.type==='victory'&&!gameState.isVictory){
+   const previouslyUnlocked=(mode==='campaign'&&window.gardenPlantUnlocked)?[...document.querySelectorAll('#plantSelection [data-plant]')].filter(c=>!window.gardenPlantUnlocked(c.dataset.plant)):[];
    if(mode==='campaign')campaign.complete();
+   const reveals=previouslyUnlocked.filter(c=>window.gardenPlantUnlocked(c.dataset.plant)).map(c=>c.querySelector('.name').textContent);
+   const reveal=document.getElementById('garden-unlock-result');
+   reveal.hidden=!reveals.length;
+   reveal.textContent=reveals.length?'新解鎖植物：'+reveals.join('、'):'';
    document.getElementById('campaign-advance').hidden=mode!=='campaign'||campaign.level===5;
    victory();
+   if(mode==='campaign'&&campaign.level===5)window.arcadeRun?.complete('garden');
    window.arcadeRun?.finish(gameState.score);
    if(extra()||campaign.level===5)saveResult();
   }
@@ -115,4 +122,4 @@ const previous=window.gardenActiveStep;window.gardenActiveStep=dt=>{previous?.(d
  renderMowers();waveHudDue-=dt;
  if(waveHudDue<=0){waveHudDue=100;renderWave()}
 };
-document.getElementById('campaign-advance').onclick=()=>{if(gameState.isVictory&&campaign.level<campaign.unlocked){campaign.level++;stageSelect.options[campaign.level-1].disabled=false;stageSelect.value=campaign.level;recommendSeeds?.();restartGame()}};window.addEventListener('resize',renderMowers);window.gardenBattleSnapshot=()=>({wave:gameState.battle?{...gameState.battle}:null,progress:gameState.battle?GardenRules.progress(gameState.battle,gameState.isVictory):0,mowers:gameState.mowers?.map(({row,x,state})=>({row,x,state})),giants:gameState.zombies.filter(z=>z.type==='giant'&&z.element).length});})();
+document.getElementById('campaign-advance').onclick=()=>{if(gameState.isVictory&&campaign.level<campaign.unlocked){campaign.level++;stageSelect.options[campaign.level-1].disabled=false;stageSelect.value=campaign.level;recommendSeeds?.();const intro=document.getElementById('garden-intro');intro.dataset.next='yes';intro.hidden=false;intro.querySelector('.garden-picker h2').tabIndex=-1;intro.querySelector('.garden-picker h2').focus()}};window.addEventListener('resize',renderMowers);window.gardenBattleSnapshot=()=>({wave:gameState.battle?{...gameState.battle}:null,progress:gameState.battle?GardenRules.progress(gameState.battle,gameState.isVictory):0,mowers:gameState.mowers?.map(({row,x,state})=>({row,x,state})),giants:gameState.zombies.filter(z=>z.type==='giant'&&z.element).length});})();

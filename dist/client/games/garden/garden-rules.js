@@ -13,7 +13,7 @@ const STAGES=[
   {id:'ice',world:4,title:'冰道 · 分期壓力'},
   {id:'roof',world:5,title:'屋頂 · 機械決戰'}
 ];
-const BOSS={hp:60,exposed:9000,armored:3000,response:6000,minions:3};
+const BOSS={hp:96,exposed:5500,enraged:4500,armored:2000,response:4000,minions:3};
 const EXTRAS={
   survival:{title:'生存 · 持續防守',world:1,endless:true},
   limited:{title:'挑戰 · 限量陽光',world:1,sun:100},

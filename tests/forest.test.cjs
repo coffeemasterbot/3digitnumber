@@ -21,3 +21,23 @@ test('walk-up and manual controls respect role and interaction distance',()=>{
   assert.equal(back.on,true);
   assert.equal(F.lever(map,wrongRole),false);
 });
+
+test('temple budget requires both roles, respects income timing and preserves the main circuits',()=>{
+  for(let stage=1;stage<=9;stage++){
+    const map=F.temple(stage);
+    const actors=[{gems:1},{gems:0}];
+    const goals=[...map.goals];
+    assert.equal(F.spendBudget(map,actors,15),false);
+    actors[1].gems=1;
+    if(stage>=4&&stage<=6)assert.equal(F.spendBudget(map,actors,11.99),false);
+    if(stage>=7){
+      actors[0].gems=2;
+      assert.equal(F.budgetStatus(map,actors,15).reserve,true);
+    }
+    assert.equal(F.spendBudget(map,actors,15),true);
+    assert.equal(F.spendBudget(map,actors,15),false);
+    assert.equal(F.budgetStatus(map,actors,15).reserve,false);
+    assert.deepEqual(map.goals,goals);
+    assert.equal(F.temple(stage).finance.spent,false);
+  }
+});

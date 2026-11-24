@@ -33,6 +33,8 @@ window.createGardenSeedPicker = function(host, callbacks) {
       if(plant.locked){
         card.setAttribute('aria-disabled','true');card.onclick=null;
         const lock=document.createElement('small');lock.textContent=plant.unlockText?'未解鎖 · '+plant.unlockText:'未解鎖';card.append(lock);
+      }else{
+        const status=document.createElement('small');status.textContent=active?'已選':'已解鎖';card.append(status);
       }
       library.append(card);
     }

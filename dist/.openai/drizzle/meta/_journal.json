@@ -29,6 +29,13 @@
       "when": 1795511636169,
       "tag": "0003_phase2_survey",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1795516301989,
+      "tag": "0004_bright_nightcrawler",
+      "breakpoints": true
     }
   ]
 }

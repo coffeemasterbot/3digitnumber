@@ -1,0 +1,1 @@
+ALTER TABLE `pfap_survey` ADD `sid_encrypted` text;

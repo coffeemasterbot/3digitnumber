@@ -183,3 +183,16 @@ html[lang=en] #plantSelection .plantCard .name {font-size:.67rem;max-width:7.5em
 @media(orientation:landscape) and (max-height:450px){
   #gameContainer{--lawn-top:111px;--lawn-bottom:67px}
 }
+
+#garden-intro[hidden]{display:none}
+#garden-intro .picker-library button[aria-pressed="true"]{border-color:#29614a;background:#c9e6ad}
+#garden-intro .picker-library button[aria-disabled="true"]{border-color:#a7947b;background:#e9e2d0}
+
+.garden-boss-rig{position:fixed;z-index:5;pointer-events:none;aspect-ratio:172/240;filter:drop-shadow(0 8px 7px #1e2b3b77);transition:transform .2s ease}
+.garden-boss-rig svg{display:block;width:100%;height:100%}
+.garden-boss-rig.exposed{transform:translateY(6%) rotate(-4deg)}
+.garden-boss-rig.enraged .boss-reactor{fill:#ff8c4b;stroke:#e46e38}
+.mechanical-body .habit-body{scale:.6;opacity:.8}
+#gameContainer .boss-attack{z-index:14;width:clamp(42px,6vw,76px)}
+#gameContainer .boss-impact-warning{z-index:10}
+@media(prefers-reduced-motion:reduce){.garden-boss-rig{transition:none}}

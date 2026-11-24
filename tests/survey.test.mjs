@@ -17,7 +17,7 @@ const makeRequest = (payload, caller = origin) => new Request(site + '/api/surve
 });
 function database() {
   const db = new DatabaseSync(':memory:');
-  for (const file of ['0002_cynical_northstar.sql', '0003_phase2_survey.sql']) {
+  for (const file of ['0002_cynical_northstar.sql', '0003_phase2_survey.sql', '0004_bright_nightcrawler.sql']) {
     db.exec(readFileSync(new URL('../drizzle/' + file, import.meta.url), 'utf8'));
   }
   const prepare = sql => {
@@ -28,7 +28,7 @@ function database() {
     }
     return {bind, ...bind()};
   };
-  return {db, env: {DB: {prepare}, PFAP_METRICS_KEY: 'test-only-metrics-key'}};
+  return {db, env: {DB: {prepare}, PFAP_METRICS_KEY: 'test-only-metrics-key', PFAP_SID_KEY: 'test-only-student-id-cipher-key'}};
 }
 
 test('survey confirms writes, preserves each phase on retry, and exposes only matched aggregates to the team', async t => {
@@ -42,7 +42,11 @@ test('survey confirms writes, preserves each phase on retry, and exposes only ma
   assert.equal(response.headers.get('access-control-allow-origin'), origin);
   assert.deepEqual(await response.json(), {saved: true});
   await send({...before, attitude: 4});
-  await send({...before, phase: 'after', attitude: 4, knowledge: 5, habit: 'log'});
+  const after={...before, phase:'after', attitude:4, knowledge:5, habit:'log', sid:'00123456'};
+  assert.equal((await send({...after,sid:undefined})).status,400);
+  assert.equal((await send({...after,game:'plan'})).status,400);
+  assert.equal((await send(after)).status,200);
+  assert.equal((await send({...after,sid:'99999999'})).status,200);
   await send({...before, pair: 'bfd2ac18-bec4-4fcb-af1a-cc1d617dd404', attitude: 1});
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM pfap_survey').get().n, 3);
   const summary = () => new Request(site + '/api/activity/summary', {headers: {'x-pfap-metrics-key': env.PFAP_METRICS_KEY}});
@@ -51,6 +55,16 @@ test('survey confirms writes, preserves each phase on retry, and exposes only ma
   assert.deepEqual(result.survey, {before_count: 2, after_count: 1, paired: 1,
     attitude_before: 2, attitude_after: 4, knowledge_before: 3, knowledge_after: 5});
   assert.doesNotMatch(JSON.stringify(result), /10898c8c/);
+  assert.doesNotMatch(JSON.stringify(result), /00123456|sid_encrypted/);
+  const stored=db.prepare("SELECT sid_encrypted FROM pfap_survey WHERE phase='after'").get().sid_encrypted;
+  assert.ok(stored && !stored.includes(after.sid));
+  const records=key=>new Request(site+'/api/survey/verification',{
+    headers:key?{'x-pfap-metrics-key':key}:{},
+  });
+  assert.equal((await surveyApi(records(),env,games,receivedAt)).status,403);
+  const decoded=await surveyApi(records(env.PFAP_METRICS_KEY),env,games,receivedAt);
+  assert.equal(decoded.headers.get('cache-control'),'no-store');
+  assert.deepEqual(await decoded.json(),{entries:[{sid:after.sid,game:'runner',time:receivedAt}]});
 });
 
 test('rejects invalid answers, unapproved origins, oversized requests and submissions after the Hong Kong deadline', async t => {

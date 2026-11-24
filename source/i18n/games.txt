@@ -545,3 +545,26 @@ Budget Defence · 睇清楚，先行動。|Budget Defence · Check first, then a
 手機：左半屏拖動搖桿移動、右半屏拖動瞄準；按 E 開門，按住 E 拆解。|Phone: drag on the left to move and on the right to aim. Tap E to open a door or hold E to disarm.
 WASD／左屏搖桿|WASD / left-side joystick
 開門／拆解 E|Open door / disarm (E)
+
+已解鎖|Unlocked
+已選|Selected
+新解鎖植物：|New plants unlocked:
+辣椒可化解冰球；亦可用公用應急卡。|Chilli counters ice balls. You can also use the shared emergency counter.
+冰火應急卡|Fire and ice counter
+火球：使用應急卡|Fireball: use the emergency counter
+冰球：辣椒或應急卡|Iceball: use chilli or the emergency counter
+重擊：避開標記格|Stomp: avoid the marked tile
+必要開支|Essentials
+應急儲備可用|Emergency reserve ready
+捷徑已開|Shortcut open
+入帳未到|Income pending
+用資源開捷徑|Fund shortcut
+兩邊必要開支已安排，已處理附加光閘。|Both essentials are covered. The extra beam is off.
+應急儲備頂住一次失誤。|Your emergency reserve covered one mistake.
+先保必要開支，再決定用資源開捷徑定留底。|Cover essentials first, then decide whether to fund a shortcut or save.
+等收入真係到帳，先用嚟付款。|Wait for income to arrive before spending it.
+保留應急儲備，可以頂住一次意外。|Keep an emergency reserve to cover an unexpected setback.
+使用 SoundCloud 配樂|Use SoundCloud soundtrack
+配樂音量會跟隨遊戲設定。|The soundtrack follows your game volume setting.
+播放未成功，已切換原創配樂。|Playback unavailable. The original game soundtrack will play instead.
+兩邊必要開支已安排，路線多一點時間。|Both essentials are covered. You gained time for the route.
