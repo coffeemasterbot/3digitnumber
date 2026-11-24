@@ -56,6 +56,10 @@
   id('score-publish-controls').hidden = !onlineEdition;
   id('score-host-notice').hidden = onlineEdition;
   for (const button of document.querySelectorAll('[data-score-view]')) {
+    if (!onlineEdition && button.dataset.scoreView !== 'mine') {
+      button.hidden = true;
+      continue;
+    }
     button.addEventListener('click', () => {
       view = button.dataset.scoreView;
       if (!dialog.open) dialog.showModal();

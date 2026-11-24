@@ -185,21 +185,50 @@ body:has(#play-panel:not([hidden])){height:100dvh}
 #habit-section .seven-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 #habit-section .seven-days span{width:100%;min-width:0}
 
-#landing .wrap{width:min(1280px,92vw)}
-#arcade,#landing :is(#cashflow,#events,#resources,.about-section){padding-block:clamp(64px,7vw,96px)}
+#landing .wrap,.site-header .wrap{width:min(1440px,94vw);max-width:none;padding-inline:clamp(8px,1.1vw,18px)}
+#arcade,#landing :is(#cashflow,#events,#resources,.about-section,.presentation-section,.habit-section){padding-block:clamp(40px,5vw,72px)}
 #arcade .game-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:24px}
-#arcade .game-card{grid-column:span 2;height:100%;min-width:0}
-#arcade .game-card:nth-child(4){grid-column:2 / span 2}
-#arcade .game-card:nth-child(5){grid-column:4 / span 2}
+#arcade .game-card{grid-column:span 2;min-width:0}
+#arcade .game-card::after{display:none}
+#arcade .game-card:nth-child(n+4){grid-column:span 3}
 #arcade .game-info{padding:20px 22px}
 #arcade .game-illustration{aspect-ratio:16 / 9;object-fit:cover}
-#arcade .game-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:3.2em}
+#arcade .game-info p,#arcade .game-info summary{font-size:1rem}
+#arcade .game-description{display:block;min-height:0}
+#arcade .game-info h3{font-size:clamp(1.35rem,2vw,1.75rem);overflow-wrap:anywhere}
 #arcade .play-button{background:#ae4824;color:#fff8ed}
+#landing p,#landing summary,#landing label,#landing .buttons,#landing .game-info [data-game-progress],#landing .quick-games button,#landing .board-actions button,#landing .play-button,.site-header nav{font-size:1rem}
+#landing .hero-lead{font-size:clamp(1.125rem,1rem + .3vw,1.25rem);line-height:1.7;max-width:55ch}
+#landing :is(.section-heading,.about-inner,.presentation-view) p{max-width:65ch;line-height:1.65}
+.site-header .header-inner{height:auto;min-height:76px;padding-block:8px;flex-wrap:wrap;row-gap:8px}
+.site-header nav{max-width:100%;flex-wrap:wrap;overflow:visible;row-gap:4px}
+.site-header nav :is(a,button),#landing :is(.primary,.play-button,.quick-games button,.board-actions button,#phase2-link,.share-button){min-height:44px}
+.site-header nav :is(a,button),#landing :is(.primary,.game-link,#phase2-link){font-size:1rem}
+.site-header nav a{display:inline-flex;align-items:center}
+#landing [hidden],#pfap-scores [hidden]{display:none!important}
+#landing .share-toolkit{padding-block:clamp(36px,5vw,64px)}
+.share-toolkit h2{margin:0 0 20px;font-size:clamp(1.75rem,3vw,2.5rem);color:#183f36}
+.share-columns{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(16px,2vw,28px)}
+.share-column{min-width:0;padding:clamp(16px,2.4vw,30px);background:#f5eddb;border:1px solid #d4c6ac;border-radius:14px}
+.share-column h3{margin:0;color:#244b3e;font-size:1.25rem}
+.share-column p{max-width:60ch;line-height:1.6}
+.share-column label{display:block;margin-top:16px}
+#share-url{width:100%;padding:10px 12px;margin:6px 0 12px;background:#fff9ec;color:#244b3e;border:1px solid #819382;border-radius:7px;font:inherit}
+.share-toolkit .buttons{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.share-toolkit .share-button{display:inline-flex;align-items:center;padding:8px 14px;border:1px solid #315c4c;border-radius:999px;background:transparent;color:#244b3e;font:inherit;text-decoration:none;cursor:pointer}
+#share-feedback:empty{display:none}
 @media(max-width:920px){
+  .site-header{position:static}
   #arcade .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
   #arcade .game-card:nth-child(n){grid-column:auto}
+  #arcade .game-card:last-child{grid-column:1/-1;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-items:center}
 }
-@media(max-width:550px){#arcade .game-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.share-columns{grid-template-columns:1fr}}
+@media(max-width:550px){
+  #arcade .game-grid{grid-template-columns:1fr}
+  #arcade .game-card:last-child{display:flex}
+  .site-header .header-inner{position:relative}
+}
 
 #survey-student label{display:block;font-weight:700}
 #survey-sid{max-width:16rem;width:100%;border:1px solid #76644e;border-radius:8px;padding:.55rem;font:inherit;background:#fffdf6;color:#213e32}

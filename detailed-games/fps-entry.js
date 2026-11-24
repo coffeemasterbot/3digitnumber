@@ -29,9 +29,8 @@ let patrolPoints=[],mapRoot=null,activeMap=null,arenaArt=null,skyFill=null,sun=n
 let mission=null;
 const demoMission=/^mission-([1-3]-(?:verify|dispatch|hold))$/.exec(window.arcadeTest?.target??'');
 let squad=[],squadOrder='follow';
-const musicChoice=$('fps-soundcloud'), musicStatus=$('fps-bgm-status'), musicHost=$('fps-soundcloud-player');
-let widget, widgetScript, musicTimeout, widgetReady=false, widgetPlaying=false, widgetRequested=false, widgetFailed=false;
-musicChoice.disabled=location.protocol==='file:'||location.origin==='null';
+const soundtrack=$('fps-bgm');
+let trackFailed=false, trackRequest=null;
 const storyTrial=()=>window.arcadeStory?.id==='verify';
 const exOffer={q:'信用卡結欠 HK$4,000，最低還款 HK$200。扣除基本生活費後，剩 HK$800。應該點安排？',answers:['只付最低額，將其餘用嚟消費','預留必要開支，再多還欠款同核對利息'],right:1,why:'最低還款只係門檻。先保留基本開支，再盡量多還並核對利息與還款期限。'};
 const offer=()=>storyTrial()?AH_JUN_OFFER:s.round===4?exOffer:OFFERS[s.round-1];
@@ -47,61 +46,31 @@ on(squadSelect,'change',()=>{
 });
 const audio=window.PFAPAudio;
 const cue=name=>audio?.play(name);
-function unlock(){audio?.setVolume(settings.volume);if(widgetReady)widget.setVolume(Math.round(20*settings.volume))}
+function unlock(){audio?.setVolume(settings.volume)}
 const musicActive=()=>!closed&&audio?.enabled('bgm')&&settings.volume>0&&s.phase==='playing'&&!terminalOpen&&!document.hidden;
-function musicMessage(message){
- if(window.siteLocale)window.siteLocale.write(musicStatus,message);else musicStatus.textContent=message;
+function stopTrack(){
+ if(!soundtrack)return;
+ trackRequest=null;
+ soundtrack.pause();
 }
-function stopWidget(){
- clearTimeout(musicTimeout);
- const wasPlaying=widgetRequested||widgetPlaying;
- widgetRequested=widgetPlaying=false;
- if(wasPlaying)widget?.pause();
+function syncTrack(){
+ if(!soundtrack)return;
+ if(!musicActive()||trackFailed){stopTrack();return}
+ soundtrack.volume=.28*settings.volume;
+ if(trackRequest||!soundtrack.paused)return;
+ const attempt=soundtrack.play();
+ trackRequest=attempt;
+ attempt.catch(()=>{
+   if(trackRequest===attempt)trackFailed=true;
+ }).finally(()=>{
+   if(trackRequest===attempt)trackRequest=null;
+ });
 }
-function syncWidget(){
- if(!musicActive()||!musicChoice.checked||!widgetReady||widgetFailed){stopWidget();return}
- if(widgetRequested)return;
- widgetRequested=true;
- widget.setVolume(Math.min(20,Math.round(20*settings.volume)));
- widget.play();
- musicTimeout=setTimeout(()=>{
-   if(!widgetPlaying&&widgetRequested){
-     widgetFailed=true;stopWidget();musicMessage('播放未成功，已切換原創配樂。');
-   }
- },2500);
-}
-function addMusicWidget(){
- if(widgetScript||musicChoice.disabled)return;
- const player=document.createElement('iframe');
- player.title='SoundCloud · Counter-Strike: Global Offensive Theme 1';
- player.allow='autoplay';player.inert=true;player.tabIndex=-1;
- player.height='100';player.width='100%';
- player.src='https://w.soundcloud.com/player/?auto_play=false&visual=false&url='+encodeURIComponent('https://soundcloud.com/csgoost/counter-strike-global-3');
- musicHost.append(player);
- widgetScript=document.createElement('script');
- widgetScript.src='https://w.soundcloud.com/player/api.js';
- widgetScript.onload=()=>{
-   if(closed||!window.SC?.Widget)return;
-   widget=window.SC.Widget(player);
-   widget.bind(window.SC.Widget.Events.READY,()=>{if(closed)return;widgetReady=true;widget.setVolume(Math.round(20*settings.volume));musicMessage('配樂音量會跟隨遊戲設定。');syncWidget()});
-   widget.bind(window.SC.Widget.Events.PLAY,()=>{
-     if(!musicActive()||!musicChoice.checked||widgetFailed){widget.pause();return}
-     widgetPlaying=true;
-   });
-   widget.bind(window.SC.Widget.Events.PAUSE,()=>{widgetPlaying=false});
-   widget.bind(window.SC.Widget.Events.FINISH,()=>{if(musicActive()&&widgetRequested){widget.seekTo(0);widget.play()}});
-   widget.bind(window.SC.Widget.Events.ERROR,()=>{widgetFailed=true;stopWidget();musicMessage('播放未成功，已切換原創配樂。')});
- };
- widgetScript.onerror=()=>{widgetFailed=true;musicMessage('播放未成功，已切換原創配樂。')};
- document.head.append(widgetScript);
-}
-on(musicChoice,'change',()=>{
- if(musicChoice.checked){widgetFailed=false;addMusicWidget()}
- else stopWidget();
-});
+if(soundtrack)on(soundtrack,'error',()=>{trackFailed=true;stopTrack()});
+on(window,'pfap-audio-change',syncTrack);
 function music(){
- syncWidget();
- if(!musicActive()||widgetPlaying)return;
+ syncTrack();
+ if(!musicActive()||(soundtrack&&!trackFailed))return;
  const now=audio.now();
  if(!now||now<nextBeat)return;
  const root=[110,98,130.81,87.31][Math.floor(beat/16)%4];
@@ -198,14 +167,14 @@ function shotSound(id){
  else if(id==='reload')cue('buy_equip');
 }
 function reload(){if(s.phase!=='playing'||terminalOpen||!startReload(s))return;s.feedback='換彈中…';cue('buy_equip')}
-function saveSettings(){unlock();reduced=settings.reduced;try{localStorage.setItem('fps-preferences-v2',JSON.stringify(settings))}catch{s.feedback='設定適用於今次遊玩。'}}
+function saveSettings(){unlock();syncTrack();reduced=settings.reduced;try{localStorage.setItem('fps-preferences-v2',JSON.stringify(settings))}catch{s.feedback='設定適用於今次遊玩。'}}
 function openSettings(){pause();clearPointer();for(const key of ['sensitivity','ads','volume']){$('setting-'+key).value=settings[key];$(''+key+'-output').textContent=key==='volume'?Math.round(settings[key]*100)+'%':settings[key].toFixed(2)+'×'}$('setting-invert').checked=settings.invert;$('setting-reduced').checked=reduced;$('settings-dialog').showModal()}
 function enterPlaying(){$('view-status').textContent='';s.phase='playing';last=performance.now();unlock();nextBeat=audio?.now()||0;renderMenu();host.focus()}
 function resumeRound(){if(s.phase!=='paused'||contextLost||$('settings-dialog').open)return;enterPlaying()}
 async function toggleFullscreen(){$('view-status').textContent='';if(s.phase==='playing')pause();clearPointer();try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();resize()}catch{$('view-status').textContent='瀏覽器未能切換全螢幕。按 V 重試，或以視窗模式繼續。'}}
 function fireBot(e){const mesh=new THREE.Mesh(new THREE.SphereGeometry(.1,6,6),new THREE.MeshBasicMaterial({color:'#ff8e56'}));mesh.position.set(e.x,1.4,e.z);scene.add(mesh);const dx=s.x-e.x,dz=s.z-e.z,dy=(s.crouch?.55:1.05)+s.jumpY-1.4,n=Math.hypot(dx,dz,dy)||1,speed=11*soloWaveBoost(s.round).projectile;bullets.push({mesh,x:e.x,y:1.4,z:e.z,vx:dx/n*speed,vy:dy/n*speed,vz:dz/n*speed,life:4});e.ammo--;e.burst--;const rate=easyFirstRound()?.7:1;e.burstClock=.15/rate;if(e.burst===0)e.shoot=(2.9-s.round*.2)/rate;if(e.ammo===0){e.reload=2.2;e.burst=0}}
 function pause(){if(s.phase!=='playing')return;s.phase='paused';window.gameAudio?.pause();fireHeld=defuseHeld=false;keys.clear();clearPointer();audio?.stopEffects();renderMenu()}
-function check(){if(s.phase!=='playing')return;if(mission&&s.verified)return;if(!nearObjective(s,task().point,3)){s.feedback='先到北面財務炸彈旁邊，撳 F 查帳。';return}s.checked=true;terminalOpen=true;stopWidget();keys.clear();audio?.stopEffects();clearPointer();const o=offer();$('terminal').innerHTML='<h2>先查帳，後拆解</h2><p>答錯會即時引爆裝置。</p><p>'+o.q+'</p>'+o.answers.map((a,i)=>'<button data-answer="'+i+'">'+a+'</button>').join('')+'<p id="terminal-feedback" role="status"></p><button id="terminal-back">返回戰場</button>';$('terminal').hidden=false;fireHeld=false;defuseHeld=false}
+function check(){if(s.phase!=='playing')return;if(mission&&s.verified)return;if(!nearObjective(s,task().point,3)){s.feedback='先到北面財務炸彈旁邊，撳 F 查帳。';return}s.checked=true;terminalOpen=true;stopTrack();keys.clear();audio?.stopEffects();clearPointer();const o=offer();$('terminal').innerHTML='<h2>先查帳，後拆解</h2><p>答錯會即時引爆裝置。</p><p>'+o.q+'</p>'+o.answers.map((a,i)=>'<button data-answer="'+i+'">'+a+'</button>').join('')+'<p id="terminal-feedback" role="status"></p><button id="terminal-back">返回戰場</button>';$('terminal').hidden=false;fireHeld=false;defuseHeld=false}
 function readMissions(){
  try{const data=JSON.parse(localStorage.getItem(missionSaveKey));return data&&data.version===1&&data.completed?data:{version:1,completed:{}}}catch{return {version:1,completed:{}}}
 }
@@ -290,7 +259,7 @@ function renderMenu(){
  const previous=document.body.dataset.phase;
  const finished=!mission&&(s.phase==='results'||(s.phase==='roundend'&&s.round===4))&&previous!==s.phase;
  if(finished)window.arcadeRun?.complete('defence');
- syncWidget();invalidateFrame();document.body.dataset.phase=s.phase;squadControl.hidden=!(s.phase==='playing'&&squad.length);squadSelect.value=squadOrder;const el=$('menu');el.innerHTML='';if(s.phase==='menu')el.innerHTML='<section class="panel"><small>FIRST PERSON · 原創機械人訓練</small><h1>預算防衛戰<br>拆解財務炸彈。</h1><p>避開消費壞習慣機械人，到北面終端核對帳目，再拆解炸彈。</p><div class="control-guide"><span><b>移動</b> WASD／左屏搖桿</span><span><b>瞄準</b> 右鍵拖動／方向鍵／觸控拖動</span><span><b>射擊</b> 左鍵或按住 X · Q 瞄準</span><span><b>互動</b> F 查帳 · E 拆解</span></div><details><summary>操作說明</summary><p>WASD 移動 · 右鍵拖動／方向鍵轉向 · Esc 暫停 · 左鍵／X 射擊 · Q 瞄準 · 空白跳躍 · C 蹲下 · 1–5 換武器 · R 換彈 · F 查帳 · E 開門／拆解 · P／Esc 暫停 · V 全螢幕。</p><p>觸控板：可用方向鍵轉向、X 射擊、Q 瞄準。手機：左半屏拖動搖桿移動、右半屏拖動瞄準；按 E 開門，按住 E 拆解。</p></details><div class="settings"><label><input id="reduce" type="checkbox" '+(reduced?'checked':'')+'> 減少鏡頭動態</label></div><div class="actions"><button data-action="begin">'+(storyTrial()?'開始核對貸款':'單人三輪')+'</button>'+(storyTrial()?'':'<button data-action="ex">EX 關 · 機械人圍攻</button><button data-action="duel">1 對 1</button><a href="range.html">無障礙不限時文字／標靶版 ↗</a>')+'</div></section>';
+ syncTrack();invalidateFrame();document.body.dataset.phase=s.phase;squadControl.hidden=!(s.phase==='playing'&&squad.length);squadSelect.value=squadOrder;const el=$('menu');el.innerHTML='';if(s.phase==='menu')el.innerHTML='<section class="panel"><small>FIRST PERSON · 原創機械人訓練</small><h1>預算防衛戰<br>拆解財務炸彈。</h1><p>避開消費壞習慣機械人，到北面終端核對帳目，再拆解炸彈。</p><div class="control-guide"><span><b>移動</b> WASD／左屏搖桿</span><span><b>瞄準</b> 右鍵拖動／方向鍵／觸控拖動</span><span><b>射擊</b> 左鍵或按住 X · Q 瞄準</span><span><b>互動</b> F 查帳 · E 拆解</span></div><details><summary>操作說明</summary><p>WASD 移動 · 右鍵拖動／方向鍵轉向 · Esc 暫停 · 左鍵／X 射擊 · Q 瞄準 · 空白跳躍 · C 蹲下 · 1–5 換武器 · R 換彈 · F 查帳 · E 開門／拆解 · P／Esc 暫停 · V 全螢幕。</p><p>觸控板：可用方向鍵轉向、X 射擊、Q 瞄準。手機：左半屏拖動搖桿移動、右半屏拖動瞄準；按 E 開門，按住 E 拆解。</p></details><div class="settings"><label><input id="reduce" type="checkbox" '+(reduced?'checked':'')+'> 減少鏡頭動態</label></div><div class="actions"><button data-action="begin">'+(storyTrial()?'開始核對貸款':'單人三輪')+'</button>'+(storyTrial()?'':'<button data-action="ex">EX 關 · 機械人圍攻</button><button data-action="duel">1 對 1</button><a href="range.html">無障礙不限時文字／標靶版 ↗</a>')+'</div></section>';
 else if(s.phase==='missions')el.innerHTML=missionMenu();
 else if(s.phase==='buy')el.innerHTML='<section class="panel"><small>'+(s.round===4?'EX 關':'ROUND '+s.round+' / 3')+' · BUY PHASE</small><h1>'+ (mission?.training?'3D 練習場':mission?mission.mission.map+' · '+mission.mission.title:'先留下一輪嘅資源。') +'</h1><p>餘下 <b>'+s.credits+' 金幣</b>。手槍與匕首免費。每輪有 100 生命值，請利用掩體；器材只限今輪。</p>'+(storyTrial()?'<p>已提供快速拆解工具。到北面終端核對阿俊嘅貸款資料。</p>':mission?'<p>'+mission.mission.brief+'</p>':'')+'<div class="gear">'+Object.entries(GEAR).map(([key,g])=>'<div><b>'+g.label+'</b><small>'+({bazooka:rocketDescription(),carbine:'24 發，射速較快',sniper:'5 發，單發高威力，可開鏡',kit:'拆解由 5 秒減至 3 秒'})[key]+'</small><strong>'+g.cost+' 金幣</strong><button data-buy="'+key+'" '+(s.purchases.includes(key)||s.credits<g.cost?'disabled':'')+'>'+(s.purchases.includes(key)?'已購買':'購買')+'</button></div>').join('')+'</div><div class="actions"><button data-action="start">進入戰場</button>'+(mission?'<button data-action="missions">返回選關</button>':'')+'</div></section>';
 else if(s.phase==='paused')el.innerHTML='<section class="panel"><h1>任務暫停</h1><span data-pfap-audio-slot></span><p>按住右鍵拖動轉向，放開即停。Esc 暫停。V 切換全螢幕。</p><p>移動、AI、子彈、換彈同倒數已停。'+Math.ceil(s.time)+' 秒 · '+s.ammo+' 發。</p><div class="actions"><button data-action="resume">繼續任務</button><button data-action="retry">'+(s.round===4?'重試 EX 關':mission?'重試任務':'由第一輪重試')+'</button></div></section>';
@@ -429,7 +398,7 @@ function resize(){
  camera.aspect=w/h;camera.updateProjectionMatrix();
  invalidateFrame();
 }
-function cleanup(){if(closed)return;closed=true;stopWidget();musicHost.replaceChildren();widgetScript?.remove();hudObserver?.disconnect();worldObserver?.disconnect();rockets=[];rocketVisuals?.dispose();rocketVisuals=null;cancelAnimationFrame(raf);events.abort();keys.clear();audio?.stopEffects();scene?.traverse(o=>{o.geometry?.dispose();const materials=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];materials.forEach(m=>{m.map?.dispose();m.dispose()})});renderer?.dispose();renderer?.forceContextLoss();clearPointer()}
+function cleanup(){if(closed)return;closed=true;stopTrack();hudObserver?.disconnect();worldObserver?.disconnect();rockets=[];rocketVisuals?.dispose();rocketVisuals=null;cancelAnimationFrame(raf);events.abort();keys.clear();audio?.stopEffects();scene?.traverse(o=>{o.geometry?.dispose();const materials=o.material?(Array.isArray(o.material)?o.material:[o.material]):[];materials.forEach(m=>{m.map?.dispose();m.dispose()})});renderer?.dispose();renderer?.forceContextLoss();clearPointer()}
 function exit(){cleanup();if(parent!==window){parent.postMessage({type:'budget-defence-exit'},location.origin);parent.postMessage({type:'website-v1-back'},location.origin)}else location.href='../../#play'}
 try{init()}catch(e){
  document.body.dataset.webglError='true';
@@ -438,7 +407,7 @@ try{init()}catch(e){
  host.innerHTML='<section class="panel webgl-fallback"><h1>3D 畫面未能啟動</h1><p>可以轉用相同學習內容嘅不限時標靶版。</p><a href="./range.html">打開無障礙版本</a></section>';
  console.warn('Budget Defence WebGL unavailable', e);
 }
-on(document,'click',e=>{unlock();const a=e.target.closest('[data-action]')?.dataset.action,b=e.target.closest('[data-buy]')?.dataset.buy,weapon=e.target.closest('[data-weapon]')?.dataset.weapon,answer=e.target.closest('[data-answer]')?.dataset.answer;if(weapon)selectWeapon(weapon);if(b&&buy(s,b)){cue('buy_equip');s.feedback='已買 '+GEAR[b].label+'，只扣一次。';renderMenu()}if(a==='duel'&&s.phase==='menu'&&!window.arcadeTest&&!storyTrial())openCoop(()=>shotSound('rocket-impact'),shotSound,'duel');if(a==='ex'){mission=null;s=create();s.round=4;s.credits=600;s.phase='buy';renderMenu()}if(a==='begin'){mission=null;s.phase='buy';if(storyTrial())s.purchases=['kit'];renderMenu()}if(a==='training'&&!storyTrial())startMission('1-verify',true);if(a==='missions'&&!storyTrial()){clearRound();mission=null;s=create();s.phase='missions';renderMenu()}if(a==='main-menu'){mission=null;s=create();renderMenu()}const chosen=e.target.closest('[data-mission]')?.dataset.mission;if(chosen&&s.phase==='missions')startMission(chosen);if(a==='start')startRound();if(a==='resume')resumeRound();if(a==='retry'){if(mission)startMission(mission.mission.id,mission.training);else{const ex=s.round===4;clearRound();recorded=false;s=create();if(ex){s.round=4;s.credits=600}s.phase='buy';if(storyTrial())s.purchases=['kit'];renderMenu()}}if(a==='next'){if(s.phase!=='roundend'||mission||storyTrial())return;if(s.round>=3)s.phase='results';else{s.round++;s.phase='buy';s.purchases=[]}renderMenu()}if(a==='exit')exit();if(answer!==undefined){if(verify(s,Number(answer),offer())){terminalOpen=false;$('terminal').hidden=true;if(mission&&task().kind==='upload')s.feedback='資料已核實。去'+task().point.name+'，留喺範圍內上傳。';unlock();host.focus()}else if(s.phase==='playing'&&s.checked&&!s.verified){terminalOpen=false;$('terminal').hidden=true;s.phase='dead';s.time=0;s.feedback='核實錯誤，裝置已引爆。';clearPointer();renderMenu()}}if(e.target.id==='terminal-back'){terminalOpen=false;$('terminal').hidden=true;host.focus()}if(answer!==undefined||e.target.id==='terminal-back'){last=0;invalidateFrame()}});
+on(document,'click',e=>{unlock();const a=e.target.closest('[data-action]')?.dataset.action,b=e.target.closest('[data-buy]')?.dataset.buy,weapon=e.target.closest('[data-weapon]')?.dataset.weapon,answer=e.target.closest('[data-answer]')?.dataset.answer;if(weapon)selectWeapon(weapon);if(b&&buy(s,b)){cue('buy_equip');s.feedback='已買 '+GEAR[b].label+'，只扣一次。';renderMenu()}if(a==='duel'&&s.phase==='menu'&&!window.arcadeTest&&!storyTrial())openCoop(()=>shotSound('rocket-impact'),shotSound,'duel');if(a==='ex'){mission=null;s=create();s.round=4;s.credits=600;s.phase='buy';renderMenu()}if(a==='begin'){mission=null;s.phase='buy';if(storyTrial())s.purchases=['kit'];renderMenu()}if(a==='training'&&!storyTrial())startMission('1-verify',true);if(a==='missions'&&!storyTrial()){clearRound();mission=null;s=create();s.phase='missions';renderMenu()}if(a==='main-menu'){mission=null;s=create();renderMenu()}const chosen=e.target.closest('[data-mission]')?.dataset.mission;if(chosen&&s.phase==='missions')startMission(chosen);if(a==='start')startRound();if(a==='resume')resumeRound();if(a==='retry'){if(mission)startMission(mission.mission.id,mission.training);else{const ex=s.round===4;clearRound();recorded=false;s=create();if(ex){s.round=4;s.credits=600}s.phase='buy';if(storyTrial())s.purchases=['kit'];renderMenu()}}if(a==='next'){if(s.phase!=='roundend'||mission||storyTrial())return;if(s.round>=3)s.phase='results';else{s.round++;s.phase='buy';s.purchases=[]}renderMenu()}if(a==='exit')exit();if(answer!==undefined){if(verify(s,Number(answer),offer())){terminalOpen=false;$('terminal').hidden=true;if(mission&&task().kind==='upload')s.feedback='資料已核實。去'+task().point.name+'，留喺範圍內上傳。';unlock();host.focus()}else if(s.phase==='playing'&&s.checked&&!s.verified){terminalOpen=false;$('terminal').hidden=true;s.phase='dead';s.time=0;s.feedback='核實錯誤，裝置已引爆。';clearPointer();renderMenu()}}if(e.target.id==='terminal-back'){terminalOpen=false;$('terminal').hidden=true;host.focus()}if(answer!==undefined||e.target.id==='terminal-back'){last=0;syncTrack();invalidateFrame()}});
 on($('fullscreen'),'click',toggleFullscreen);on($('settings-open'),'click',openSettings);on(document,'fullscreenchange',()=>{$('fullscreen').textContent=document.fullscreenElement?'退出全螢幕 V':'全螢幕 V';$('fullscreen').setAttribute('aria-pressed',String(!!document.fullscreenElement));resize()});for(const key of ['sensitivity','ads','volume'])on($('setting-'+key),'input',e=>{settings[key]=Number(e.target.value);$(''+key+'-output').textContent=key==='volume'?Math.round(settings[key]*100)+'%':settings[key].toFixed(2)+'×';saveSettings()});for(const key of ['invert','reduced'])on($('setting-'+key),'change',e=>{settings[key]=e.target.checked;saveSettings()});on($('pause'),'click',pause);on($('exit'),'click',exit);$('mute').replaceWith(audio.controls());on(document,'change',e=>{if(e.target.id==='reduce')reduced=e.target.checked});on($('reload'),'click',reload);on($('check'),'click',check);on($('jump'),'click',jump);on($('crouch'),'click',()=>{if(s.phase==='playing'&&!terminalOpen)crouchToggle=!crouchToggle});on($('scope'),'click',toggleScope);
 on(document,'keydown',e=>{if(e.target instanceof Element&&e.target.matches('input,select,textarea'))return;if($('settings-dialog').open)return;if(['KeyP','Escape'].includes(e.code)){if(!e.repeat){if(e.code==='KeyP'&&s.phase==='paused')resumeRound();else pause()}return}if(e.code==='KeyV'&&!e.repeat){e.preventDefault();toggleFullscreen();return}if(s.phase!=='playing'||terminalOpen)return;if(['KeyW','KeyA','KeyS','KeyD','Space','KeyE','KeyR','KeyF','KeyX','KeyQ','ArrowLeft','ArrowRight','ShiftLeft'].includes(e.code))e.preventDefault();keys.add(e.code);if(e.code==='Space'&&!e.repeat)jump();if(e.code==='KeyX'&&!e.repeat)shoot();if(e.code==='KeyQ'&&!e.repeat)toggleScope();if(/^Digit[1-5]$/.test(e.code))selectWeapon(['pistol','carbine','sniper','knife','bazooka'][Number(e.code.slice(-1))-1]);if(e.code==='KeyR'&&!e.repeat)reload();if(e.code==='KeyF'&&!e.repeat)check();if(e.code==='KeyE'&&!e.repeat)interact();});on(document,'keyup',e=>{keys.delete(e.code);if(e.code==='KeyE')defuseHeld=false});
 function interact(){

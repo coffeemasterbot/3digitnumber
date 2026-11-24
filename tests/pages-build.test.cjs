@@ -28,7 +28,7 @@ test('GitHub Pages build is static and describes local-only scores', () => {
   assert.ok(fs.existsSync(path.join(root, 'index.html')));
   assert.ok(fs.existsSync(path.join(root, 'downloads/lost-found-money-offline.html')));
   assert.match(read('index.html'), /最佳分數只保存在本機，不設共用排行榜/);
-  assert.ok(read('index.html').includes('value="https://lost-found-money-journey.cottonpatch1.chatgpt.site/#play"'));
+  assert.ok(read('index.html').includes('value="https://coffeemasterbot.github.io/3digitnumber/"'));
   assert.match(read('index.html'), /<body data-pfap-static>/);
   assert.match(read('app.js'), /此版本只保留本機成績/);
   assert.match(read('presentation.js'), /Runner and flight best scores stay in this browser/);
@@ -36,6 +36,17 @@ test('GitHub Pages build is static and describes local-only scores', () => {
   const jet = read('games/jet/app.js').replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
   assert.match(jet, /本機保存最佳紀錄/);
   assert.doesNotMatch(jet,/每局成績可見於共同排行榜|共同排行榜會記錄每一局/);
+});
+
+test('the toolkit and FPS soundtrack are packaged for each edition', () => {
+  const home = read('index.html');
+  assert.match(home, /id="share"[\s\S]*id="offline"/);
+  assert.doesNotMatch(home, /Codex／ChatGPT/);
+  const offline = read('downloads/lost-found-money-offline.html');
+  assert.doesNotMatch(offline, /id="download-offline"|budget-defence-bgm\.mp3/);
+  assert.match(offline, /id="offline"/);
+  assert.match(read('games/budget-defence/index.html'), /id="fps-bgm" src="\.\.\/\.\.\/assets\/audio\/budget-defence-bgm\.mp3" loop preload="none"/);
+  assert.ok(fs.statSync(path.join(root,'assets/audio/budget-defence-bgm.mp3')).size < 1_500_000);
 });
 
 test('GitHub Pages game bundles make no leaderboard API requests', () => {
