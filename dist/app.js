@@ -28,8 +28,11 @@ function mountFrame(frame,kind){
     defence:'games/budget-defence/index.html',coins:'games/runner/index.html',shipping:'games/jet/index.html',instalments:'games/garden/index.html',
   }[kind])||'story/index.html?arcade='+encodeURIComponent(kind);
 }
-function launch(kind,habitSuggestion='',testTarget=null){
+function launch(kind,habitSuggestion='',testTarget=null,surveyHandled=false){
   if(!Object.hasOwn(labels,kind))return;
+  const game=window.gameCatalogue.find(entry=>entry.key===kind);
+  if(game&&!testTarget&&!surveyHandled&&window.pfapSurvey?.beforeGame(
+    kind,()=>launch(kind,habitSuggestion,testTarget,true)))return;
   if(!active)originFocus=document.activeElement;
   flushFrame($('game-frame'));
   active=kind;
@@ -42,6 +45,7 @@ function launch(kind,habitSuggestion='',testTarget=null){
   if(kind==='plan'&&habitSuggestion)frame.dataset.habit=habitSuggestion.slice(0,120);
   const loading=document.createElement('p');
   if(kind==='plan'){
+    window.pfapSurvey?.watchPlan(frame);
     loading.className='plan-loading';
     loading.setAttribute('role','status');
     loading.textContent='載入中…';
@@ -103,12 +107,13 @@ function refreshCaseLabel(){
 }
 refreshCaseLabel();
 window.addEventListener('arcade-records-change',refreshCaseLabel);
-$('privacy-open').onclick=()=>showInfo('<div class="eyebrow">私隱說明</div><h2>你嘅記錄，喺你手上。</h2><p>主線進度、遊戲回顧同十四日行動存在瀏覽器 localStorage。主線毋須登入。開啟公開成績後，排行榜會顯示暱稱、遊戲、模式、成績及遊玩時間，並使用匿名 cookie 識別此瀏覽器。你可以刪除由此瀏覽器發布嘅成績；阿俊嘅故事存檔留喺本機。</p><p>網上版本用匿名瀏覽器識別碼統計訪問同正式開局，成效報表只向獲授權嘅團隊成員開放。</p><p>請勿喺行動卡填寫戶口、收入或欠款等敏感資料。下載嘅行動卡會保存在你裝置。清除網站資料會移除本機進度。</p><p>外部官方連結按其服務條款及私隱政策運作。網站託管服務本身亦可能處理基本連線記錄。</p>');
+$('privacy-open').onclick=()=>showInfo('<div class="eyebrow">私隱說明</div><h2>你嘅記錄，喺你手上。</h2><p>主線進度、遊戲回顧同十四日行動存在瀏覽器 localStorage。主線毋須登入。開啟公開成績後，排行榜會顯示暱稱、遊戲、模式、成績及遊玩時間，並使用匿名 cookie 識別此瀏覽器。你可以刪除由此瀏覽器發布嘅成績；阿俊嘅故事存檔留喺本機。</p><p>網上版本用匿名瀏覽器識別碼統計訪問同正式開局，成效報表只向獲授權嘅團隊成員開放。</p><p data-survey-privacy>前後測屬自願。網站用隨機代碼配對，問卷只收集自評、習慣選項同活動種類，並與故事、排行榜同訪問紀錄分開。獲授權嘅團隊成員可以睇匯總結果。</p><p>請勿喺行動卡填寫戶口、收入或欠款等敏感資料。下載嘅行動卡會保存在你裝置。清除網站資料會移除本機進度。</p><p>外部官方連結按其服務條款及私隱政策運作。網站託管服務本身亦可能處理基本連線記錄。</p>');
 window.addEventListener('message',e=>{
   const f=$('game-frame');
   if(e.source!==f?.contentWindow||e.origin!==location.origin&&!(window.offlineMount&&e.origin==='null'))return;
   if(e.data?.type==='website-v1-back')home();
   else if(e.data?.type==='website-v1-play')launch(e.data.key);
+  else if(e.data?.type==='pfap-defence-round-over'&&active==='defence'&&!f.name)window.pfapSurvey?.finished('defence');
   else if(e.data?.type==='arcade-records-change'&&!$('landing').hidden)window.dispatchEvent(new Event('arcade-records-change'));
 });
 function syncPlayerRoute(){
@@ -127,6 +132,6 @@ function syncPlayerRoute(){
     $(hash.slice(1))?.scrollIntoView();
   }
 }
-syncPlayerRoute();
+document.addEventListener('DOMContentLoaded',syncPlayerRoute,{once:true});
 // Keep the iframe in sync when browser Back/Forward crosses an anchor navigation.
 window.addEventListener('popstate',syncPlayerRoute);

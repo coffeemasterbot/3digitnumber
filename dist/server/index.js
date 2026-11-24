@@ -1,4 +1,5 @@
 import {activityApi} from './activity.mjs';
+import {surveyApi} from './survey.mjs';
 export const GAMES = new Set(['runner', 'jet', 'garden', 'forest', 'defence']);
 
 const boards = {
@@ -84,6 +85,7 @@ async function finishRun(db, body, who, now) {
 
 export async function api(request, env) {
   const url = new URL(request.url);
+  if (url.pathname === '/api/survey') return surveyApi(request, env, GAMES);
   if (url.pathname === '/api/activity' || url.pathname === '/api/activity/summary') return activityApi(request, env, GAMES);
   const db = env.DB;
   if (!db) return json({error: '排行榜暫時未連線，遊戲仍可繼續。'}, 503);

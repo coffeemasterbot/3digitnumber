@@ -49,6 +49,30 @@ body[data-phase=playing] #weapon-bar{left:50%;bottom:44px;transform:translateX(-
 @media(pointer:coarse){#touch{bottom:88px}.touch-actions{grid-template-columns:repeat(3,minmax(40px,56px))}#notice{top:calc(var(--hud-bottom) + 90px);bottom:auto}#defuse{top:calc(var(--hud-bottom) + 42px);bottom:auto}#touch #look{display:none}}
 @media(max-height:520px) and (pointer:coarse){.touch-actions{grid-template-columns:repeat(4,52px)}}
 
+#world{isolation:isolate;touch-action:none}
+.webgl-fallback{position:absolute;inset:calc(var(--hud-bottom,65px) + 20px) 12px auto;margin:0 auto;width:min(90%,32rem)}
+#touch{position:absolute;inset:0;pointer-events:none;touch-action:none}
+#touch-stick{box-sizing:border-box;position:absolute;left:24px;bottom:calc(24px + env(safe-area-inset-bottom));width:120px;aspect-ratio:1;border:2px solid #ffffff8c;border-radius:50%;display:grid;place-items:center;background:#17383150}
+#touch-stick[style]{transform:translate(-50%,-50%)}
+#touch-stick>div{width:40%;aspect-ratio:1;border-radius:50%;border:2px solid #ffffffae;background:#ffffff46;transform:translate(var(--stick-x,0px), var(--stick-y,0px))}
+#touch .touch-actions{position:absolute;right:max(16px,env(safe-area-inset-right));bottom:calc(40px + env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(2,auto);align-items:center;justify-items:center;gap:6px;pointer-events:none}
+#touch button{width:46px;height:42px;min-height:0;padding:0;border-radius:50%;border:1px solid #ffffff96;background:#16352dc9;color:#fff8e9;font-size:.72rem;pointer-events:auto;touch-action:none}
+#touch :is(#scope,[data-hold=interact]){width:56px;height:56px}
+#touch [data-hold=fire]{grid-column:2;grid-row:2 / span 2;width:74px;height:74px}
+#touch [data-hold=interact]{grid-column:1;grid-row:2}
+#touch #scope{grid-column:1;grid-row:3}
+@media(any-pointer:coarse){
+  body[data-phase=playing] #touch{display:block!important}
+  body[data-terminal=true] #touch{display:none!important}
+}
+@media(max-height:380px){
+  #touch .touch-actions{grid-template-columns:repeat(3,auto);gap:4px;bottom:28px}
+  #touch [data-hold=fire]{grid-column:3;grid-row:2}
+  #touch :is(#scope,[data-hold=interact]){grid-row:2}
+  #touch #scope{grid-column:2}
+  #touch-stick{width:96px}
+}
+
 #hud {background:#162c30f2;border:1px solid #638682;border-radius:7px;box-shadow:0 3px 12px #05171355}
 #hud #timer,#hud #ammo,#hud #money {font-variant-numeric:tabular-nums}
 #hud button {border-radius:4px}

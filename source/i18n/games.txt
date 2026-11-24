@@ -542,3 +542,6 @@ Budget Defence · 睇清楚，先行動。|Budget Defence · Check first, then a
 重試呢一關|Retry this stage
 轉文字版|Switch to text mode
 結束並回顧|Finish and reflect
+手機：左半屏拖動搖桿移動、右半屏拖動瞄準；按 E 開門，按住 E 拆解。|Phone: drag on the left to move and on the right to aim. Tap E to open a door or hold E to disarm.
+WASD／左屏搖桿|WASD / left-side joystick
+開門／拆解 E|Open door / disarm (E)

@@ -163,12 +163,13 @@
   function controls() {
     const group=document.createElement('span');
     group.className='pfap-audio-controls';
-    const english=document.documentElement.lang.toLowerCase().startsWith('en');
     for(const channel of channels){
       const b=document.createElement('button');
       b.type='button';
       b.dataset.pfapAudio=channel;
-      b.textContent=channel==='bgm'?(english?'🎵 Music':'🎵 音樂'):(english?'🔊 SFX':'🔊 音效');
+      const label=channel==='bgm'?'🎵 音樂':'🔊 音效';
+      if(window.siteLocale)window.siteLocale.write(b,label);
+      else b.textContent=label;
       b.setAttribute('aria-pressed',String(preferences[channel]));
       group.append(b);
     }

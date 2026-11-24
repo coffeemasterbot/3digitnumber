@@ -108,7 +108,7 @@
     const recent=Object.hasOwn(games,started)?started:recorded.includes(profile.recent)?profile.recent:recorded[0];
     resume.hidden=homeResume.hidden=!recent;
     resume.textContent=recent?'繼續遊玩 · '+games[recent]:'';
-    homeResume.textContent=recent?'▶ 繼續遊玩 · '+games[recent]:'';
+    homeResume.textContent=resume.textContent;
     resume.onclick=recent?()=>document.querySelector('[data-play="'+recent+'"]')?.click():null;
     homeResume.onclick=recent?()=>resume.click():null;
   }

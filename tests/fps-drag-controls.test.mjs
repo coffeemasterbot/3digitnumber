@@ -1,6 +1,6 @@
 import {test} from 'node:test';
 import assert from 'node:assert/strict';
-import {bindMatchPointer} from '../detailed-games/fps-pointer.mjs';
+import {bindMatchPointer, stickVector} from '../detailed-games/fps-pointer.mjs';
 
 test('only right drag turns the view and left click can fire during the drag',()=>{
   const before=globalThis.window;
@@ -29,4 +29,42 @@ test('only right drag turns the view and left click can fire during the drag',()
     assert.equal(movements.length,2);
     assert.equal(shots.at(-1),false);
   }finally{globalThis.window=before;}
+});
+
+test('two touch pointers move and look independently, and cancellation clears the joystick', () => {
+  const previous = globalThis.window;
+  globalThis.window = new EventTarget();
+  try {
+    const canvas = Object.assign(new EventTarget(), {
+      getBoundingClientRect: () => ({left: 40, width: 800}),
+      setPointerCapture() {},
+    });
+    const aim = [], movement = [];
+    const controls = bindMatchPointer({
+      on:(target, type, handler) => target.addEventListener(type, handler),
+      canvas, active:() => true, look:(...args) => aim.push(args),
+      walk:(right, forward) => movement.push([right, forward]),
+      fire() {}, clearInput() {}, stickRadius:() => 36,
+    });
+    const touch = (target, type, pointerId, clientX, clientY) => target.dispatchEvent(
+      Object.assign(new Event(type, {cancelable:true}), {pointerType:'touch', pointerId, clientX, clientY}));
+    touch(canvas, 'pointerdown', 1, 170, 230);
+    touch(canvas, 'pointerdown', 2, 610, 160);
+    touch(window, 'pointermove', 1, 170, 194);
+    touch(window, 'pointermove', 2, 620, 165);
+    assert.deepEqual(movement.at(-1), [0, 1]);
+    assert.deepEqual(aim, [[22, 11]]);
+    touch(canvas, 'pointercancel', 1);
+    assert.deepEqual(movement.at(-1), [0, 0]);
+    touch(window, 'pointermove', 2, 625, 165);
+    assert.deepEqual(aim.at(-1), [11, 0]);
+    controls.clear();
+    touch(window, 'pointermove', 2, 650, 165);
+    assert.equal(aim.length, 2);
+    assert.equal(stickVector(2, 0, 36).right, 0);
+    const diagonal = stickVector(40, -40, 36);
+    assert.ok(Math.abs(Math.hypot(diagonal.right, diagonal.forward) - 1) < 1e-12);
+  } finally {
+    globalThis.window = previous;
+  }
 });

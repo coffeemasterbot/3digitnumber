@@ -106,7 +106,21 @@ body:has(#play-panel:not([hidden]))>.site-header{display:none}
 .phase2-survey-content { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap;
   gap:.8rem 1.3rem; padding:1.15rem 1.4rem; margin-bottom:1.5rem; border-radius:.9rem; background:#183f36; color:#fff6e3 }
 .phase2-survey-content h2 { color:inherit; font-size:clamp(1rem, 2.4vw, 1.3rem); margin:0 }
-.phase2-survey-content a { background:#ffe0a0; color:#183f36; border-radius:.45rem; padding:.55rem .9rem; font-weight:700 }
+.phase2-survey-content button { background:#ffe0a0; color:#183f36; border-radius:.45rem; padding:.55rem .9rem; font-weight:700 }
+#pfap-survey h2 { margin:0 }
+#survey-privacy { color:#4a6359; font-size:.88rem }
+#survey-questions fieldset { border:0; margin:1rem 0; padding:0; display:flex; flex-wrap:wrap; gap:.5rem }
+#survey-questions legend { padding:0; margin-bottom:.55rem; font-weight:700 }
+#survey-questions label { position:relative; cursor:pointer }
+#survey-questions input { position:absolute; width:1px; height:1px; opacity:0 }
+#survey-questions label span { display:grid; place-items:center; min-width:2.75rem; min-height:2.75rem; padding:.4rem .7rem; border:1px solid #788d78; border-radius:999px }
+#survey-questions input:checked + span { color:#fff8e9; background:#20493c; border-color:#20493c }
+#survey-questions input:focus-visible + span { outline:3px solid #ae4824; outline-offset:2px }
+#survey-comparison { background:#e5eddf; border-radius:.75rem; padding:1rem }
+#survey-comparison h3,#survey-comparison dl { margin:0 }
+#survey-comparison dl { display:grid; grid-template-columns:auto 1fr; gap:.35rem 1rem; margin-top:.5rem }
+#survey-comparison dd { margin:0; font-weight:750 }
+.survey-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:.6rem }
 .game-learning strong { display:inline-block; padding:.22rem .55rem; border-radius:.42rem; background:#dbe9df; color:#183f36 }
 .support-phones { padding-inline-start:1.2rem }
 .support-phones li + li { margin-top:.5rem }
@@ -170,3 +184,19 @@ body:has(#play-panel:not([hidden])){height:100dvh}
 #habit-section .habit-grid>div:first-child p{max-width:32ch;margin:16px 0 24px}
 #habit-section .seven-days{display:grid;grid-template-columns:repeat(7,minmax(0,1fr))}
 #habit-section .seven-days span{width:100%;min-width:0}
+
+#landing .wrap{width:min(1280px,92vw)}
+#arcade,#landing :is(#cashflow,#events,#resources,.about-section){padding-block:clamp(64px,7vw,96px)}
+#arcade .game-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:24px}
+#arcade .game-card{grid-column:span 2;height:100%;min-width:0}
+#arcade .game-card:nth-child(4){grid-column:2 / span 2}
+#arcade .game-card:nth-child(5){grid-column:4 / span 2}
+#arcade .game-info{padding:20px 22px}
+#arcade .game-illustration{aspect-ratio:16 / 9;object-fit:cover}
+#arcade .game-description{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;min-height:3.2em}
+#arcade .play-button{background:#ae4824;color:#fff8ed}
+@media(max-width:920px){
+  #arcade .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #arcade .game-card:nth-child(n){grid-column:auto}
+}
+@media(max-width:550px){#arcade .game-grid{grid-template-columns:1fr}}

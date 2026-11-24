@@ -86,6 +86,36 @@ Academic Building · 1103 室|Academic Building · Room 1103
 共 9 關 · 挑戰解鎖|9 Stages · Unlock as You Play
 最後衝刺！3 分鐘填寫第二階段理財問卷（11月27日截止）|Final Push: 3-Min Phase 2 Financial Survey (Closes Nov 27)
 填寫問卷 ↗|Take the survey ↗
+填寫問卷|Take the survey
+理財前後測|Financial habits survey
+理財前測|Before survey
+理財後測|After survey
+前測已收到|Before survey received
+前測 → 後測|Before → After
+評分題：1 代表非常不同意，5 代表非常同意。|Rating scale: 1 means strongly disagree and 5 means strongly agree.
+自願參加。系統用隨機代碼配對兩份問卷，毋須填寫姓名或學生編號。答案唔會公開。|Taking part is optional. A random code links your two surveys. No name or student number is needed. Your answers are private.
+我清楚自己每月啲錢花喺邊，月底唔會慌|I know where my money goes each month and feel prepared for month-end.
+遇到湊免運／Min Pay，我識分辨真實代價|I can work out the real cost of free-shipping thresholds or minimum credit card payments.
+目前記帳習慣|How often do you track your spending?
+完全冇|Never
+寫幾日就停|I stop after a few days
+有持續記帳|I keep track regularly
+體驗後，我有信心控制開支、唔做月光族|After the activity, I feel confident managing my spending without running out of money each month.
+體驗後，我清楚點避開小額漏財、優惠陷阱同卡數|After the activity, I know how to manage small purchases, misleading offers and credit card debt.
+未來 14 日最想實行嘅微習慣|Which small habit would you most like to try over the next 14 days?
+每晚記低 1 筆支出|Record one expense each evening
+買前停 10 秒|Pause for ten seconds before buying
+減手搖飲或外賣|Buy fewer drinks or takeaways
+先儲起應急錢|Set aside emergency savings first
+略過先玩|Skip and play
+提交答案|Submit answers
+提交中…|Submitting…
+多謝，已收到你嘅答案。|Thank you. Your answers were received.
+多謝你參加理財前後測。|Thank you for taking the financial habits survey.
+未能確認收到答案。你可以重試，或者關閉後繼續。|We couldn't confirm receipt. You can retry or close the survey and continue.
+完成一局遊戲或儲存十四日行動，就可以填後測。|Finish a game round or save a 14-day action to take the after survey.
+態度|Attitude
+知識|Knowledge
 聖雅各福群會青年服務|St. James’ Settlement Youth Services
 香港青年協會「關心一線」|HKFYG Youthline
 明愛向晴軒 24 小時危機熱線|Caritas 24-hour crisis hotline
@@ -171,6 +201,13 @@ Academic Building · 1103 室|Academic Building · Room 1103
 開源鳴謝|Open-source credits
 私隱說明|Privacy notice
 你嘅記錄，喺你手上。|Your records stay in your hands
+主線進度、遊戲回顧同十四日行動存在瀏覽器 localStorage。主線毋須登入。開啟公開成績後，排行榜會顯示暱稱、遊戲、模式、成績及遊玩時間，並使用匿名 cookie 識別此瀏覽器。你可以刪除由此瀏覽器發布嘅成績；阿俊嘅故事存檔留喺本機。|Story progress, game records and your 14-day action are stored in this browser. The story requires no sign-in. If you enable public scores, your nickname, game, mode, score and playing time appear on the leaderboard, and an anonymous cookie identifies this browser. You can delete scores published from this browser. Ah Jun's story save stays on your device.
+主線進度、遊戲回顧同十四日行動存在瀏覽器 localStorage。主線毋須登入。此版本只保留本機成績。|Story progress, game records and your 14-day action are saved in this browser. The story requires no sign-in. Scores in this edition stay on this device.
+主線進度、遊戲回顧同十四日行動存在瀏覽器 localStorage。主線毋須登入。離線版本不會連線、上傳成績或使用線上排行榜；進度與最佳分數只存於本機。|Story progress, game records and your 14-day action are saved in this browser. The offline edition keeps progress and scores on your device and does not connect to online leaderboards.
+網上版本用匿名瀏覽器識別碼統計訪問同正式開局，成效報表只向獲授權嘅團隊成員開放。|The online site uses a random browser identifier to count visits and game starts. Only authorized team members can view the report.
+前後測屬自願。網站用隨機代碼配對，問卷只收集自評、習慣選項同活動種類，並與故事、排行榜同訪問紀錄分開。獲授權嘅團隊成員可以睇匯總結果。|The survey is optional. A random code pairs your self-ratings, habit choices and activity type. Survey responses are kept separate from story saves, leaderboards and visit records. Authorized team members can view aggregate results.
+請勿喺行動卡填寫戶口、收入或欠款等敏感資料。下載嘅行動卡會保存在你裝置。清除網站資料會移除本機進度。|Keep sensitive details such as account numbers, income and debts off your action card. Downloaded cards stay on your device. Clearing site data removes your local progress.
+外部官方連結按其服務條款及私隱政策運作。網站託管服務本身亦可能處理基本連線記錄。|External sites follow their own terms and privacy policies. This site's hosting provider may process basic connection records.
 內容供一般理財教育用途，並非個人化投資建議。故事人物及金額屬虛構；遊戲分數不代表個人理財能力。|This project is for general financial education. The characters and amounts are fictional. Game scores do not measure personal financial ability.
 現金流實驗室|Cash Flow Lab
 兩個方案可以有一樣嘅期末結餘，但中途有機會唔夠錢。試下改到帳日，比較七日內最緊嘅一日。|Two plans can end with the same balance and still run short along the way. Change the payment date and compare the tightest day in each plan.

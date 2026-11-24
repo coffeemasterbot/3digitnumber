@@ -132,6 +132,10 @@
   function sync() {
     document.documentElement.lang=language==='en'?'en':'zh-HK';
     visit(document.documentElement);
+    document.querySelectorAll('a[data-en-href]').forEach(link=>{
+      link.dataset.zhHref ??= link.getAttribute('href');
+      link.href = language==='en' ? link.dataset.enHref : link.dataset.zhHref;
+    });
     document.querySelectorAll('[data-site-language]').forEach(button=>{
       button.textContent=language==='en'?'繁體中文':'English';
       button.lang=language==='en'?'zh-HK':'en';

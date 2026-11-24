@@ -1,6 +1,5 @@
 (() => {
   'use strict';
-  const PHASE2_SURVEY_URL = 'https://docs.google.com/forms/d/e/1FAIpQLScuYl4VmZ3ir-Z96WnlD0zqBpSpP9zQW6W_2ddRjSlOu3OIew/viewform';
   // This hash gates a browser-only demo. It grants no server privileges.
   const DEV_PASSWORD_HASH = '40fb589fe000ee385ac60beebdd8b10483fffddafe0c885b9f477bd83114fa0e';
   const id = value => document.getElementById(value);
@@ -17,25 +16,6 @@
     try { window.goatcounter?.count?.({path:name, event:true, no_session:true, referrer:''}); }
     catch { /* Analytics never blocks play. */ }
   };
-  const surveyLink = id('phase2-link');
-  const surveyOpens = Date.parse('2026-11-20T00:00:00+08:00');
-  const surveyCloses = Date.parse('2026-11-28T00:00:00+08:00');
-  surveyLink.href = PHASE2_SURVEY_URL;
-  function updateSurvey() {
-    const now = Date.now();
-    const visible = !window.offlineMount && now >= surveyOpens && now < surveyCloses;
-    id('phase2-survey').hidden = !visible;
-    return visible;
-  }
-  updateSurvey();
-  window.addEventListener('pageshow', updateSurvey);
-  document.addEventListener('visibilitychange', updateSurvey);
-  const delay = surveyCloses - Date.now();
-  if (delay > 0 && delay < 2 ** 31) setTimeout(updateSurvey, delay);
-  surveyLink.addEventListener('click', event => {
-    if (updateSurvey()) trackEvent('phase2-survey-click');
-    else event.preventDefault();
-  });
   document.addEventListener('click', event => {
     const link = event.target.closest?.('a[download]');
     if (link && /\.html$/i.test(link.download || new URL(link.href, location.href).pathname)) trackEvent('offline-html-download');
@@ -224,6 +204,7 @@
     const finished = openRun;
     openRun = null;
     saveBest(finished,message);
+    window.pfapSurvey?.finished(finished.game);
     const session = await finished.remote;
     if (finished.shared && publish.checked) {
       syncStatus.textContent='已保留本機成績，未能上傳。';

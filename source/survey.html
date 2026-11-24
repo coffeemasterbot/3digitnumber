@@ -1,0 +1,14 @@
+<dialog id="pfap-survey" class="pfap-dialog" aria-labelledby="survey-title">
+  <form id="survey-form">
+    <h2 id="survey-title">理財前後測</h2>
+    <p id="survey-intro"></p>
+    <p id="survey-privacy">自願參加。系統用隨機代碼配對兩份問卷，毋須填寫姓名或學生編號。答案唔會公開。</p>
+    <div id="survey-questions"></div>
+    <section id="survey-comparison" hidden aria-labelledby="survey-comparison-title">
+      <h3 id="survey-comparison-title">前測 → 後測</h3>
+      <dl id="survey-comparison-values"></dl>
+    </section>
+    <p id="survey-status" role="status"></p>
+    <div class="survey-actions"><button type="button" id="survey-skip">略過先玩</button><button class="primary" id="survey-submit">提交答案</button></div>
+  </form>
+</dialog>

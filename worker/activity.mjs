@@ -31,7 +31,17 @@ export async function activityApi(request,env,games) {
       if (!db) return reply({error:'Unavailable'},503);
       const totals=await db.prepare("SELECT COUNT(DISTINCT visitor) AS visitors, COUNT(DISTINCT CASE WHEN game<>'' THEN visitor END) AS players, MIN(created_at) AS first_event FROM pfap_activity").first();
       const entries=await db.prepare("SELECT game, COUNT(DISTINCT visitor) AS players, COUNT(*) AS starts FROM pfap_activity WHERE game<>'' GROUP BY game").all();
-      return reply({...totals,games:entries.results??[]});
+      const survey=await db.prepare(`SELECT
+        COUNT(CASE WHEN b.phase='before' THEN 1 END) AS before_count,
+        COUNT(CASE WHEN b.phase='after' THEN 1 END) AS after_count,
+        COUNT(a.pair_id) AS paired,
+        AVG(CASE WHEN a.pair_id IS NOT NULL THEN b.attitude END) AS attitude_before,
+        AVG(a.attitude) AS attitude_after,
+        AVG(CASE WHEN a.pair_id IS NOT NULL THEN b.knowledge END) AS knowledge_before,
+        AVG(a.knowledge) AS knowledge_after
+        FROM pfap_survey b LEFT JOIN pfap_survey a
+          ON a.pair_id=b.pair_id AND a.phase='after' AND b.phase='before'`).first().catch(()=>null);
+      return reply({...totals,games:entries.results??[],survey});
     }
     const origin=request.headers.get('origin');
     const fromPages=origin==='https://coffeemasterbot.github.io';
