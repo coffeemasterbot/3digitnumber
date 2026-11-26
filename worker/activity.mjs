@@ -1,4 +1,5 @@
 const randomId = /^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i;
+const reportCutoff = Date.parse('2026-11-28T00:00:00+08:00');
 const reply = (value, status=200, extra={}) => new Response(JSON.stringify(value),{status,headers:{
   'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff',...extra,
 }});
@@ -31,17 +32,20 @@ export async function activityApi(request,env,games) {
       if (!db) return reply({error:'Unavailable'},503);
       const totals=await db.prepare("SELECT COUNT(DISTINCT visitor) AS visitors, COUNT(DISTINCT CASE WHEN game<>'' THEN visitor END) AS players, MIN(created_at) AS first_event FROM pfap_activity").first();
       const entries=await db.prepare("SELECT game, COUNT(DISTINCT visitor) AS players, COUNT(*) AS starts FROM pfap_activity WHERE game<>'' GROUP BY game").all();
-      const survey=await db.prepare(`SELECT
-        COUNT(CASE WHEN b.phase='before' THEN 1 END) AS before_count,
-        COUNT(CASE WHEN b.phase='after' THEN 1 END) AS after_count,
+      const surveyThrough = cutoff => db.prepare(`WITH cohort AS (
+        SELECT * FROM pfap_survey WHERE created_at < ?
+      ) SELECT
+        (SELECT COUNT(*) FROM cohort WHERE phase='before') AS before_count,
+        (SELECT COUNT(*) FROM cohort WHERE phase='after') AS after_count,
         COUNT(a.pair_id) AS paired,
         AVG(CASE WHEN a.pair_id IS NOT NULL THEN b.attitude END) AS attitude_before,
         AVG(a.attitude) AS attitude_after,
         AVG(CASE WHEN a.pair_id IS NOT NULL THEN b.knowledge END) AS knowledge_before,
         AVG(a.knowledge) AS knowledge_after
-        FROM pfap_survey b LEFT JOIN pfap_survey a
-          ON a.pair_id=b.pair_id AND a.phase='after' AND b.phase='before'`).first().catch(()=>null);
-      return reply({...totals,games:entries.results??[],survey});
+        FROM cohort b LEFT JOIN cohort a
+          ON a.pair_id=b.pair_id AND a.phase='after' WHERE b.phase='before'`).bind(cutoff).first().catch(()=>null);
+      const [survey,survey_report]=await Promise.all([surveyThrough(Number.MAX_SAFE_INTEGER),surveyThrough(reportCutoff)]);
+      return reply({...totals,games:entries.results??[],survey,survey_report});
     }
     const origin=request.headers.get('origin');
     const fromPages=origin==='https://coffeemasterbot.github.io';

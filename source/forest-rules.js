@@ -76,7 +76,7 @@ function temple(n){
  const [x,y,w,h]=extraBeams[n-1];
  m.hazards.push({x,y,w,h,borrowedRoute:true});
  if(!m.hazards.some(hazard=>hazard.borrowedRoute)&&m.hazards.length)m.hazards.at(-1).borrowedRoute=true;
- m.finance={temple:Math.floor((n-1)/3),spent:false,usedReserve:false};
+ m.finance={temple:Math.floor((n-1)/3),spent:false,usedReserve:false,savedReserve:false};
  m.light=m.lights[0];m.signals={};m.clock=0;return m;
 }
 function budgetStatus(map,players,elapsed){
@@ -84,8 +84,14 @@ function budgetStatus(map,players,elapsed){
  if(!account)return null;
  const essentials=players.filter(player=>player.gems>=1).length;
  const saved=players.filter(player=>player.gems>=2).length;
- return {essentials,saved,canSpend:essentials===2&&!account.spent&&(account.temple!==1||elapsed>=12),
-  pending:account.temple===1&&elapsed<12,reserve:account.temple===2&&saved>0&&!account.spent&&!account.usedReserve};
+ return {essentials,saved,canSpend:essentials===2&&!account.spent&&!account.savedReserve&&(account.temple!==1||elapsed>=12),
+  canSave:account.temple>0&&essentials===2&&!account.spent&&!account.usedReserve&&!account.savedReserve,
+  pending:account.temple===1&&elapsed<12,reserve:!account.spent&&!account.usedReserve&&(account.savedReserve||(account.temple===2&&saved>0))};
+}
+function saveBudget(map,players,elapsed){
+ if(!budgetStatus(map,players,elapsed)?.canSave)return false;
+ map.finance.savedReserve=true;
+ return true;
 }
 function spendBudget(map,players,elapsed){
  if(!budgetStatus(map,players,elapsed)?.canSpend)return false;
@@ -192,5 +198,5 @@ function pushPlayer(map,p,oldX,players,dt){const dx=p.x-oldX;for(const b of map.
 function stepBodies(map,players,dt){for(const b of map.bodies||[]){if(b.locked)continue;const oldX=b.x,oldY=b.y,standing=players.filter(p=>p.grounded&&Math.abs(p.y+p.h-b.y)<2&&p.x+p.w>b.x&&p.x<b.x+b.w);const dx=moveBody(map,b,b.vx*dt,players);b.vx=Math.abs(dx)<.0001?0:b.vx*Math.exp(-7*dt);b.vy=Math.min(700,b.vy+1280*dt);b.y+=b.vy*dt;for(const o of [...map.platforms,...map.bodies.filter(o=>o!==b)]){if(b.vy>=0&&oldY+b.h<=o.y+.5&&b.y+b.h>=o.y&&b.x+b.w>o.x+.1&&b.x<o.x+o.w-.1){b.y=o.y-b.h;b.vy=0;break}}for(const p of standing){p.x+=b.x-oldX;p.y+=b.y-oldY}if(b.y>600){b.x=b.startX;b.y=b.startY;b.vx=b.vy=0;b.angle=0}dockBody(map,b,oldX)}}
 function landOnBodies(map,p,oldY){for(const b of map.bodies||[]){if(p.x+p.w<=b.x+.1||p.x>=b.x+b.w-.1)continue;if(p.vy>=0&&oldY+p.h<=b.y+1&&p.y+p.h>=b.y){p.y=b.y-p.h;p.vy=0;p.grounded=true;p.support=b.id;break}if(p.vy<0&&oldY>=b.y+b.h-.5&&p.y<b.y+b.h){p.y=b.y+b.h;p.vy=0}}}
 function playerNames(raw){const defaults=['火仔','冰仔'];return defaults.map((d,i)=>{const value=Array.isArray(raw)&&typeof raw[i]==='string'?raw[i]:'';return Array.from(value.replace(/[<>\x00-\x1f\x7f]/g,'').trim()).slice(0,16).join('')||d})}
-return {stepPlatforms,playerNames,level,temple,temples,budgetStatus,spendBudget,traceLight,savePoint,onPlate,onWeight,platePressed,update,checkpoint,doorCollision,nearbyLever,nearbyControl,lever,moveBody,pushPlayer,stepBodies,landOnBodies,dockBody};
+return {stepPlatforms,playerNames,level,temple,temples,budgetStatus,spendBudget,saveBudget,traceLight,savePoint,onPlate,onWeight,platePressed,update,checkpoint,doorCollision,nearbyLever,nearbyControl,lever,moveBody,pushPlayer,stepBodies,landOnBodies,dockBody};
 });

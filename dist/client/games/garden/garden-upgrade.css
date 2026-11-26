@@ -155,13 +155,29 @@ html[lang=en] #plantSelection .plantCard .name {font-size:.67rem;max-width:7.5em
 }
 
 /* Fit the lawn inside the available HUD and footer space in both player modes. */
-#gameContainer{container-type:size;height:100dvh;max-height:700px}
+#gameContainer{container-type:size;height:100dvh;max-height:100dvh;max-width:1600px}
 :fullscreen #gameContainer{height:100dvh;max-height:100dvh;max-width:1600px}
 #gameContainer{
   --lawn-top:144px;
   --lawn-bottom:82px;
   --lawn-gutters:122px;
   --lawn-width:min(calc(100cqw - var(--lawn-gutters)),max(1px,calc((100cqh - var(--lawn-top) - var(--lawn-bottom)) * 1.8)));
+}
+.garden-impact{position:absolute;z-index:15;pointer-events:none;width:var(--cell-w);height:var(--cell-h);border-radius:50%;translate:-50% -50%;animation:garden-impact .52s ease-out both}
+.garden-impact-mine{background:radial-gradient(#fff2be,#f0a247 28%,#8a5024 50%,transparent 72%)}
+.garden-impact-cherry{width:calc(var(--cell-w) * 3.2);height:calc(var(--cell-h) * 3);background:radial-gradient(#fff5c7 0%,#ffa654 33%,#e54b46 54%,transparent 72%)}
+.garden-impact-pepper{left:50%!important;width:100%;border-radius:0;background:linear-gradient(0deg,transparent,#e94621 22%,#fff5a1 50%,#fc8a38 73%,transparent);animation-name:garden-fire-wave}
+.garden-impact-squash{height:calc(var(--cell-h) * .42);background:radial-gradient(#fff8cd,#b8de65 42%,transparent 72%)}
+.garden-impact-bite{background:radial-gradient(transparent 25%,#ffe9a4 35%,#b77bda 48%,transparent 72%)}
+.squash-leap{animation:squash-leap .45s ease-in-out both!important}
+.chomper-digest{animation:chomper-chew .55s ease-in-out infinite alternate!important}
+@keyframes garden-impact{0%{scale:.32;opacity:1}50%{opacity:.94}100%{scale:1.09;opacity:0}}
+@keyframes garden-fire-wave{0%{clip-path:inset(0 95% 0 0);opacity:.75}55%{clip-path:inset(0);opacity:1}100%{opacity:0}}
+@keyframes squash-leap{35%{translate:calc(var(--squash-travel) * .4) -25px}100%{translate:var(--squash-travel) 0;scale:1.13 .77}}
+@keyframes chomper-chew{to{scale:1.06 .93;filter:saturate(1.36)}}
+@media(prefers-reduced-motion:reduce){
+  .garden-impact{animation:garden-impact .24s linear both;scale:1}
+  .squash-leap,.chomper-digest{animation:none!important;outline:2px solid #ffe18d}
 }
 #gameBoard{
   box-sizing:border-box;top:var(--lawn-top)!important;bottom:auto!important;

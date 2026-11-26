@@ -20,6 +20,19 @@ const GardenAbilities = (() => {
   }
   function damage(z,amount){GardenEnemies.applyDamage(z,amount,'ability')}
   function consume(p){p.element.remove();p.element=null}
+  function effect(p,kind,x){
+    const board=document.getElementById('gameBoard');
+    const {width,height}=gameState.cellSize;
+    const node=document.createElement('div');
+    node.className='garden-impact garden-impact-'+kind;
+    node.setAttribute('aria-hidden','true');
+    node.style.setProperty('--cell-w',width+'px');
+    node.style.setProperty('--cell-h',height+'px');
+    node.style.left=(x??(p.col+.5)*width)+'px';
+    node.style.top=(p.row+.5)*height+'px';
+    board.append(node);
+    node.addEventListener('animationend',()=>node.remove(),{once:true});
+  }
   function step(p,dt){
     if(!cards[p.type]||p.type==='torch')return;
     const width=gameState.cellSize.width;
@@ -30,16 +43,23 @@ const GardenAbilities = (() => {
     if(p.type==='mine'){
       p.element.title=p.age<4500?'布防中':'已布防';
       p.element.style.opacity=p.age<4500?'.55':'1';
-      if(p.age>=4500&&close.length){close.forEach(z=>damage(z,65));consume(p)}
+      if(p.age>=4500&&close.length){effect(p,'mine');close.forEach(z=>damage(z,65));consume(p)}
     }else if(p.type==='squash'){
-      if(close.length&&p.targetX===undefined){p.targetX=close[0].x;p.rest=450;p.element.style.translate='0 -22px'}
-      if(p.targetX!==undefined&&!p.rest){row.filter(z=>Math.abs(z.x-p.targetX)<width).forEach(z=>damage(z,70));consume(p)}
-    }else if(p.type==='pepper'&&p.age>=650){GardenBoss.pepper(p.row);for(const key in gameState.iceTracks){if(key.startsWith(p.row+','))gameState.iceTracks[key]=0}row.forEach(z=>damage(z,z.type==='giant'?70:999));consume(p)}
+      if(close.length&&p.targetX===undefined){
+        p.targetX=close[0].x;p.rest=450;
+        p.element.style.setProperty('--squash-travel',(p.targetX-x)+'px');
+        p.element.classList.add('squash-leap');
+      }
+      if(p.targetX!==undefined&&!p.rest){effect(p,'squash',p.targetX);row.filter(z=>Math.abs(z.x-p.targetX)<width).forEach(z=>damage(z,70));consume(p)}
+    }else if(p.type==='pepper'&&p.age>=650){effect(p,'pepper');GardenBoss.pepper(p.row);for(const key in gameState.iceTracks){if(key.startsWith(p.row+','))gameState.iceTracks[key]=0}row.forEach(z=>damage(z,z.type==='giant'?70:999));consume(p)}
     else if(p.type==='chomper'&&!p.rest&&close.length){
       const z=close.find(e=>!e.submerged);if(!z)return;const large=['giant','zomboni','boss'].includes(z.type);
-      damage(z,large?4:z.health);p.rest=large?1200:8000;
+      effect(p,'bite',z.x);damage(z,large?4:z.health);p.rest=large?1200:8000;
     }else if(p.type==='spike'&&!p.rest){close.forEach(z=>damage(z,z.type==='zomboni'?z.health:2));p.rest=650;if(close.some(z=>z.type==='zomboni'))consume(p)}
-    if(p.element&&p.type==='chomper')p.element.title=p.rest?'消化中':'準備吞食';
+    if(p.element&&p.type==='chomper'){
+      p.element.title=p.rest?'消化中':'準備吞食';
+      p.element.classList.toggle('chomper-digest',p.rest>0);
+    }
   }
   function crossing(proj,from,to){
     if(!proj.pea)return;
@@ -64,5 +84,5 @@ const GardenAbilities = (() => {
     card.title=description+' · 第 '+level+' 關';
   }
   const unlockStage=type=>type==='repeater'?2:type==='threepeater'?3:cards[type]?.[2]||1;
-  return {cards,step,icon,crossing,unlockStage};
+  return {cards,step,icon,crossing,unlockStage,effect};
 })();

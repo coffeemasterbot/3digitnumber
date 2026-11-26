@@ -99,7 +99,8 @@ for(const rel of ['index.html','story/index.html','story/anna.html','games/budge
  const target=path.join(dist,rel),page=fs.readFileSync(target,'utf8');
  const messages=rel.startsWith('story/')?locales:{home:locales.home,games:locales.games};
  const scripts=['window.siteMessages='+JSON.stringify(messages)+';\n'+localizer];
- if(rel==='index.html')scripts.push(devScript);
+ if(rel==='index.html')scripts.push(devScript,fs.readFileSync(path.join(audioDir,'player.js'),'utf8'),
+  'document.addEventListener("DOMContentLoaded",()=>{'+fs.readFileSync(path.join(root,'source/home-music.js'),'utf8')+'});');
  else if(!['story/anna.html','games/budget-defence/range.html'].includes(rel)){
   scripts.push(caseChallenge,devScript,fs.readFileSync(path.join(root,'source/arcade-run.js'),'utf8'));
   const base=rel.startsWith('story')?'../':'../../';

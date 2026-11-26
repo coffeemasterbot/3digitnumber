@@ -60,7 +60,8 @@ export function Game({ onReady }: { onReady?: () => void }) {
     Object.assign(extras, {
       distance: 0, time: 0, airKind: null, airStart: 0, airOrigin: 0, airHeight: 0, airRemaining: 0,
       pogoPhase: 'idle', flightPhase: 'idle', deathTime: 0, impact: 0, deathKind: '',
-      board: 0, shoes: 0, magnet: 0, double: 0, index: 0, next: 0, pickups: [],
+      board: 0, boardMounted: 0, shieldUntil: 0, budget: 0, spent: 0, nextBudgetGate: 100,
+      shoes: 0, magnet: 0, double: 0, index: 0, next: 0, pickups: [],
     });
     progress.current = freshProgress();
     nextHud.current = 0;
@@ -175,10 +176,11 @@ export function Game({ onReady }: { onReady?: () => void }) {
     if (support) playerState.y = Math.max(playerState.y, support + .9);
 
     const hit = checkObstacleCollision(obstacles, playerState, playerZ);
-    if (hit) {
+    if (hit && extras.time >= extras.shieldUntil) {
       extras.impact = .4;
       if (extras.board > extras.time) {
         extras.board = 0;
+        extras.shieldUntil = extras.time + 1.1;
         (window as any).PFAPAudio?.play('shield_break');
         obstacles.splice(obstacles.indexOf(hit), 1);
       } else {
@@ -188,6 +190,14 @@ export function Game({ onReady }: { onReady?: () => void }) {
         useGameStore.setState({ gameState: 'dying' });
         return;
       }
+    }
+    if (!extras.airKind && extras.distance >= extras.nextBudgetGate) {
+      if (player.lane === 2) {
+        extras.spent += 5;
+        extras.double = Math.max(extras.double,extras.time+3);
+      }
+      else extras.budget += 5;
+      extras.nextBudgetGate += 100;
     }
 
     const collected = checkCoinCollision(coins, playerState, playerZ);
@@ -211,7 +221,7 @@ export function Game({ onReady }: { onReady?: () => void }) {
       const lane = testTarget ? 0 : index === 0 ? LANES[2] : LANES[(index + 1) % 3];
       const ahead = testTarget ? 8 : index === 0 ? 21 : 43;
       extras.pickups.push({ id: index, kind, lane, z: playerZ - ahead });
-      extras.next = extras.time + 8;
+      extras.next = extras.time + 7;
       pickupsChanged = true;
     }
     for (let i = extras.pickups.length - 1; i >= 0; i--) {

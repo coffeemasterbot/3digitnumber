@@ -10,7 +10,15 @@
   function save(key, value) {
     try { localStorage.setItem(key, JSON.stringify(value)); } catch {}
   }
+  const pagesEdition = document.body.hasAttribute('data-pfap-static') &&
+    location.origin==='https://coffeemasterbot.github.io' && !window.offlineMount;
   const onlineEdition = /^https?:$/.test(location.protocol) && !window.offlineMount && !document.body.hasAttribute('data-pfap-static');
+  let scoreOwner = pagesEdition && read('pfap-score-owner',null);
+  if (pagesEdition && !/^[a-f0-9-]{36}$/i.test(scoreOwner ?? '')) {
+    scoreOwner = crypto.randomUUID();
+    save('pfap-score-owner',scoreOwner);
+  }
+  const sharedEdition = onlineEdition || pagesEdition;
   window.trackEvent = function trackEvent(name) {
     if (!onlineEdition || navigator.onLine === false) return;
     try { window.goatcounter?.count?.({path:name, event:true, no_session:true, referrer:''}); }
@@ -30,7 +38,7 @@
     jet:[['endless','無盡飛行']],
     garden:numberStages(5),
     forest:Object.entries(difficultyLabels).flatMap(([key,title]) => numberStages(9,'relay-'+key+'-stage').map(([board,label])=>[board,title+' · '+label])),
-    defence:[['quick','快速三輪'], ...[1,2,3].flatMap(round => [
+    defence:[['quick','快速三輪'],['ex','EX 關'], ...[1,2,3].flatMap(round => [
       [round+'-verify','地圖 '+round+' · 核對帳目'], [round+'-dispatch','地圖 '+round+' · 上傳資料'], [round+'-hold','地圖 '+round+' · 雙目標演習']])],
   };
   const localKey = 'pfap-personal-bests-v1';
@@ -53,10 +61,10 @@
   publish.addEventListener('change', () => save(publishKey, publish.checked));
   player.addEventListener('input', () => { try { localStorage.setItem('arcade-player-name', player.value); } catch {} });
 
-  id('score-publish-controls').hidden = !onlineEdition;
-  id('score-host-notice').hidden = onlineEdition;
+  id('score-publish-controls').hidden = !sharedEdition;
+  id('score-host-notice').hidden = sharedEdition;
   for (const button of document.querySelectorAll('[data-score-view]')) {
-    if (!onlineEdition && button.dataset.scoreView !== 'mine') {
+    if (!sharedEdition && button.dataset.scoreView !== 'mine') {
       button.hidden = true;
       continue;
     }
@@ -80,7 +88,11 @@
     return /^[A-Z0-9-]{1,24}$/.test(code) ? 'seed-'+code : null;
   }
   async function api(path, options={}) {
-    const response = await fetch('/api/'+path, options);
+    const bridge = pagesEdition && path!=='activity';
+    const url = (bridge ? 'https://lost-found-money-journey.cottonpatch1.chatgpt.site' : '') + '/api/' + path;
+    const headers = new Headers(options.headers);
+    if (bridge) headers.set('x-pfap-score-owner',scoreOwner);
+    const response = await fetch(url,{...options,headers,credentials:bridge?'omit':'same-origin'});
     if (!response.ok) throw new Error('Leaderboard request failed');
     return response.json();
   }
@@ -119,7 +131,7 @@
     if (!board) { status.textContent = '請輸入種子代碼。'; return; }
     const best = read(localKey, {})[game]?.[board] ?? legacyBest(game,board);
     if (view === 'mine' && best) showEntry('本機最佳', resultLabel(game,best));
-    if (!onlineEdition) {
+    if (!sharedEdition) {
       status.textContent = view==='mine'&&!best ? '暫時未有成績。' : '';
       return;
     }
@@ -142,8 +154,6 @@
     catch { status.textContent = '未能刪除，請再試。'; }
   });
 
-  const pagesEdition = document.body.hasAttribute('data-pfap-static') &&
-    location.origin==='https://coffeemasterbot.github.io';
   let pagesVisitor = null;
   if(pagesEdition)try{
     pagesVisitor=read('pfap-pages-visitor',null);
@@ -163,6 +173,7 @@
   }
   const activityReady = sendActivity({type:'visit'}).catch(()=>null);
   let openRun = null;
+  let latestResult = null;
   const syncStatus = id('score-sync');
   function saveBest(run, {score,duration,distance}) {
     const data = read(localKey, {});
@@ -185,6 +196,18 @@
     const message = event.data;
     if (!frame || event.source !== frame.contentWindow || !frameOrigin(event) ||
         frame.name || message?.type !== 'pfap-arcade-run') return;
+    if (message.action === 'scores' && latestResult?.frame===frame && latestResult.id===message.id) {
+      const {game,board}=latestResult;
+      gameField.value=game;
+      listBoards();
+      boardField.value=board;
+      if (!boardField.value) boardField.add(new Option(board,board,true,true));
+      view=sharedEdition?'top':'mine';
+      if (document.fullscreenElement) await document.exitFullscreen().catch(()=>{});
+      if (!dialog.open) dialog.showModal();
+      loadScores();
+      return;
+    }
     if (message.action === 'start' && Object.hasOwn(gameKeys,active) && gameKeys[active]===message.game &&
         typeof message.id === 'string' && /^[a-f0-9-]{36}$/i.test(message.id)) {
       activityReady.then(()=>sendActivity({type:'start',game:message.game,id:message.id})).catch(()=>{});
@@ -192,9 +215,10 @@
       save('pfap-last-played',active);
       window.dispatchEvent(new CustomEvent('pfap-played',{detail:active}));
       openRun = null;
+      latestResult = null;
       syncStatus.textContent='';
       if (!validBoard(message.game,message.board)) return;
-      const shared = onlineEdition && publish.checked;
+      const shared = sharedEdition && publish.checked;
       const remote = shared && navigator.onLine !== false
         ? post('runs/start',{game:message.game,board:message.board,difficulty:message.difficulty,player:player.value}).catch(()=>null)
         : Promise.resolve(null);
@@ -207,6 +231,7 @@
         !Number.isFinite(message.distance) || message.distance<0) return;
     const finished = openRun;
     openRun = null;
+    latestResult = {...finished,frame};
     saveBest(finished,message);
     if (finished.board === 'endless' && ['runner','jet'].includes(finished.game)) {
       window.pfapSurvey?.finished(finished.game);

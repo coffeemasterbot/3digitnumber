@@ -74,3 +74,25 @@ test('GitHub Pages can send anonymous activity without shared cookies or dashboa
  sqlite.close();
 });
 test('A visitor can delete only their own online records',async()=>{const{DB,sqlite}=database();const a=await api(request('runs/start',{game:'runner',player:'A'}),{DB}),cookie=a.headers.get('set-cookie').split(';')[0],{id}=await a.json();await api(request('runs/finish',{id,score:0,distance:0,duration:0},cookie),{DB});const other=new Request('https://game.test/api/runs/mine',{method:'DELETE',headers:{origin:'https://game.test'}});await api(other,{DB});assert.equal(sqlite.prepare('SELECT count(*) AS n FROM arcade_runs').get().n,1);const own=new Request('https://game.test/api/runs/mine',{method:'DELETE',headers:{origin:'https://game.test',cookie}});const result=await(await api(own,{DB})).json();assert.equal(result.deleted,1);assert.equal(sqlite.prepare('SELECT count(*) AS n FROM arcade_runs').get().n,0);sqlite.close()});
+test('Pages results use anonymous ownership and share the same public board',async t=>{
+ const {DB,sqlite}=database();
+ t.after(()=>sqlite.close());
+ const origin='https://coffeemasterbot.github.io';
+ const owner=crypto.randomUUID();
+ const send=(path,{method='GET',body,identity=owner}={})=>api(new Request('https://game.test/api/'+path,{
+  method,headers:{origin,'content-type':'application/json','x-pfap-score-owner':identity},body:body&&JSON.stringify(body)
+ }),{DB});
+ const preflight=await send('runs/start',{method:'OPTIONS'});
+ assert.equal(preflight.status,204);
+ assert.equal(preflight.headers.get('access-control-allow-origin'),origin);
+ const started=await send('runs/start',{method:'POST',body:{game:'runner',board:'endless',player:'Visitor'}});
+ assert.equal(started.status,201);
+ assert.equal(started.headers.get('set-cookie'),null);
+ const {id}=await started.json();
+ const result={method:'POST',body:{id,score:10,duration:1,distance:2}};
+ assert.equal((await send('runs/finish',{...result,identity:crypto.randomUUID()})).status,404);
+ assert.equal((await send('runs/finish',result)).status,200);
+ const board='leaderboard?game=runner&board=endless';
+ assert.equal((await (await api(request(board),{DB})).json()).entries[0].score,10);
+ assert.equal((await (await send('runs/mine',{method:'DELETE'})).json()).deleted,1);
+});

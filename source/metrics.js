@@ -45,8 +45,13 @@
       for(const [label,value] of [['網站訪客 / Website visitors',data.visitors],['已開局玩家 / Players',data.players]]) {
         setText(totals,'dt',label);setText(totals,'dd',value);
       }
-      if (data.survey) {
-        const survey=data.survey;
+      for (const [period,survey] of [['截至 11 月 27 日 / Through Nov 27',data.survey_report],['全期 / All time',data.survey]]) {
+        if (!survey) continue;
+        const section=document.createElement('section');
+        setText(section,'h2',period);
+        const measures=document.createElement('dl');
+        section.append(measures);
+        totals.after(section);
         const average=value=>value===null?'—':Number(value).toFixed(2);
         for(const [label,value] of [
           ['前測 / Before',survey.before_count],['後測 / After',survey.after_count],
@@ -54,7 +59,7 @@
           ['配對態度自評 / Matched attitude',average(survey.attitude_before)+' → '+average(survey.attitude_after)],
           ['配對知識自評 / Matched knowledge',average(survey.knowledge_before)+' → '+average(survey.knowledge_after)],
         ]) {
-          setText(totals,'dt',label);setText(totals,'dd',value);
+          setText(measures,'dt',label);setText(measures,'dd',value);
         }
       }
       for(const [game,label] of Object.entries(names)){

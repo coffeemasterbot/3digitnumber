@@ -6,7 +6,7 @@ export const EXPEDITION_KEY = 'runner-expeditions-v1';
 // Each module lists [lane, forward offset in metres, obstacle, train variant].
 // Leave a continuous ground lane, even when a faster roof route is available.
 export const COURSES = [
-  {id:'street-exit',district:'street',slots:[[-2,0,'block','ramp'],[0,5,'crate'],[0,30,'jump']]},
+  {id:'street-exit',district:'street',slots:[[-2,0,'block','ramp'],[-2,8,'block','car'],[-2,16,'block','car'],[0,5,'crate'],[0,30,'jump']]},
   {id:'shop-awning',district:'street',slots:[[2,0,'block','ramp'],[0,7,'slide'],[2,8,'block','car'],[0,33,'jump']]},
   {id:'market-crates',district:'street',slots:[[-2,1,'crate'],[2,9,'jump'],[-2,29,'crate'],[2,37,'sign']]},
   {id:'night-delivery',district:'street',slots:[[0,0,'block','low'],[2,8,'crate'],[0,15,'block','rise'],[0,23,'block','car']]},
@@ -17,8 +17,8 @@ export const COURSES = [
   {id:'station-express',district:'station',slots:[[2,0,'moving','car'],[0,10,'block','ramp'],[0,18,'block','car']]},
   {id:'station-gantry',district:'station',slots:[[0,1,'sign'],[-2,10,'hurdle'],[0,25,'slide'],[-2,38,'jump']]},
   {id:'station-interchange',district:'station',slots:[[-2,0,'block','ramp'],[0,1,'block','ramp'],[-2,8,'block','car'],[0,9,'block','car'],[0,17,'block','car']]},
-  {id:'station-luggage',district:'station',slots:[[2,0,'crate'],[-2,8,'block','low'],[-2,23,'block','rise'],[2,29,'jump']]},
-  {id:'bridge-entry',district:'bridge',slots:[[-2,0,'block','ramp'],[-2,8,'block','car'],[0,5,'gap']]},
+  {id:'station-luggage',district:'station',slots:[[2,0,'crate'],[-2,8,'block','low'],[-2,23,'block','rise'],[-2,31,'block','car'],[2,29,'slide']]},
+  {id:'bridge-entry',district:'bridge',slots:[[-2,0,'block','ramp'],[-2,8,'block','car'],[-2,16,'block','car'],[0,5,'gap'],[0,29,'slide']]},
   {id:'pier-paths',district:'bridge',slots:[[2,0,'block','low'],[2,15,'block','rise'],[2,23,'block','car'],[0,9,'hurdle']]},
   {id:'harbour-overpass',district:'bridge',slots:[[0,0,'block','ramp'],[0,8,'block','car'],[2,11,'jump'],[0,38,'sign']]},
   {id:'river-service',district:'bridge',slots:[[-2,2,'moving','car'],[0,13,'block','ramp'],[0,21,'block','car']]},

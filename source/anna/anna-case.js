@@ -10,6 +10,8 @@
   const OPENING = ['phone','receipt','diary'];
   const HOUSE = ['fridge','drawer','desk','wardrobe','landlord','bank'];
   const CAFE = ['receipts','notebook'];
+  const ROLES = ['社工','醫生','偵探','咒術師','心理學家','黑客'];
+  const HOTEL = ['rest','water','window'];
   const CLUES = [...OPENING, ...HOUSE, ...CAFE];
   const CHALLENGES = {
     reserve: {game:'instalments', act:2, requires:HOUSE, title:'預留應急資源'},
@@ -38,7 +40,8 @@
     return {debitCents, calculatedCents, differenceCents:calculatedCents-BANK.reportedCents};
   }
   const receiptTotal = () => RECEIPTS.reduce((sum, row) => sum + row[1], 0);
-  const fresh = () => ({version:VERSION, act:0, clues:[], oriented:false, unlocked:false, reconciled:false, challenges:{}, heard:false, completed:false});
+  const fresh = () => ({version:VERSION, act:0, clues:[], oriented:false, unlocked:false, reconciled:false, challenges:{}, heard:false, completed:false,
+    role:'', hotel:null, locker:false, budget:null});
   const includes = (s, list) => list.every(id => s.clues.includes(id));
   const identified = (s, id) => s.clues.includes(id);
   const questReady = (s, id) => Object.hasOwn(CHALLENGES,id) && s.act === CHALLENGES[id].act
@@ -52,13 +55,19 @@
   }
   function apply(s, action, value) {
     let next = s;
+    if(action==='role' && s.act===0 && ROLES.includes(value) && s.role!==value)next={...s,role:value};
+    if(action==='hotel' && s.act===2 && !s.oriented && !s.hotel && HOTEL.includes(value?.choice)
+      && Number.isInteger(value.roll) && value.roll>=1 && value.roll<=10)next={...s,hotel:{choice:value.choice,roll:value.roll}};
+    if(action==='locker' && s.act===3 && !s.locker)next={...s,locker:true};
+    if(action==='budget' && s.act===3 && includes(s,CAFE) && Array.isArray(value) && value.length===RECEIPTS.length
+      && value.every(item=>['need','want','recurring'].includes(item)))next={...s,budget:[...value]};
     if(action === 'start' && s.act === 0) next = {...s,act:1};
     if(action === 'orient' && s.act === 2 && !s.oriented) next = {...s,oriented:true};
     if(action === 'clue' && !identified(s,value)) {
       const readable = s.act === 1 && OPENING.includes(value)
         || s.act === 2 && s.oriented && HOUSE.includes(value) && (value !== 'bank' || s.unlocked)
         || s.act === 3 && CAFE.includes(value);
-      if(readable) next = {...s,clues:[...s.clues,value]};
+      if(readable) next = {...s,clues:[...s.clues,value],locker:s.locker||s.act===3};
     }
     if(action === 'unlock' && s.act === 2 && identified(s,'desk') && value === '241125' && !s.unlocked) next = {...s,unlocked:true};
     if(action === 'reconcile' && s.act === 2 && identified(s,'bank') && value === 'incomplete' && !s.reconciled) next = {...s,reconciled:true};
@@ -76,9 +85,15 @@
       || !data.challenges || typeof data.challenges!=='object' || Array.isArray(data.challenges)) throw Error('unsupported case save');
     for(const field of ['oriented','unlocked','reconciled','heard','completed']) if(typeof data[field]!=='boolean') throw Error('invalid flag');
     let s = fresh();
+    if(data.role)s=apply(s,'role',data.role);
+    if(data.role && s.role!==data.role)throw Error('invalid role');
     if(data.act) s = apply(s,'start');
     for(const id of OPENING) if(data.clues.includes(id)) s = apply(s,'clue',id);
     if(data.act>=2) s = apply(s,'advance');
+    if(data.hotel){
+      s=apply(s,'hotel',data.hotel);
+      if(!s.hotel)throw Error('invalid hotel choice');
+    }
     if(data.oriented) s = apply(s,'orient');
     for(const id of HOUSE.filter(id=>id!=='bank')) if(data.clues.includes(id)) s = apply(s,'clue',id);
     if(data.unlocked) s = apply(s,'unlock','241125');
@@ -90,7 +105,12 @@
     restore('coordinate');
     restore('reserve');
     if(data.act>=3) s = apply(s,'advance');
+    if(data.locker || data.clues.some(id=>CAFE.includes(id)))s=apply(s,'locker');
     for(const id of CAFE) if(data.clues.includes(id)) s = apply(s,'clue',id);
+    if(data.budget){
+      s=apply(s,'budget',data.budget);
+      if(!s.budget)throw Error('invalid receipt plan');
+    }
     restore('receipts');
     restore('offer');
     if(data.act>=4) s = apply(s,'advance');
@@ -109,5 +129,5 @@
     try { return {status:'ready',state:validate(JSON.parse(raw))}; }
     catch { return {status:'recovery',state:fresh(),raw}; }
   }
-  return {KEY,ACTS,OPENING,HOUSE,CAFE,CLUES,CHALLENGES,CHALLENGE_IDS,BANK,RECEIPTS,bankMath,receiptTotal,fresh,includes,identified,questReady,mayAdvance,apply,validate,load};
+  return {KEY,ACTS,OPENING,HOUSE,CAFE,ROLES,CLUES,CHALLENGES,CHALLENGE_IDS,BANK,RECEIPTS,bankMath,receiptTotal,fresh,includes,identified,questReady,mayAdvance,apply,validate,load};
 });

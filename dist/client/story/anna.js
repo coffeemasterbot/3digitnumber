@@ -93,8 +93,12 @@
   const header = (title,lead) => '<h1 id="act-title" tabindex="-1">'+title+'</h1><p class="lead">'+lead+'</p>';
   function opening() {
     return '<div class="opening"><div>'+header('失物認領處','陳警長請你接手一宗失蹤案。過去三個月，每逢 6 號就有一位年輕人失蹤。阿俊寄來一箱失物，幾日冇返工，亦冇返屋企。')+
-      '<p>佢寄出呢個箱之前，留低一張字條。</p>'+button('打開失物箱','data-action="start"','primary')+
-      '</div><div class="case-box" aria-label="失物箱上嘅字條"><div class="box-note"><span>阿俊寄件</span><blockquote>「'+boxNote+'」</blockquote></div></div></div>';
+      '<p>佢寄出呢個箱之前，留低一張字條。</p><fieldset class="case-roles"><legend>揀一個專家身份</legend>'+
+      C.ROLES.map(role=>button(role,'data-role="'+role+'" aria-pressed="'+(state.role===role)+'"','secondary')).join('')+
+      '</fieldset>'+button('打開失物箱','data-action="start"','primary')+
+      '</div><div class="case-box" aria-label="失物箱上嘅字條"><div class="box-props" aria-hidden="true">'+
+      C.OPENING.map(id=>'<div class="prop prop-'+id+'"><i></i><b></b></div>').join('')+
+      '</div><div class="box-note"><span>阿俊寄件</span><blockquote>「'+boxNote+'」</blockquote></div></div></div>';
   }
   function station() {
     return header('警局失物認領處','「我哋只有呢箱嘢。你睇到嘅線索，可能同我哋唔同。」　陳警長')+
@@ -118,14 +122,31 @@
   }
   function hotel() {
     if(state.oriented)return apartment();
-    return header('警局對面嘅酒店','你熄咗房燈。好似有一張單據，喺門罅下面慢慢滑入嚟。')+
+    const choices={rest:['拉高張被','床尾突然凹落去，好似有人坐低。'],water:['去浴室睇','水龍頭突然打開，流出單據一樣嘅紅色。'],window:['行去窗邊','霓虹燈映出一個冇五官嘅影。']};
+    const branch=state.hotel && choices[state.hotel.choice];
+    return header('警局對面嘅酒店','你熄咗房燈，刮擦聲由房入面傳過嚟。你會點做？')+
       '<div class="hotel-scene"><div class="hotel-door"><span>06</span></div><div class="red-slip" aria-hidden="true"></div></div>'+
-      '<div class="case-actions">'+button('查看異夢','data-action="dream"','secondary')+button('去警局睇城市地圖','data-action="orient"','primary')+'</div>';
+      (branch?'<section class="case-finding"><strong>'+branch[0]+' · 骰子 '+state.hotel.roll+'</strong><p>'+branch[1]+'</p>'+
+        '<p>'+(state.hotel.roll===1?'你仲睇到紅色紙角印住「6 號」。':state.hotel.roll===10?'你驚醒時冇睇清楚。天光後可以問陳警長。':'醒嚟之後，枕邊多咗張空白紅色單據。')+'</p></section>'+
+        '<div class="case-actions">'+button('去警局睇城市地圖','data-action="orient"','primary')+'</div>':
+        '<div class="case-actions">'+Object.entries(choices).map(([id,[label]])=>button(label,'data-hotel="'+id+'"','secondary')).join('')+'</div>');
+  }
+  const receiptCategories = [['need','必要'],['want','想要'],['recurring','定期續費']];
+  function receiptBudget(){
+    if(!C.includes(state,C.CAFE))return '';
+    if(state.budget){
+      return '<dl class="case-debrief">'+receiptCategories.map(([id,label])=>{
+        const cents=C.RECEIPTS.reduce((sum,row,i)=>sum+(state.budget[i]===id?row[1]:0),0);
+        return '<div><dt>'+label+'</dt><dd>'+money(cents)+'</dd></div>';
+      }).join('')+'</dl>'+button('重新分類','data-action="receipt-budget"','secondary');
+    }
+    return button('將收據放入帳簿','data-action="receipt-budget"','secondary');
   }
   function cafe() {
-    return header('咖啡店員工休息室','店長交低備用鎖匙。「佢幾日冇返嚟，入去拎返阿俊啲嘢啦。」')+
+    return header('咖啡店員工休息室','店長：「佢幾日冇返嚟，你哋係唔係搵阿俊？」')+
       '<div class="locker-scene" aria-label="休息室有一排儲物櫃，其中一個貼住阿俊名字"><div class="locker" aria-hidden="true"></div><div class="locker focus-locker"><span>阿俊</span></div><div class="locker" aria-hidden="true"></div></div>'+
-      '<div class="case-actions">'+logButton('receipts')+logButton('notebook')+'</div>'+tasksBlock('receipts')+tasksBlock('offer')+
+      '<div class="case-actions">'+(state.locker?logButton('receipts')+logButton('notebook'):button('向店長問攞儲物櫃鎖匙','data-action="locker"','primary'))+'</div>'+
+      receiptBudget()+tasksBlock('receipts')+tasksBlock('offer')+
       '<div class="case-actions">'+nextButton('去自修室 C 區 13 號')+'<p>先查收據同記帳本。</p></div>';
   }
   const debriefs = [
@@ -240,6 +261,11 @@
     parent.postMessage(data,location.origin==='null'?'*':location.origin);
   }
   const actions={
+    locker:()=>commit('locker',null,{focus:true}),
+    'receipt-budget':()=>open('收據分類帳','<form id="receipt-budget-form">'+C.RECEIPTS.map(([name,cents],i)=>
+      '<label>'+name+' · '+money(cents)+' <select name="r'+i+'" required><option value="">揀類別</option>'+
+      receiptCategories.map(([id,label])=>'<option value="'+id+'" '+(state.budget?.[i]===id?'selected':'')+'>'+label+'</option>').join('')+
+      '</select></label>').join('')+'<button class="primary">計算合計</button></form>'),
     start:()=>commit('start',null,{focus:true}),
     advance:()=>commit('advance',null,{focus:true}),
     orient:()=>commit('orient',null,{focus:true}),
@@ -268,7 +294,9 @@
     const trigger=event.target.closest('button');
     if(!trigger)return;
     const data=trigger.dataset;
-    if(data.clue)showClue(data.clue);
+    if(data.role)commit('role',data.role);
+    else if(data.hotel)commit('hotel',{choice:data.hotel,roll:1+Math.floor(Math.random()*10)},{focus:true});
+    else if(data.clue)showClue(data.clue);
     else if(data.place==='home'){$('floor-title').scrollIntoView({block:'nearest'});$('floor-title').focus({preventScroll:true});}
     else if(Object.hasOwn(mapNotes,data.place))open(...mapNotes[data.place]);
     else if(data.reason)reason(data.reason);
@@ -284,7 +312,9 @@
     const form=event.target;
     event.preventDefault();
     const values=new FormData(form);
-    if(form.id==='pin-form') {
+    if(form.id==='receipt-budget-form') {
+      if(commit('budget',C.RECEIPTS.map((_,i)=>values.get('r'+i))))dialog.close();
+    } else if(form.id==='pin-form') {
       if(commit('unlock',values.get('pin'),{paint:false}))showClue('bank');
       else $('pin-feedback').textContent='密碼唔啱，對照電腦枱張便利貼再試。';
     } else if(form.id==='reconcile') {

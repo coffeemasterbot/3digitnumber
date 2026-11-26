@@ -120,3 +120,15 @@ fieldset label{display:block;min-height:44px;padding-block:6px}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
 @media(max-width:700px){.case-main{width:calc(100% - 30px)}.opening,.investigation-layout,.case-task{grid-template-columns:1fr}.opening{gap:28px;min-height:auto}.evidence-tile{padding-inline:4px}.exhibit-row{gap:5px}.hotspot{padding-inline:7px}.exhibit-row .hotspot{font-size:.9rem}.case-header{padding-inline:12px}.case-trail{gap:4px}.case-trail li{font-size:.85rem}}
 @media(max-width:365px){.exhibit-row{grid-template-columns:1fr}.evidence-tile{display:flex;align-items:center;gap:10px}.prop{margin:0;height:72px;max-width:48px}.prop-receipt i,.prop-diary i{height:28px}}
+.case-roles{padding:0;border:0;margin:1rem 0;display:flex;flex-wrap:wrap;gap:.5rem}
+.case-roles legend{margin-bottom:.5rem;font-weight:700}
+.case-roles button[aria-pressed=true]{background:#28604d;color:#fff4d8}
+.case-box{isolation:isolate;overflow:hidden}
+.case-box .box-note{position:relative;z-index:1}
+.box-props{position:absolute;inset:7% 8% 24%;display:flex;align-items:center;justify-content:space-around;pointer-events:none}
+.box-props .prop{width:29%;max-height:88%;margin:0;filter:drop-shadow(0 9px 8px #291b1260)}
+.box-props .prop-phone{rotate:11deg;translate:0 -8%}
+.box-props .prop-receipt{rotate:-10deg;translate:0 6%}
+#receipt-budget-form{display:grid;gap:.75rem}
+#receipt-budget-form label{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem}
+#receipt-budget-form select{font:inherit;padding:.45rem .55rem;border:1px solid #6f7f6a;border-radius:.4rem;background:#fff7e6}

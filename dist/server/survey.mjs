@@ -1,7 +1,6 @@
 import {canRead} from './activity.mjs';
 
 const opens = Date.parse('2026-11-20T00:00:00+08:00');
-const closes = Date.parse('2026-11-28T00:00:00+08:00');
 const habits = {
   before: ['none', 'stopped', 'regular'],
   after: ['log', 'wait', 'cut', 'reserve'],
@@ -67,7 +66,7 @@ export async function surveyApi(request, env, games, now = Date.now()) {
       'access-control-allow-headers': 'Content-Type',
     }});
   }
-  if (now < opens || now >= closes) return reply({error: 'Survey closed'}, 410);
+  if (now < opens) return reply({error: 'Survey closed'}, 410);
   if (!env.DB) return reply({error: 'Survey unavailable'}, 503);
   try {
     if (request.method === 'GET') {

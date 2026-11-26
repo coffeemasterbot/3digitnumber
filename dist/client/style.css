@@ -158,6 +158,8 @@ body:has(#play-panel:not([hidden]))>.site-header{display:none}
 .desk-diary{top:22%;left:14%;width:35%;height:53%;background:repeating-linear-gradient(#f1dcaa 0 13px,#b8996c 14px 15px);border-left:8px solid #8a5037;transform:rotate(-12deg)}
 .desk-phone{top:16%;left:58%;width:19%;height:48%;border:6px solid #343d33;border-radius:10px;background:linear-gradient(130deg,transparent 41%,#a9b9a4 42% 43%,transparent 44%),linear-gradient(34deg,#283e37 52%,#a0ab99 53% 55%,#465b51 56% 100%);transform:rotate(14deg)}
 .desk-receipt{top:36%;left:43%;width:29%;height:49%;background:repeating-linear-gradient(#fbebc2 0 8px,#d8bc88 9px 10px);border-block:6px solid #f9e7be;transform:rotate(31deg)}
+.desk-receipt::before{content:'';position:absolute;inset:33% -4% auto;height:18%;background:#e0cca781;rotate:-11deg}
+.desk-diary::before{content:'';position:absolute;inset:0 0 auto;height:12%;background:#e0b982;clip-path:polygon(0 0,100% 0,100% 56%,82% 81%,70% 35%,51% 88%,32% 48%,15% 91%,0 46%)}
 .desk-note{position:absolute;z-index:1;bottom:12%;right:12%;width:78%;margin:0;padding:clamp(11px,2vw,20px);background:#fff2ce;color:#4e3629;font:700 clamp(.91rem,1.7vw,1.22rem)/1.55 Georgia,"Noto Serif TC",PMingLiU,serif;transform:rotate(6deg);box-shadow:3px 7px 10px #402b1d62}
 .arcade-section .game-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:18px}
 .arcade-section .game-illustration{filter:none;aspect-ratio:1.65}
@@ -192,6 +194,7 @@ body:has(#play-panel:not([hidden])){height:100dvh}
 #arcade .game-card::after{display:none}
 #arcade .game-card:nth-child(n+4){grid-column:span 3}
 #arcade .game-info{padding:20px 22px}
+#arcade .game-card-actions{margin-top:auto}
 #arcade .game-illustration{aspect-ratio:16 / 9;object-fit:cover}
 #arcade .game-info p,#arcade .game-info summary{font-size:1rem}
 #arcade .game-description{display:block;min-height:0}
@@ -205,6 +208,10 @@ body:has(#play-panel:not([hidden])){height:100dvh}
 .site-header nav :is(a,button),#landing :is(.primary,.play-button,.quick-games button,.board-actions button,#phase2-link,.share-button){min-height:44px}
 .site-header nav :is(a,button),#landing :is(.primary,.game-link,#phase2-link){font-size:1rem}
 .site-header nav a{display:inline-flex;align-items:center}
+@media(min-width:1200px){
+  html[lang=en] .site-header nav{flex-wrap:nowrap;gap:clamp(8px,1vw,16px);white-space:nowrap}
+  html[lang=en] .site-header nav :is(a,button){font-size:.9375rem}
+}
 #landing [hidden],#pfap-scores [hidden]{display:none!important}
 #landing .share-toolkit{padding-block:clamp(36px,5vw,64px)}
 .share-toolkit h2{margin:0 0 20px;font-size:clamp(1.75rem,3vw,2.5rem);color:#183f36}

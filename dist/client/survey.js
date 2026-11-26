@@ -1,7 +1,6 @@
 (() => {
   'use strict';
   const opens = Date.parse('2026-11-20T00:00:00+08:00');
-  const closes = Date.parse('2026-11-28T00:00:00+08:00');
   const localKey = 'pfap-phase2-survey-v1';
   const id = value => document.getElementById(value);
   const banner = id('phase2-survey');
@@ -19,7 +18,7 @@
   const supported = !window.offlineMount && (!staticPage || pages) && /^https?:$/.test(location.protocol);
   const endpoint = (pages ? 'https://lost-found-money-journey.cottonpatch1.chatgpt.site' : '') + '/api/survey';
   const gameKeys = {coins: 'runner', shipping: 'jet', instalments: 'garden', pause: 'forest', defence: 'defence'};
-  const available = () => supported && Date.now() >= opens && Date.now() < closes;
+  const available = () => supported && Date.now() >= opens;
   const automatic = () => available() && navigator.onLine !== false;
   const ratings = [1, 2, 3, 4, 5].map(value => [value, value]);
   const guides = {
@@ -58,8 +57,6 @@
   updateBanner();
   window.addEventListener('pageshow', updateBanner);
   document.addEventListener('visibilitychange', updateBanner);
-  const delay = closes - Date.now();
-  if (delay > 0 && delay < 2 ** 31) setTimeout(updateBanner, delay);
 
   function addQuestion([name, caption, options]) {
     const group = document.createElement('fieldset');
@@ -206,7 +203,6 @@
     update();
     window.addEventListener('pageshow', update);
     document.addEventListener('visibilitychange', update);
-    if (delay > 0 && delay < 2 ** 31) setTimeout(update, delay);
     attendee.addEventListener('click', () => {
       if (!available()) return;
       if (state.after) show('complete');

@@ -148,6 +148,7 @@ function RunHud({ onPause }: { onPause: () => void }) {
     {phase === 'playing' && <>
       <div className="runner-powers">
         {extras.airKind && <span><RunnerIcon kind={extras.airKind}/>{extras.airKind === 'pogo' ? '彈射' : '噴射飛行'}
+          <progress aria-label="飛行剩餘時間" max={extras.airKind==='pogo'?2:8} value={extras.airRemaining}/>
           <small>{Math.ceil(extras.airRemaining)} 秒</small></span>}
         {powerKinds.filter(kind => extras[kind] > extras.time).map(kind => {
           const timeLeft = extras[kind] - extras.time;
@@ -156,6 +157,8 @@ function RunHud({ onPause }: { onPause: () => void }) {
             <small>{Math.ceil(timeLeft)} 秒</small></span>;
         })}
       </div>
+      {!extras.airKind && extras.nextBudgetGate-extras.distance<30 &&
+        <div className="runner-budget-gate">左／中線留起 $5 · 右線花 $5，雙倍里程 3 秒</div>}
       {pickup&&<div className="runner-pickup" role="status"><RunnerIcon kind={pickup}/>
         <b>{pickup==='jetpack'?'噴射飛行':pickup==='pogo'?'彈射':powerLabels[pickup]}</b></div>}
       <div className="runner-touch" aria-label="觸控操作">
@@ -321,7 +324,7 @@ function App() {
             <span>散紙 <b>{store.coins}</b></span><span>最佳 <b>{bestForRun}</b></span>
           </div>
           {obstacle && <p>撞到「{obstacle}」。</p>}
-          <p className="runner-lesson">{nextStep}</p>
+          <p>沿途預留 ${extras.budget} · 小額支出 ${extras.spent}</p><p className="runner-lesson">{nextStep}</p>
         </> : paused ? <p>距離 {Math.floor(store.distance)} m · {runStatus(store.launch,store.distance)}</p> : <>
           <p>低欄跳過、高欄滑鏟。見斜坡可以跑上靜止列車。</p>
           <div className="runner-modes">

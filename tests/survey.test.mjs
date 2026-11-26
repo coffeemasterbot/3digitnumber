@@ -67,7 +67,7 @@ test('survey confirms writes, preserves each phase on retry, and exposes only ma
   assert.deepEqual(await decoded.json(),{entries:[{sid:after.sid,game:'runner',time:receivedAt}]});
 });
 
-test('rejects invalid answers, unapproved origins, oversized requests and submissions after the Hong Kong deadline', async t => {
+test('rejects invalid answers, unapproved origins, oversized requests and submissions before opening', async t => {
   const {db, env} = database();
   t.after(() => db.close());
   for (const data of [{...before, attitude: 6}, {...before, habit: 'log'}, {...before, game: 'unknown'}]) {
@@ -75,7 +75,20 @@ test('rejects invalid answers, unapproved origins, oversized requests and submis
   }
   assert.equal((await surveyApi(makeRequest(before, 'https://example.com'), env, games, receivedAt)).status, 403);
   assert.equal((await surveyApi(makeRequest({...before, extra: 'x'.repeat(1024)}), env, games, receivedAt)).status, 413);
-  assert.equal((await surveyApi(makeRequest(before), env, games, Date.parse('2026-11-28T00:00:00+08:00'))).status, 410);
+  assert.equal((await surveyApi(makeRequest(before), env, games, Date.parse('2026-11-19T23:59:59+08:00'))).status, 410);
   assert.equal((await surveyApi(makeRequest(before), {}, games, receivedAt)).status, 503);
   assert.equal(db.prepare('SELECT COUNT(*) AS n FROM pfap_survey').get().n, 0);
+});
+test('The survey continues after the report cutoff without increasing the report cohort',async t=>{
+  const {db,env}=database();
+  t.after(()=>db.close());
+  const late=Date.parse('2026-11-28T00:30:00+08:00');
+  assert.equal((await surveyApi(makeRequest(before),env,games,receivedAt)).status,200);
+  const after={...before,phase:'after',attitude:4,knowledge:5,habit:'log',sid:'00123456'};
+  assert.equal((await surveyApi(makeRequest(after),env,games,late)).status,200);
+  const request=new Request(site+'/api/activity/summary',{headers:{'x-pfap-metrics-key':env.PFAP_METRICS_KEY}});
+  const report=await (await activityApi(request,env,games)).json();
+  assert.equal(report.survey.paired,1);
+  assert.equal(report.survey_report.paired,0);
+  assert.equal(report.survey_report.before_count,1);
 });

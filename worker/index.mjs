@@ -7,7 +7,7 @@ const boards = {
   jet: /^(practice|endless|trial|mission-(basics|warning|rotor|piston|gravity|blink|mix|reserve)|seed-[A-Z0-9-]{1,24})$/,
   garden: /^(stage-[1-5]|survival|limited|seeds|mowers|armour|giants)$/,
   forest: /^(?:relay-)?(standard|relaxed|hard)-stage-[1-9]$/,
-  defence: /^(quick|[1-3]-(verify|dispatch|hold))$/,
+  defence: /^(quick|ex|[1-3]-(verify|dispatch|hold))$/,
 };
 const isBoard = (game, board) => typeof board === 'string' && GAMES.has(game) && boards[game].test(board);
 const json = (data, status = 200, extra = {}) => new Response(JSON.stringify(data), {
@@ -84,13 +84,31 @@ async function finishRun(db, body, who, now) {
 }
 
 export async function api(request, env) {
+  const pages='https://coffeemasterbot.github.io';
+  const origin=request.headers.get('origin');
+  const path=new URL(request.url).pathname;
+  if(origin!==pages || !/^\/api\/(?:leaderboard|runs\/)/.test(path)) return siteApi(request,env);
+  const cors={'access-control-allow-origin':pages,vary:'Origin'};
+  if(request.method==='OPTIONS')return new Response(null,{status:204,headers:{
+    ...cors,'access-control-allow-methods':'GET, POST, DELETE','access-control-allow-headers':'Content-Type, X-PFAP-Score-Owner'
+  }});
+  const owner=request.headers.get('x-pfap-score-owner');
+  if(!owner || !/^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/i.test(owner)) return json({error:'Invalid score owner'},400,cors);
+  const response=await siteApi(request,env,owner);
+  const headers=new Headers(response.headers);
+  headers.delete('set-cookie');
+  for(const [key,value] of Object.entries(cors))headers.set(key,value);
+  return new Response(response.body,{status:response.status,headers});
+}
+
+async function siteApi(request, env, crossSiteOwner) {
   const url = new URL(request.url);
   if (url.pathname === '/api/survey' || url.pathname === '/api/survey/verification') return surveyApi(request, env, GAMES);
   if (url.pathname === '/api/activity' || url.pathname === '/api/activity/summary') return activityApi(request, env, GAMES);
   const db = env.DB;
   if (!db) return json({error: '排行榜暫時未連線，遊戲仍可繼續。'}, 503);
-  if (['POST', 'DELETE'].includes(request.method) && request.headers.get('origin') !== url.origin) return json({error: 'Invalid origin'}, 403);
-  const who = visitor(request);
+  if (['POST', 'DELETE'].includes(request.method) && !crossSiteOwner && request.headers.get('origin') !== url.origin) return json({error: 'Invalid origin'}, 403);
+  const who = crossSiteOwner || visitor(request);
   try {
     if (request.method === 'GET' && url.pathname === '/api/leaderboard') return await readBoard(db, url.searchParams, who);
     if (request.method === 'DELETE' && url.pathname === '/api/runs/mine') {

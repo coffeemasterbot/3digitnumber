@@ -49,12 +49,14 @@ export function stepRocket(rocket,dt,solids,bots){
  return {id:rocket.id,owner:rocket.owner,position:{...rocket.position},direct};
 }
 
-export function impactDamage(event,target,solids,self=false){
+export function impactDamage(event,target,solids,self=false,solo=false){
  if(!self&&target.id===event.direct)return WEAPONS.bazooka.damage;
  const from=event.position;
  const delta={x:target.x-from.x,y:(target.y??1.05)-from.y,z:target.z-from.z};
  const distance=Math.hypot(delta.x,delta.y,delta.z);
- const {blastRadius,splash,selfCap}=WEAPONS.bazooka;
+ const {selfCap}=WEAPONS.bazooka;
+ const blastRadius=solo?5.4:WEAPONS.bazooka.blastRadius;
+ const splash=solo?210:WEAPONS.bazooka.splash;
  if(distance>=blastRadius||solids.some(solid=>entry(from,delta,solid,0)<1))return 0;
  return Math.min(self?selfCap:splash,Math.round(splash*(1-distance/blastRadius)));
 }

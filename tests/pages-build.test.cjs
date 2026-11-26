@@ -24,15 +24,15 @@ test('game cards ship the five actual game previews in each edition', () => {
   }
 });
 
-test('GitHub Pages build is static and describes local-only scores', () => {
+test('GitHub Pages build is static and describes opt-in shared scores', () => {
   assert.ok(fs.existsSync(path.join(root, 'index.html')));
   assert.ok(fs.existsSync(path.join(root, 'downloads/lost-found-money-offline.html')));
-  assert.match(read('index.html'), /最佳分數只保存在本機，不設共用排行榜/);
+  assert.match(read('index.html'), /最佳成績會喺本機保留，亦可選擇將成績放上公開排行榜/);
   assert.ok(read('index.html').includes('value="https://coffeemasterbot.github.io/3digitnumber/"'));
   assert.match(read('index.html'), /<body data-pfap-static>/);
-  assert.match(read('app.js'), /此版本只保留本機成績/);
-  assert.match(read('presentation.js'), /Runner and flight best scores stay in this browser/);
-  assert.match(read('presentation.js'), /跑酷與飛行的最佳分數只保存在本機/);
+  assert.match(read('app.js'), /此瀏覽器用匿名代碼管理所發布嘅成績/);
+  assert.match(read('presentation.js'), /All five games have public leaderboards with optional score publishing/);
+  assert.match(read('presentation.js'), /五款遊戲都有公開排行榜，玩家可自行選擇發布成績/);
   const jet = read('games/jet/app.js').replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
   assert.match(jet, /本機保存最佳紀錄/);
   assert.doesNotMatch(jet,/每局成績可見於共同排行榜|共同排行榜會記錄每一局/);

@@ -139,7 +139,7 @@ export const Player = forwardRef<PlayerHandle>((_, ref) => {
     const bounce = !inAir && !sliding && !riding && !reducedMotion ? .035 * Math.abs(Math.sin(swing)) : 0;
     actor.position.y = (sliding ? .38 + s.surface : s.y) + (riding ? .13 : 0) + bounce - compression;
     const leaningBack = Math.min(1, s.slide / .18);
-    const lean = sliding ? .95 * leaningBack : extras.airKind==='jetpack' ? -.68 : inAir ? (s.vy > 0 ? .21 : -.16) : -.08;
+    const lean = sliding ? .95 * leaningBack : extras.airKind==='jetpack' ? -.68 : inAir ? (s.vy > 0 ? .21 : -.16) : riding ? .14 : -.08;
     frame.rotation.x += (lean - frame.rotation.x) * lift;
     frame.rotation.z = (LANES[s.lane] - actor.position.x) * -.18;
 
@@ -174,6 +174,9 @@ export const Player = forwardRef<PlayerHandle>((_, ref) => {
     }
     if (board.current) {
       board.current.visible = riding;
+      const mount = reducedMotion ? 1 : Math.min(1,(extras.time-extras.boardMounted)/.24);
+      board.current.scale.setScalar(riding ? .5+.5*mount : 1);
+      board.current.rotation.x = riding ? -.46*(1-mount) : 0;
       board.current.rotation.z = reducedMotion ? 0 : Math.sin(extras.time * 5) * .06;
     }
     if (shadow.current) {

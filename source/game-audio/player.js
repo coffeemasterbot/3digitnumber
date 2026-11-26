@@ -18,6 +18,7 @@
   const notes = {
     plant_place: [[205,.075,0,'triangle'],[120,.05,.026]],
     sun_collect: [[690,.10],[920,.12,.055],[1380,.16,.11]],
+    bomb_detonate: [[64,.34,0,'triangle'],[47,.56,.08,'sine'],[39,.64,.15,'sine']],
     hit_thud: [[100,.075,0,'triangle']],
     wave_horn: [[130,.26,0,'sawtooth'],[174,.32,.18,'triangle']],
     mower_go: [[68,.44,0,'sawtooth'],[106,.35,.10,'triangle']],
@@ -185,6 +186,7 @@
   }
   window.PFAPAudio={
     preferences, controls, mountControls, setEnabled, setThrust, stopEffects,
+    stopMusic(){for(const entry of active)if(entry.destination===music)stop(entry)},
     enabled: channel=>Boolean(preferences[channel]),
     now: ()=>context?.currentTime ?? 0,
     setVolume(value) { soundVolume=Math.max(0,Math.min(1,value));applyPreferences(); },

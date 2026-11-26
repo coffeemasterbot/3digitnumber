@@ -26,6 +26,7 @@ export function activateRunnerBoard() {
   const state = useGameStore.getState();
   if (state.gameState !== 'playing' || extras.airKind || extras.board > extras.time || state.boardCharges === 0) return;
   extras.board = extras.time + POWER_DURATION.board;
+  extras.boardMounted = extras.time;
   useGameStore.setState({boardCharges:state.boardCharges - 1});
 }
 
