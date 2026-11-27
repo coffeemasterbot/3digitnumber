@@ -153,6 +153,7 @@ window.toggleHabitDay=function(i){
   if(!Number.isInteger(i)||i<0||i>=JourneyCore.PLAN_DAYS||!s.planStart||!demo&&i>elapsed())return;
   s.stamps[i]=s.stamps[i]?null:{date:hkDate(),backfill:i<elapsed(),demo};
   if(personalCard)save(true);
+  if(personalCard&&!demo&&i===3&&s.stamps[i]&&parent!==window)parent.postMessage({type:'pfap-habit-day4'},location.origin==='null'?'*':location.origin);
   render();
   document.querySelectorAll('.stamp')[i]?.focus({preventScroll:true});
   if(s.stamps[i])notify(planText(demo?'示範蓋印':'記低咗一小步'));

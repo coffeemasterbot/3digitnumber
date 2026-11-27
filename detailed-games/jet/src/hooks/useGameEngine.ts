@@ -46,6 +46,7 @@ export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,
   const canvasRef  = useRef<HTMLCanvasElement | null>(null);
   const rafRef     = useRef<number>(0);
   const frameRef   = useRef(0);
+  const trophy = useRef({hits:0,vehicles:0,dodged:0,bestDodge:0,clean800:false,passed:new WeakSet<object>()});
   const countdown = useRef(0);
   const warned = useRef(new WeakSet<Missile>());
 
@@ -147,6 +148,7 @@ export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,
     speedRef.current     = BASE_SPEED[difficulty] ?? 5;
     scrollRef.current    = 0;
     frameRef.current     = 0;
+    trophy.current={hits:0,vehicles:0,dodged:0,bestDodge:0,clean800:false,passed:new WeakSet<object>()};
     missileTimerRef.current = MISSILE_SPAWN_BASE;
     hazardCount.current = 0;
     coinTimerRef.current    = 20;
@@ -280,7 +282,14 @@ export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,
   function finishRun() {
     gameStateRef.current = 'gameover';
     finishedAt.current = performance.now();
-    (window as any).arcadeRun?.finish(scoreRef.current, frameRef.current / 60, distanceRef.current);
+    const run=(window as any).arcadeRun;
+    const count=trophy.current,distance=distanceRef.current;
+    if(distance>=1000){run?.trophies('jet_1000m');run?.cleared()}
+    else if(passed.current)run?.cleared();
+    if(distance>=2000&&count.vehicles>=2)run?.trophies('jet_ace');
+    if(count.bestDodge>=10)run?.trophies('jet_dodge_10');
+    if(count.clean800)run?.trophies('jet_monk_800');
+    run?.finish(scoreRef.current, frameRef.current / 60, distance);
     const hs = Math.max(highScoreRef.current, Math.floor(scoreRef.current));
     highScoreRef.current = hs;
     try{
@@ -569,6 +578,13 @@ export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,
       return pu.x + POWERUP_SIZE > -20;
     });
 
+    const flightTrophy=trophy.current;
+    for(const hazard of missilesRef.current){
+      if(hazard.active && !hazard.warningFrames && hazard.x+hazard.width<p.x && !flightTrophy.passed.has(hazard)){
+        flightTrophy.passed.add(hazard);
+        flightTrophy.bestDodge=Math.max(flightTrophy.bestDodge,++flightTrophy.dodged);
+      }
+    }
     // ── Collision: player ↔ missiles ────────────
     if (!p.invincible&&!(p.dashFrames||0)) {
       for (const m of missilesRef.current) {
@@ -579,6 +595,8 @@ export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,
             play('hit');
             continue;
           }
+          flightTrophy.hits++;
+          flightTrophy.dodged=0;
           if ((p.shieldFrames||0)>0||vehicles.includes(p.powerUp)) {
             // Shield absorbs hit
             if(!vehicles.includes(p.powerUp)){p.shieldFrames=0;m.active=false;p.invincible=true;p.invincibleTimer=60;break}
@@ -598,6 +616,7 @@ export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,
       }
     }
 
+    if (!flightTrophy.hits&&distanceRef.current>=800)flightTrophy.clean800=true;
     if (gameStateRef.current !== 'playing') break;
 
     // ── Collision: player ↔ coins ─────────────
@@ -620,6 +639,7 @@ export function useGameEngine(difficulty: Difficulty,mode:string,vehicle:string,
         pu.active = false;
         if(pu.type==='boost'){p.dashFrames=45;play('powerup');continue}
         if(pu.type==='magnet'||pu.type==='shield'){if(pu.type==='magnet')p.magnetFrames=MAGNET_DURATION;else p.shieldFrames=SHIELD_DURATION;play('powerup');continue}
+        if(vehicles.includes(pu.type))flightTrophy.vehicles++;
         p.powerUp = pu.type;p.invertedGravity=false;
         p.powerUpTimer =
           vehicles.includes(pu.type)?0:pu.type === 'shield' ? SHIELD_DURATION :

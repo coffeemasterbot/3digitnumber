@@ -52,7 +52,7 @@ async function readBoard(db, params, who) {
     : 'score DESC, finished_at ASC, id ASC';
   const where = mine ? ' AND visitor=?' : '';
   const args = mine ? [game, board, who] : [game, board];
-  const rows = await db.prepare('SELECT id,player,score,distance,duration,difficulty,finished_at FROM arcade_runs WHERE game=? AND board=? AND finished_at IS NOT NULL' + where + ' ORDER BY ' + order + ' LIMIT 30').bind(...args).all();
+  const rows = await db.prepare('SELECT id,player,score,distance,duration,difficulty,finished_at FROM arcade_runs WHERE game=? AND board=? AND finished_at IS NOT NULL' + where + ' ORDER BY ' + order + (view==='top'?' LIMIT 10':' LIMIT 30')).bind(...args).all();
   return json({entries: rows.results ?? [], shared: true, game, board});
 }
 
@@ -78,8 +78,11 @@ async function finishRun(db, body, who, now) {
   if (!run) return json({error: 'Unknown run'}, 404);
   if (run.finished_at !== null) return json({saved: true, duplicate: true, id: run.id});
   if (!validateResult(body, run, now)) return json({error: '成績未能通過檢查。'}, 400);
-  const result = await db.prepare('UPDATE arcade_runs SET finished_at=?,score=?,distance=?,duration=? WHERE id=? AND finished_at IS NULL')
-    .bind(now, body.score, Math.floor(body.distance), Math.round(body.duration * 1000), run.id).run();
+  const player=typeof body.nickname==='string'
+    ? body.nickname.normalize('NFKC').replace(/[<>\x00-\x1f]/g,'').trim().slice(0,14)||'玩家'
+    : run.player;
+  const result = await db.prepare('UPDATE arcade_runs SET finished_at=?,score=?,distance=?,duration=?,player=? WHERE id=? AND finished_at IS NULL')
+    .bind(now, body.score, Math.floor(body.distance), Math.round(body.duration * 1000), player, run.id).run();
   return json({saved: true, id: run.id, duplicate: !result.meta.changes});
 }
 

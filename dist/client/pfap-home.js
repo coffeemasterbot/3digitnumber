@@ -100,6 +100,12 @@
     body:JSON.stringify(body), keepalive:true});
   function showEntry(label, line) {
     const entry = document.createElement('li');
+    if(list.dataset.view==='top'){
+      const rank=document.createElement('span');
+      rank.className='score-rank';
+      rank.textContent='#'+(list.children.length+1);
+      entry.append(rank);
+    }
     const title = document.createElement('strong');
     title.textContent = label;
     const value = document.createElement('span');
@@ -123,16 +129,18 @@
     const controller = reading = new AbortController();
     const game = gameField.value;
     const board = resolveBoard();
+    showManual(latestResult?.game===game&&latestResult.board===board?latestResult:null);
     id('score-seed-label').hidden = boardField.value !== 'seed';
     id('pfap-score-title').textContent = {mine:'我的成績', top:'公開排行榜', recent:'最新成績'}[view];
     dialog.querySelectorAll('[data-score-view]').forEach(button =>
       button.setAttribute('aria-pressed', String(button.dataset.scoreView === view)));
     list.replaceChildren();
+    list.dataset.view=view;
     if (!board) { status.textContent = '請輸入種子代碼。'; return; }
     const best = read(localKey, {})[game]?.[board] ?? legacyBest(game,board);
     if (view === 'mine' && best) showEntry('本機最佳', resultLabel(game,best));
     if (!sharedEdition) {
-      status.textContent = view==='mine'&&!best ? '暫時未有成績。' : '';
+      status.textContent = best ? '離線模式：顯示本機紀錄' : '暫時未有成績。';
       return;
     }
     status.textContent = '載入中…';
@@ -143,7 +151,11 @@
       for (const entry of result.entries) showEntry(entry.player,resultLabel(game,entry));
       status.textContent = list.children.length?'':'暫時未有成績。';
     } catch {
-      if (!controller.signal.aborted) status.textContent = '暫時未能連上排行榜，本機成績仍可查看。';
+      if (!controller.signal.aborted){
+        list.dataset.view='mine';
+        if(view!=='mine'&&best)showEntry('本機最佳',resultLabel(game,best));
+        status.textContent = '離線模式：顯示本機紀錄';
+      }
     }
   }
 
@@ -174,6 +186,48 @@
   const activityReady = sendActivity({type:'visit'}).catch(()=>null);
   let openRun = null;
   let latestResult = null;
+  const manual=id('score-manual');
+  const manualName=id('score-result-name');
+  const manualStatus=id('score-manual-status');
+  const manualButton=manual.querySelector('button');
+  const manualKey='pfap-score-nickname';
+  manualName.value=String(read(manualKey,player.value)).slice(0,14);
+  function showManual(result){
+    manual.hidden=!sharedEdition||!result||result.score<=0;
+    manualButton.disabled=!!(result?.submitted||result?.uploading);
+    manualStatus.textContent=result?.submitted?'最新一局已加入公開排行榜。':'';
+  }
+  async function submitScore(result,nickname){
+    if(!result||result.submitted||result.uploading)return;
+    result.uploading=true;
+    if(latestResult===result)showManual(result);
+    try{
+      const session=await result.remote;
+      if(!session){
+        if(latestResult===result)manualStatus.textContent='今局未有網上紀錄，下次連線後開局即可上傳。';
+        return;
+      }
+      const {score,duration,distance}=result;
+      await post('runs/finish',{id:session.id,score,duration,distance,...(nickname?{nickname}:{})});
+      result.submitted=true;
+      syncStatus.textContent='最新一局已加入公開排行榜。';
+      if(latestResult===result)manualStatus.textContent=syncStatus.textContent;
+      if(dialog.open)loadScores();
+    }catch{
+      syncStatus.textContent='已保留本機成績，未能上傳。';
+      if(latestResult===result)manualStatus.textContent='未能上傳分數，請稍後再試。';
+    }finally{
+      result.uploading=false;
+      if(latestResult===result)manualButton.disabled=result.submitted===true;
+    }
+  }
+  manual.addEventListener('submit',event=>{
+    event.preventDefault();
+    const name=manualName.value.trim().slice(0,14);
+    if(!name||!latestResult)return;
+    save(manualKey,name);
+    submitScore(latestResult,name);
+  });
   const syncStatus = id('score-sync');
   function saveBest(run, {score,duration,distance}) {
     const data = read(localKey, {});
@@ -194,8 +248,22 @@
   window.addEventListener('message', async event => {
     const frame = id('game-frame');
     const message = event.data;
+    if(frame&&event.source===frame.contentWindow&&frameOrigin(event)&&!frame.name&&active==='plan'&&message?.type==='pfap-habit-day4'){
+      window.unlockAchievement?.('meta_day4');
+      return;
+    }
     if (!frame || event.source !== frame.contentWindow || !frameOrigin(event) ||
         frame.name || message?.type !== 'pfap-arcade-run') return;
+    if(openRun?.id===message.id && (message.action==='trophies'||message.action==='cleared')){
+      let playerAudio;
+      try{playerAudio=frame.contentWindow.PFAPAudio}catch{}
+      if(message.action==='trophies')window.pfapAchievements?.event(openRun.game,message.ids,playerAudio);
+      else{
+        window.pfapAchievements?.clear(openRun.game);
+        if(openRun.game==='forest')window.pfapAchievements?.forest(message.stage,playerAudio);
+      }
+      return;
+    }
     if (message.action === 'scores' && latestResult?.frame===frame && latestResult.id===message.id) {
       const {game,board}=latestResult;
       gameField.value=game;
@@ -203,6 +271,7 @@
       boardField.value=board;
       if (!boardField.value) boardField.add(new Option(board,board,true,true));
       view=sharedEdition?'top':'mine';
+      showManual(latestResult);
       if (document.fullscreenElement) await document.exitFullscreen().catch(()=>{});
       if (!dialog.open) dialog.showModal();
       loadScores();
@@ -216,11 +285,12 @@
       window.dispatchEvent(new CustomEvent('pfap-played',{detail:active}));
       openRun = null;
       latestResult = null;
+      showManual(null);
       syncStatus.textContent='';
       if (!validBoard(message.game,message.board)) return;
       const shared = sharedEdition && publish.checked;
-      const remote = shared && navigator.onLine !== false
-        ? post('runs/start',{game:message.game,board:message.board,difficulty:message.difficulty,player:player.value}).catch(()=>null)
+      const remote = sharedEdition && navigator.onLine !== false
+        ? post('runs/start',{game:message.game,board:message.board,difficulty:message.difficulty,player:shared?player.value:undefined}).catch(()=>null)
         : Promise.resolve(null);
       openRun={id:message.id, game:message.game, board:message.board, remote, shared};
       return;
@@ -231,21 +301,13 @@
         !Number.isFinite(message.distance) || message.distance<0) return;
     const finished = openRun;
     openRun = null;
-    latestResult = {...finished,frame};
+    const result=latestResult={...finished,frame,score:message.score,duration:message.duration,distance:message.distance};
     saveBest(finished,message);
+    window.pfapAchievements?.finish();
     if (finished.board === 'endless' && ['runner','jet'].includes(finished.game)) {
       window.pfapSurvey?.finished(finished.game);
     }
-    const session = await finished.remote;
-    if (finished.shared && publish.checked) {
-      syncStatus.textContent='已保留本機成績，未能上傳。';
-      if (session) {
-        try {
-          await post('runs/finish',{id:session.id,score:message.score,duration:message.duration,distance:message.distance});
-          syncStatus.textContent='最新一局已加入公開排行榜。';
-        } catch { /* The result has already been saved locally. */ }
-      }
-    }
+    if(finished.shared&&publish.checked&&message.score>0)await submitScore(result);
     if (dialog.open) loadScores();
   });
 

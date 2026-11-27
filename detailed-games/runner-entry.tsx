@@ -18,7 +18,7 @@ const runnerWindow = window as Window & {
   orientationPause?: () => void;
   flushArcadeResult?: () => void;
   arcadeTest?: {target:string};
-  arcadeRun?: {start(game:string,board:string,difficulty:string):void;finish(score:number,duration:number,distance:number):void};
+  arcadeRun?: {start(game:string,board:string,difficulty:string):void;finish(score:number,duration:number,distance:number):void;trophies(...ids:string[]):void;cleared():void};
   arcadeStory?: object;
   gameAudio?: {pause(): void};
 };
@@ -43,7 +43,14 @@ useGameStore.subscribe((state, previous) => {
   if (state.gameState === previous.gameState) return;
   if (state.gameState === 'gameOver') {
     persistRunnerBest(state);
-    runnerWindow.arcadeRun?.finish(state.score, extras.time, state.distance);
+    const run=runnerWindow.arcadeRun;
+    const rookie=state.distance>=500||state.score>=1000;
+    if(rookie){run?.trophies('run_500m');run?.cleared()}
+    else if(state.completed)run?.cleared();
+    if(state.distance>=1500||state.score>=5000)run?.trophies('run_1500m');
+    if(['jetpack','shoes','board','double','magnet'].every(item=>extras.collectedPowers.has(item)))run?.trophies('run_all_items');
+    if(extras.boardSave!==null&&state.distance-extras.boardSave>=200)run?.trophies('run_hover_clutch');
+    run?.finish(state.score, extras.time, state.distance);
   }
   window.dispatchEvent(new CustomEvent('arcade-game-state', {
     detail: {state:state.gameState, mode:state.launch.mode, completed:state.completed, runNumber:state.runNumber},

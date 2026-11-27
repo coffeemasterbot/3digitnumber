@@ -149,7 +149,11 @@ function robot(x,z,i){
 }
 function startRound(){if(!beginRoundGate())return;const testRound=/^round-([1-3])$/.exec(window.arcadeTest?.target??'');if(testRound&&!mission)s.round=Number(testRound[1]);startRoundReady()}
 function beginRoundGate(){return s.phase==='buy'}
-function startRoundReady(){if(!beginRound(s))return;if(s.round===1||s.round===4||mission)window.arcadeRun?.start('defence',mission?.training?null:mission?.mission.id??(s.round===4?'ex':'quick'));clearRound();buildMap();last=performance.now();yaw=0;pitch=0;clock=0;deadClock=0;nextBombBeep=0;scoped=false;crouchToggle=false;recoilPitch=0;doors.forEach(d=>d.open=false);rebuildGun();const spawns=spawnPoints();patrolPoints=spawns;for(let i=0;i<(storyTrial()?2:Math.min(spawns.length,s.round===4?14:SOLO_ROBOTS[s.round-1]));i++){const bot=robot(...spawns[i],i);bot.maxHp=Math.ceil(bot.maxHp*soloWaveBoost(s.round).health);bot.hp=bot.maxHp;enemies.push(bot)}squadOrder='follow';if(mission?.training)s.time=180;else if(mission)squad=makeSquad(scene,doors);s.feedback=mission?.training?'練習場 · 機械靶唔會還擊。可以練習移動、開門、查帳同拆解。':mission?mission.mission.brief:'100 生命值 · 利用掩體到北面查帳拆彈，毋須消滅所有敵人。';unlock();renderMenu();host.focus()}
+const trophyRuns=new WeakMap();
+function startRoundReady(){if(!beginRound(s))return;
+ const trophy=trophyRuns.get(s)||{hitless:0,spent:false};
+ trophy.roundShots=s.shots;trophy.roundHits=s.hits;trophy.spent||=s.purchases.length>0;
+ trophyRuns.set(s,trophy);if(s.round===1||s.round===4||mission)window.arcadeRun?.start('defence',mission?.training?null:mission?.mission.id??(s.round===4?'ex':'quick'));clearRound();buildMap();last=performance.now();yaw=0;pitch=0;clock=0;deadClock=0;nextBombBeep=0;scoped=false;crouchToggle=false;recoilPitch=0;doors.forEach(d=>d.open=false);rebuildGun();const spawns=spawnPoints();patrolPoints=spawns;for(let i=0;i<(storyTrial()?2:Math.min(spawns.length,s.round===4?14:SOLO_ROBOTS[s.round-1]));i++){const bot=robot(...spawns[i],i);bot.maxHp=Math.ceil(bot.maxHp*soloWaveBoost(s.round).health);bot.hp=bot.maxHp;enemies.push(bot)}squadOrder='follow';if(mission?.training)s.time=180;else if(mission)squad=makeSquad(scene,doors);s.feedback=mission?.training?'練習場 · 機械靶唔會還擊。可以練習移動、開門、查帳同拆解。':mission?mission.mission.brief:'100 生命值 · 利用掩體到北面查帳拆彈，毋須消滅所有敵人。';unlock();renderMenu();host.focus()}
 function spawnPoints(){const points=[[-12,5],[12,0],[-11,-11],[11,-13],[3,-14],[-13,-1],[13,10]];for(const z of [-14,-9,-3,3,9])for(const x of [-14,-10,-5,0,5,10,14])if(!collides(x,z,.55,doors)&&Math.hypot(x,z-14)>8&&points.every(p=>Math.hypot(x-p[0],z-p[1])>2.5))points.push([x,z]);return points.filter(([x,z])=>!collides(x,z,.55,doors))}
 let matchPointer;
 function clearPointer(){matchPointer?.clear();fireHeld=false;scoped=false}
@@ -188,6 +192,19 @@ function startMission(id,training=false){
  clearRound();recorded=false;mission={...selection,training};s=create();s.round=selection.mission.round;s.credits=400;s.phase='buy';renderMenu()
 }
 function finishRound(){
+ if(!mission?.training){
+  const run=window.arcadeRun,trophy=trophyRuns.get(s);
+  if(trophy){
+   if(s.hp===100){
+    trophy.hitless++;
+    run?.trophies('csgo_hitless_1');
+    if(s.round===4)run?.trophies('csgo_hitless_ex');
+    if(!mission&&trophy.hitless===3)run?.trophies('csgo_hitless_3');
+   }
+   if(s.shots>trophy.roundShots&&s.shots-trophy.roundShots===s.hits-trophy.roundHits)run?.trophies('csgo_zero_miss');
+   if(mission||s.round>=3){if(!trophy.spent)run?.trophies('csgo_eco_zero');run?.cleared()}
+  }
+ }
  if((!mission&&s.round>=3)||(mission&&!mission.training)){
   const {judgement,reserve}=score(s);
   window.arcadeRun?.finish(Math.min(100,(mission?s.decisionCorrect*80:judgement)+reserve));

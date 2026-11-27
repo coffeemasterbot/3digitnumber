@@ -60,7 +60,7 @@ export function Game({ onReady }: { onReady?: () => void }) {
     Object.assign(extras, {
       distance: 0, time: 0, airKind: null, airStart: 0, airOrigin: 0, airHeight: 0, airRemaining: 0,
       pogoPhase: 'idle', flightPhase: 'idle', deathTime: 0, impact: 0, deathKind: '',
-      board: 0, boardMounted: 0, shieldUntil: 0, budget: 0, spent: 0, nextBudgetGate: 100,
+      board: 0, boardSave: null, collectedPowers: new Set<string>(), boardMounted: 0, shieldUntil: 0, budget: 0, spent: 0, nextBudgetGate: 100,
       shoes: 0, magnet: 0, double: 0, index: 0, next: 0, pickups: [],
     });
     progress.current = freshProgress();
@@ -180,6 +180,7 @@ export function Game({ onReady }: { onReady?: () => void }) {
       extras.impact = .4;
       if (extras.board > extras.time) {
         extras.board = 0;
+        extras.boardSave ??= extras.distance;
         extras.shieldUntil = extras.time + 1.1;
         (window as any).PFAPAudio?.play('shield_break');
         obstacles.splice(obstacles.indexOf(hit), 1);
@@ -247,6 +248,7 @@ export function Game({ onReady }: { onReady?: () => void }) {
           extras[pickup.kind] = extras.time + POWER_DURATION[pickup.kind];
         }
       }
+      if(reached)extras.collectedPowers.add(pickup.kind);
       if (reached) window.dispatchEvent(new CustomEvent('runner-power-up',{detail:pickup.kind}));
       if (reached || pickup.z - playerZ > 10) {
         extras.pickups.splice(i, 1);

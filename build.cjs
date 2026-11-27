@@ -75,7 +75,7 @@ if(!fs.existsSync(path.join(dist,'assets','talk-poster.png')))throw Error('Missi
 const css=path.join(dist,'style.css');fs.writeFileSync(css,fs.readFileSync(css,'utf8').replace("@import url('');\n",''));console.log('Built website v2');
 
 fs.copyFileSync(path.join(root,'source/cashflow-lab.js'),path.join(dist,'cashflow-lab.js'));
-fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'presentation.js'));for(const file of ['metrics.html','metrics.js'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,file));for(const file of ['pfap-home.js','survey.js'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,file));require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
+fs.copyFileSync(path.join(root,'source/presentation.js'),path.join(dist,'presentation.js'));for(const file of ['metrics.html','metrics.js'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,file));for(const file of ['pfap-home.js','survey.js','achievements.js'])fs.copyFileSync(path.join(root,'source',file),path.join(dist,file));require('./landing-build.cjs');fs.copyFileSync(path.join(root,'landing.css'),path.join(dist,'style.css'));
 
 if(!process.argv.includes('--preserve-arcade'))require('node:child_process').execFileSync(process.execPath,[path.join(root,'build-detailed.cjs')],{stdio:'inherit'});
 

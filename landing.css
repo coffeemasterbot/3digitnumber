@@ -224,6 +224,32 @@ body:has(#play-panel:not([hidden])){height:100dvh}
 .share-toolkit .buttons{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
 .share-toolkit .share-button{display:inline-flex;align-items:center;padding:8px 14px;border:1px solid #315c4c;border-radius:999px;background:transparent;color:#244b3e;font:inherit;text-decoration:none;cursor:pointer}
 #share-feedback:empty{display:none}
+.evidence-desk{position:relative;isolation:isolate;overflow:hidden;aspect-ratio:4/3;border-radius:16px;background:#173228;display:flex;align-items:center}
+.evidence-box{width:100%;min-height:0;height:96%;box-sizing:border-box}
+.evidence-label{position:absolute;top:18px;left:18px;max-width:85%;border:1.5px solid #9e2a1c;background:#fff8eded;color:#892b20;border-radius:4px;rotate:-3deg;text-wrap:balance}
+.desk-note{right:auto;left:50%;bottom:16px;width:min(88%,440px);translate:-50% 0;transform:rotate(-1.2deg);text-wrap:balance}
+.desk-note::before,.desk-note::after{content:'';position:absolute;top:-6px;width:36px;height:13px;background:#d9b06d9e}
+.desk-note::before{left:10px;rotate:-13deg}.desk-note::after{right:10px;rotate:13deg}
+@media(hover:hover) and (prefers-reduced-motion:no-preference){.desk-note{transition:transform .25s ease}.evidence-desk:hover .desk-note{transform:translateY(-3px)}}
+#achievement-dialog{width:min(900px,94vw);max-height:85dvh}
+.achievement-progress{display:flex;align-items:center;gap:.6rem}.achievement-progress progress{accent-color:#286451;flex:1}
+#achievement-list{padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:.75rem;list-style:none}
+#achievement-list li{background:#faf1df;border:1px solid #c3ad8c;border-radius:.75rem;padding:.8rem;color:#214236}
+#achievement-list li strong,#achievement-list li small{display:block}
+#achievement-list li p{margin:.25rem 0}
+#achievement-list [data-unlocked=false]{background:#eee8db;color:#55574e}
+#achievement-list [data-unlocked=true]{border-color:#8b552f}
+#achievement-list [data-unlocked=true][data-rarity=silver]{border-color:#57778a}
+#achievement-list [data-unlocked=true][data-rarity=gold]{border-color:#a47b24;background:#fff0b9}
+#achievement-list [data-unlocked=true][data-rarity=platinum]{border-color:#277569;background:#d9eeea}
+#achievement-toast{position:fixed;top:.8rem;right:.8rem;z-index:9999;max-width:min(440px,85vw);padding:.8rem 1rem;border:1px solid #ffdc93;border-radius:.65rem;background:#173e33;color:#fff4df;pointer-events:none}
+#score-entries .score-rank{flex:none;min-width:2rem;font-weight:750;color:#3f5148}
+#score-entries[data-view=top]{list-style:none;padding-inline-start:0}
+#score-entries li:first-child .score-rank{color:#805900}
+#score-entries li:nth-child(2) .score-rank{color:#425f76}
+#score-entries li:nth-child(3) .score-rank{color:#954e28}
+#score-manual{padding:.65rem;border:1px solid #af9873;border-radius:.6rem}
+#score-manual input{width:min(14ch,100%)}
 @media(max-width:920px){
   .site-header{position:static}
   #arcade .game-grid{grid-template-columns:repeat(2,minmax(0,1fr))}

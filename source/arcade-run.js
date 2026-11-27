@@ -9,6 +9,12 @@
     complete(game) {
       notify('complete', {game});
     },
+    trophies(...ids) {
+      if(run)notify('trophies',{id:run.id,ids});
+    },
+    cleared(stage) {
+      if(run)notify('cleared',{id:run.id,stage});
+    },
     start(game, board, difficulty = 'standard') {
       resultLink?.remove();
       run = {game, board, difficulty, id:crypto.randomUUID(), at:performance.now()};

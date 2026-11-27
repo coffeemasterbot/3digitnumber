@@ -169,6 +169,7 @@
       delete pending[session.phase];
       remember({[session.phase]: {attitude: payload.attitude, knowledge: payload.knowledge}, pending});
       session.saved = true;
+      if(session.phase==='before')window.dispatchEvent(new Event('pfap-before-survey'));
       status.textContent = '多謝，已收到你嘅答案。';
       submit.hidden = true;
       student.hidden = sid.disabled = true;

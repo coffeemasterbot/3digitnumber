@@ -7,7 +7,16 @@ const extrasKey='garden-extras-v1';
 let mode='campaign',recommendSeeds,stageSelect;
 const extra=()=>GardenRules.EXTRAS[mode];
 window.gardenMode=()=>mode;
-const beginRankedBattle=()=>window.arcadeRun?.start('garden',mode==='campaign'?'stage-'+campaign.level:mode);
+let plantedTypes=new Set(),earlySun=0;
+window.gardenTrophyPlant=type=>{
+ plantedTypes.add(type);
+ if(['sunflower','sunshroom'].includes(type)&&gameState.wave===1&&!(gameState.battle?.spawned>0)&&++earlySun===3)
+  window.arcadeRun?.trophies('pvz_pay_first');
+};
+const beginRankedBattle=()=>{
+ plantedTypes=new Set();earlySun=0;
+ window.arcadeRun?.start('garden',mode==='campaign'?'stage-'+campaign.level:mode);
+};
 const restartBattle=restartGame;
 restartGame=function(){restartBattle();beginRankedBattle();window.PFAPAudio?.play('wave_horn')};
 window.gardenSeedRestriction=()=>extra()?.seeds;
@@ -113,6 +122,9 @@ const previous=window.gardenActiveStep;window.gardenActiveStep=dt=>{previous?.(d
    reveal.textContent=reveals.length?'新解鎖植物：'+reveals.join('、'):'';
    document.getElementById('campaign-advance').hidden=mode!=='campaign'||campaign.level===5;
    victory();
+   if(gameState.mowers?.length===5&&gameState.mowers.every(m=>m.state==='ready'))window.arcadeRun?.trophies('pvz_all_mowers');
+   if(plantedTypes.size>0&&plantedTypes.size<=4)window.arcadeRun?.trophies('pvz_minimalist');
+   if(mode==='campaign')window.arcadeRun?.cleared();
    if(mode==='campaign'&&campaign.level===5)window.arcadeRun?.complete('garden');
    window.arcadeRun?.finish(gameState.score);
    if(extra()||campaign.level===5)saveResult();

@@ -79,7 +79,7 @@ Academic Building · 1103 室|Academic Building · Room 1103
 互動簡報，方向鍵切換|Interactive presentation. Use the arrow keys to move between slides.
 分享與離線工具包|Sharing and offline play
 邀請朋友，一齊試玩。|Invite friends to play
-毋須登入。最佳成績會喺本機保留，亦可選擇將成績放上公開排行榜。|Play without signing in. Best scores stay in this browser and you can opt in to the public leaderboard.
+毋須登入。最佳成績會喺本機保留，亦可選擇將成績放上公開排行榜。每關顯示前十名。|Play without signing in. Best scores stay in this browser. Choose whether to publish scores to each stage’s Top 10 leaderboard.
 這是離線版本，不會上傳成績。你亦可在有網絡時分享公開網站連結。|Offline scores stay in this browser. You can share the public link when online.
 全部遊戲，已在這個檔案。|All games are included in this file.
 毋須登入或連線。故事、簡報及五款遊戲可離線使用；排行榜已停用。分數及進度只保留於本機。請保留檔案名稱及使用同一瀏覽器；清除瀏覽器資料或移動檔案可能影響存檔。外部連結需要網絡。|Play all five games and use the story and slides offline. Scores and progress stay in this browser. Keep the file name and browser the same to keep using your saves. External links require internet access.
@@ -315,3 +315,12 @@ B 結餘|B balance
 完成整個故事或遊戲，再填寫後測。|Complete the full story or game to take the after survey.
 前後測屬自願。網站用隨機代碼配對，收集自評、習慣選項同活動種類。後測必須填 SID，會加密儲存，只供授權團隊核對及撰寫報告。問卷與故事、排行榜同訪問紀錄分開。|The survey is optional. A random code pairs your self-ratings, habits and activity type. The after survey requires a student ID, encrypted for authorized verification and reporting. Responses are kept separate from story saves, leaderboards and visit records.
 提交後測須填寫 6 至 12 位數字。SID 以加密方式保存，只供獲授權嘅項目團隊核對參與及撰寫報告。|Enter 6–12 digits to submit the post-assessment. Student IDs are stored encrypted and accessible only to authorized project team members for participation verification and reporting.
+警局失物認領處 · CASE #06|LOST & FOUND · CASE #06
+成就獎盃|Achievements
+成就進度|Achievement progress
+上傳分數|Submit Score
+離線模式：顯示本機紀錄|Offline mode: showing local bests
+未能上傳分數，請稍後再試。|Could not submit your score. Please try again.
+今局未有網上紀錄，下次連線後開局即可上傳。|This run has no online record. Start your next run while connected to submit a score.
+
+公開排行榜會顯示每關前十名。|Public leaderboards show the Top 10 for each stage.

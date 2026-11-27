@@ -19,6 +19,15 @@ const GardenAbilities = (() => {
     return '<svg viewBox="0 0 100 100" aria-hidden="true"><path d="'+cards[type][4]+'" stroke="#34482e" stroke-width="5" fill="'+({mine:'#d4a260',pepper:'#ed7452',torch:'#edac45',chomper:'#ac82c7'}[type]||'#86b975')+'"/></svg>';
   }
   function damage(z,amount){GardenEnemies.applyDamage(z,amount,'ability')}
+  function emergency(targets,amount){
+    let kills=0;
+    for(const zombie of targets){
+      if(!zombie.element)continue;
+      damage(zombie,amount(zombie));
+      if(!zombie.element)kills++;
+    }
+    if(kills>=4)window.arcadeRun?.trophies('pvz_emergency');
+  }
   function consume(p){p.element.remove();p.element=null}
   function effect(p,kind,x){
     const board=document.getElementById('gameBoard');
@@ -43,7 +52,7 @@ const GardenAbilities = (() => {
     if(p.type==='mine'){
       p.element.title=p.age<4500?'布防中':'已布防';
       p.element.style.opacity=p.age<4500?'.55':'1';
-      if(p.age>=4500&&close.length){effect(p,'mine');close.forEach(z=>damage(z,65));consume(p)}
+      if(p.age>=4500&&close.length){effect(p,'mine');emergency(close,()=>65);consume(p)}
     }else if(p.type==='squash'){
       if(close.length&&p.targetX===undefined){
         p.targetX=close[0].x;p.rest=450;
@@ -51,7 +60,7 @@ const GardenAbilities = (() => {
         p.element.classList.add('squash-leap');
       }
       if(p.targetX!==undefined&&!p.rest){effect(p,'squash',p.targetX);row.filter(z=>Math.abs(z.x-p.targetX)<width).forEach(z=>damage(z,70));consume(p)}
-    }else if(p.type==='pepper'&&p.age>=650){effect(p,'pepper');GardenBoss.pepper(p.row);for(const key in gameState.iceTracks){if(key.startsWith(p.row+','))gameState.iceTracks[key]=0}row.forEach(z=>damage(z,z.type==='giant'?70:999));consume(p)}
+    }else if(p.type==='pepper'&&p.age>=650){effect(p,'pepper');GardenBoss.pepper(p.row);for(const key in gameState.iceTracks){if(key.startsWith(p.row+','))gameState.iceTracks[key]=0}emergency(row,z=>z.type==='giant'?70:999);consume(p)}
     else if(p.type==='chomper'&&!p.rest&&close.length){
       const z=close.find(e=>!e.submerged);if(!z)return;const large=['giant','zomboni','boss'].includes(z.type);
       effect(p,'bite',z.x);damage(z,large?4:z.health);p.rest=large?1200:8000;
@@ -84,5 +93,5 @@ const GardenAbilities = (() => {
     card.title=description+' · 第 '+level+' 關';
   }
   const unlockStage=type=>type==='repeater'?2:type==='threepeater'?3:cards[type]?.[2]||1;
-  return {cards,step,icon,crossing,unlockStage,effect};
+  return {cards,step,icon,crossing,unlockStage,effect,emergency};
 })();

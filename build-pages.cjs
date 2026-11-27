@@ -17,7 +17,7 @@ const replaceRequired=(value,from,to,label)=>{
 let home=fs.readFileSync(path.join(output,'index.html'),'utf8');
 home=replaceRequired(home,
   '打開網址就可以直接遊玩，毋須登入或下載。',
-  '毋須登入。最佳成績會喺本機保留，亦可選擇將成績放上公開排行榜。',
+  '毋須登入。最佳成績會喺本機保留，亦可選擇將成績放上公開排行榜。每關顯示前十名。',
   'Pages score notice');
 
 fs.writeFileSync(path.join(output,'index.html'),home.replace('<body>','<body data-pfap-static>'));

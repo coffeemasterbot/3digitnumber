@@ -96,3 +96,20 @@ test('Pages results use anonymous ownership and share the same public board',asy
  assert.equal((await (await api(request(board),{DB})).json()).entries[0].score,10);
  assert.equal((await (await send('runs/mine',{method:'DELETE'})).json()).deleted,1);
 });
+test('Top 10 caps the board and manual names are saved only once',async t=>{
+ const {DB,sqlite}=database();
+ t.after(()=>sqlite.close());
+ for(let score=1;score<=11;score++){
+  const opened=await api(request('runs/start',{game:'garden',board:'stage-1'}),{DB});
+  const owner=opened.headers.get('set-cookie').split(';')[0];
+  const {id}=await opened.json();
+  const stats={id,score,duration:1,distance:0,nickname:score===11?'  Long display name  ':'Player'};
+  assert.equal((await api(request('runs/finish',stats,owner),{DB})).status,200);
+  const twice=await api(request('runs/finish',{...stats,nickname:'Changed'},owner),{DB});
+  assert.equal((await twice.json()).duplicate,true);
+ }
+ const board=await api(request('leaderboard?game=garden&board=stage-1'),{DB});
+ const {entries}=await board.json();
+ assert.deepEqual(entries.map(row=>row.score),[11,10,9,8,7,6,5,4,3,2]);
+ assert.equal(entries[0].player,'Long display n');
+});
